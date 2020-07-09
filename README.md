@@ -7,7 +7,7 @@
   - Statistics
   - Wishlist
 - Climbs
-  - Python class/object for type (i.e. Ropes, Boulders, Ice)
+  - JSON object for type (i.e. Ropes, Boulders, Ice)
   - Undefined area hierarchy: 
     Not just Country, region, area, wall, climb.  Allows for sub-areas within sub-areas, etc.
   - Characteristics:
@@ -22,8 +22,8 @@
     - Notes for each send
     - Parent area
 - Areas
-  - Python class/object for area and continent
-    - Continent will be highest level of hierarchy
+  - JSON object for area
+    - Continents will be collections, highest level of hierarchy
   - Characteristics
     - Name
     - Description
@@ -32,5 +32,13 @@
 - Primary Language: Python
 - Database: MongoDB
   - Because of unknown/unpredictable hierarchy, NOSQL allows for more flexibility
-  - Assign parent and key to each climb/area (not country) in "app" before loading to db
-
+  - Assign parent (and Mongo \_id) to each climb/area in "app" before loading to db
+## Navigation
+- Databases
+  - MyTicksClimbs
+    Hosts areas and climbs with their attributes
+  - MyTicksUsers
+    Holds users and their ticks tracked by climb \_id
+- Files
+  - climbNav.py
+    Helps user navigate MyTicksClimbs database, add climbs/areas
