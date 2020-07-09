@@ -22,8 +22,8 @@
     - Notes for each send
     - Parent area
 - Areas
-  - Python class/object for area and country
-    - Country will be highest level of hierarchy
+  - Python class/object for area and continent
+    - Continent will be highest level of hierarchy
   - Characteristics
     - Name
     - Description
