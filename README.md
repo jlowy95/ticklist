@@ -16,7 +16,7 @@
     - Danger
     - Quality
     - Description
-    - # of times climbed/repeats
+    - \# of times climbed/repeats
     - Height
     - FA
     - Notes for each send
