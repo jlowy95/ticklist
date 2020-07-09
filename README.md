@@ -20,3 +20,17 @@
     - Height
     - FA
     - Notes for each send
+    - Parent area
+- Areas
+  - Python class/object for area and country
+    - Country will be highest level of hierarchy
+  - Characteristics
+    - Name
+    - Description
+    - Parent area/country
+## Planned Framework/Dependencies
+- Primary Language: Python
+- Database: MongoDB
+  - Because of unknown/unpredictable hierarchy, NOSQL allows for more flexibility
+  - Assign parent and key to each climb/area (not country) in "app" before loading to db
+
