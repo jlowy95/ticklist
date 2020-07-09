@@ -33,4 +33,12 @@
 - Database: MongoDB
   - Because of unknown/unpredictable hierarchy, NOSQL allows for more flexibility
   - Assign parent (and Mongo \_id) to each climb/area in "app" before loading to db
-
+## Navigation
+- Databases
+  - MyTicksClimbs
+    Hosts areas and climbs with their attributes
+  - MyTicksUsers
+    Holds users and their ticks tracked by climb \_id
+- Files
+  - climbNav.py
+    Helps user navigate MyTicksClimbs database, add climbs/areas
