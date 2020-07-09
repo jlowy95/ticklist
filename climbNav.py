@@ -15,6 +15,39 @@ db = client.MyTicksClimbs
 # Define nav abilities:
 # Locate area/climb, edit entry, add entry, delete entry
 
+# Basic welcome message
+def welcome():
+    print('Welcome!')
+
+# Prompt user for next action, reloop if invalid option
+def navOptions():
+    valid = False
+    while not valid:
+        print('What would you like to do next?')
+        ability = input("""Locate an area or climb [0] 
+        Edit an existing entry [1]
+        Add a new entry [2]
+        Delete an existing entry [3]""")
+        if type(ability) != int:
+            ability = ability.lower()
+            if 'loc' in ability:
+                return 0
+            elif 'ed' in ability:
+                return 1
+            elif 'ad' in ability:
+                return 2
+            elif 'del' in ability:
+                return 3
+            else:
+                print("I'm sorry, I couldn't understand that. Let's try this again.")
+            
+# Direct to correct function           
+def navOptionSelect(option_int):
+    options = {0: 'locatefunction',
+        1: 'editfunction',
+        2: 'addfunction',
+        3: 'delfunction'}
+    options[option_int]
 
 
 # defineNewArea
