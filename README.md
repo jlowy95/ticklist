@@ -1,4 +1,5 @@
-# Personal Ticklist App Project
+# MyTicks
+### Personal Ticklist App Project
 
 ## Planned Functionality
 - Userbase
@@ -29,6 +30,7 @@
     - Description
     - Parent area/country
 ## Planned Framework/Dependencies
+- Description: Flask web-app for tracking/recording climbs
 - Primary Language: Python
 - Database: MongoDB
   - Because of unknown/unpredictable hierarchy, NOSQL allows for more flexibility
@@ -36,9 +38,8 @@
 ## Navigation
 - Databases
   - MyTicksClimbs
+    
     Hosts areas and climbs with their attributes
   - MyTicksUsers
+    
     Holds users and their ticks tracked by climb \_id
-- Files
-  - climbNav.py
-    Helps user navigate MyTicksClimbs database, add climbs/areas
