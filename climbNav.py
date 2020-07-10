@@ -41,13 +41,15 @@ def navOptions():
             else:
                 print("I'm sorry, I couldn't understand that. Let's try this again.")
             
-# Direct to correct function           
+# Direct user to correct function           
 def navOptionSelect(option_int):
     options = {0: 'locatefunction',
         1: 'editfunction',
         2: 'addfunction',
         3: 'delfunction'}
     options[option_int]
+
+def findEntry()
 
 
 # defineNewArea
