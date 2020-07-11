@@ -12,17 +12,50 @@ import pprint
 app = Flask(__name__)
 
 # Use flask_pymongo to set up mongo connection
-app.config["MONGO_URI"] = "mongodb://localhost:27017/ticklist"
+app.config["MONGO_URI"] = "mongodb://localhost:27017/MyTicksClimbs"
 mongo = PyMongo(app)
 
+# Define collection for primary use
+climbs_col = mongo.db.climbs
 
+# Sample Entry
+'''
+Types: 0 - Continent (highest), 1 - Area, 2 - Boulder, 3 - Route
+{
+    _id: ObjectID(5f091fca617c42623517786f),
+    name: 'North America',
+    type: 0,
+    parent: null,
+    children: [],
+    properties: {
+        description: 'North America is pretty.'
+        images: []
+    }
+}
+'''
+
+# Home Route
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/navDB', methods=['POST'])
-def predict_rent_price():
-    collection = request.get_json()
+# API Route
+# Loads the corresponding page type to the entry requested
+@app.route('/climbs/<entry_id>')
+def area(entry_id):
+    entry = climbs_col.find({'_id': f'ObjectID({entry_id})'})
+    print(entry)
+    templates = {0: 'continent.html',
+        1: 'area.html',
+        2: 'boulder.html',
+        3: 'route.html'}
+    return render_template(templates[entry['type']])
+
+
+# Search query route
+@app.route('/search/<search_terms>')
+def search(search_terms):
+    print(search_terms)
 
 if __name__ == '__main__':
     app.run(debug=True)
