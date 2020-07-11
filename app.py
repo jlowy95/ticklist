@@ -6,6 +6,7 @@
 
 from flask import Flask, render_template, redirect, request, jsonify
 from flask_pymongo import PyMongo
+from bson import ObjectId
 import json
 import pprint
 
@@ -43,13 +44,18 @@ def index():
 # Loads the corresponding page type to the entry requested
 @app.route('/climbs/<entry_id>')
 def area(entry_id):
-    entry = climbs_col.find({'_id': f'ObjectID({entry_id})'})
-    print(entry)
-    templates = {0: 'continent.html',
-        1: 'area.html',
-        2: 'boulder.html',
-        3: 'route.html'}
-    return render_template(templates[entry['type']])
+    print(f'Entry: {entry_id}')
+    try:
+        entry = climbs_col.find_one({'_id': ObjectId(f'{entry_id}')})
+        print(f'Entry: {entry}')
+        templates = {0: 'continent.html',
+            1: 'area.html',
+            2: 'boulder.html',
+            3: 'route.html'}
+        return render_template(templates[entry['type']])
+    except Exception as e:
+        print(e)
+        return render_template('index.html')
 
 
 # Search query route
