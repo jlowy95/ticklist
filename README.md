@@ -20,28 +20,19 @@
 - Climbs/Areas
   - Different 'type' attribute for custom pages for areas, boulders, routes, etc.
   - Sample object:
-  
-  `{
-    
-    \_id: ObjectID(5f091fca617c42623517786f),
-    
-    name: 'North America',
-    
-    type: 0,
-    
-    parent: null,
-    
-    children: [5f091fca617c42623517786f, 5f091fca617c42623517786f, 5f091fca617c42623517786f],
-    
-    properties: {
-        
-        description: 'North America is pretty.'
-        
-        images: []
-      
-      }
-  
-  }`
+  ```
+  {
+    \_id: ObjectID(5f091fca617c42623517786f),    
+    name: 'North America',    
+    type: 0,    
+    parent: null,   
+    children: [5f091fca617c42623517786f, 5f091fca617c42623517786f, 5f091fca617c42623517786f],   
+    properties: {       
+        description: 'North America is pretty.'       
+        images: []     
+      } 
+  }
+  ```
 - Characteristics
   - Climbs
     - Grade
