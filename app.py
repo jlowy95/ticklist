@@ -32,7 +32,19 @@ Types:  0 - Area, 1 - Boulder, 2 - Route
     children: [],
     properties: {
         description: 'North America is pretty.'
-        images: []
+        images: [],
+        'child_counts': {
+                'areas': 0,
+                'boulder': 0,
+                'sport': 0,
+                'trad': 0,
+                'ice': 0
+            },
+            'elevation': '',
+            'coords': {
+                'lat': '',
+                'lng': ''
+            }
     }
 }
 '''
