@@ -48,17 +48,32 @@ def index():
 @app.route('area/<entry_id>')
 def area(entry_id):
     print(f'Entry: {entry_id}')
+    try:
+        entry = areas_col.find_one({'_id': ObjectId(f'{entry_id}')})
+        print(f'Entry: {entry}')
+        return render_template('area.html')
+    except Exception as e:
+        print(e)
+        return render_template('index.html')
 
 @app.route('/boulder/<entry_id>')
 def boulder(entry_id):
     print(f'Entry: {entry_id}')
     try:
-        entry = climbs_col.find_one({'_id': ObjectId(f'{entry_id}')})
+        entry = boulders_col.find_one({'_id': ObjectId(f'{entry_id}')})
         print(f'Entry: {entry}')
-        templates = {0: 'area.html',
-            2: 'boulder.html',
-            3: 'route.html'}
-        return render_template(templates[entry['type']])
+        return render_template('boulder.html')
+    except Exception as e:
+        print(e)
+        return render_template('index.html')
+
+@app.route('/route/<entry_id>')
+def routeClimb(entry_id):
+    print(f'Entry: {entry_id}')
+    try:
+        entry = routes_col.find_one({'_id': ObjectId(f'{entry_id}')})
+        print(f'Entry: {entry}')
+        return render_template('route.html')
     except Exception as e:
         print(e)
         return render_template('index.html')
@@ -68,6 +83,23 @@ def boulder(entry_id):
 @app.route('/search/<search_terms>')
 def search(search_terms):
     print(search_terms)
+
+
+# Entry Management
+# addArea (adds a sub-area to the current area)
+@app.route('/new-area')
+def addArea():
+    return render_template('addArea.html')
+
+@app.route('/new-boulder')
+def addBoulder():
+    return render_template('addBoulder.html')
+
+@app.route('/new-route')
+def addRoute():
+    return render_template('addRoute.html')
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
