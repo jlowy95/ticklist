@@ -1,6 +1,11 @@
 # MyTicks
 ### Personal Ticklist App Project
 
+## Todo
+1. Decide on final database structure
+  - Paths between parents/children, retain redundant info or load multiple items
+2. Integrate Flask to html templates
+3. Begin DB loading through 'add' forms
 
 ## Planned Framework/Dependencies
 - Description: Flask web-app for tracking/recording climbs
