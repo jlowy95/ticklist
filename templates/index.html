@@ -97,8 +97,18 @@
         <div class="col-md-6"></div>
         <div class="col-md-2">
             <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                <div class="btn-group" role="group">
+                    <button id="addEntry" type="button"
+                            class="btn btn-secondary dropdown-toggle"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Add Entry
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="addEntryDrop">
+                      <a class="dropdown-item" href="#!">Area</a>
+                      <a class="dropdown-item" href="#!">Climb</a>
+                    </div>
+                  </div>
                 <div class="btn-group" role="group" aria-label="First group">
-                    <button type="button" class="btn btn-secondary">Add Entry</button>
                     <button type="button" class="btn btn-secondary">Edit Entry</button>
                     <button type="button" class="btn btn-secondary">Delete Entry</button>
                 </div>

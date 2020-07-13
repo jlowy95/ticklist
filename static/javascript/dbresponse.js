@@ -13,20 +13,5 @@
 // Default to 'This area is currently empty!'
 
 
-// Send request to flask and use response in page
-// function requestSelection(data) {
-//     fetch('/navDB', {
-
-//             // Specify the method
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             // A JSON payload
-//             body: JSON.stringify(data)
-//         }).then(response => response.json())
-//         .then(function(data) {
-//             console.log(data);
-//         });
-
-// }
+// Add new entry
+// function addEntry()
