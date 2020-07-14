@@ -83,6 +83,61 @@ def getChildrenInfo(children):
         
     return children_info
 
+# simplifyArray: takes JSON form array and converts it to single python dictionary
+def simplifyArray(json_request):
+    return {field['name']: field['value'] for field in json_request}
+
+#updateChildren: update the children property based on if there is or isnt already info there
+def updateChildren(parent, new_entry):
+    if parent['children'] == None:
+        return ['area/'+str(new_entry.inserted_id)]
+    else:
+        return parent['children'].append(f'area/{str(new_entry.inserted_id)}')
+
+# addArea: inserts new area entry and updates parent area
+def addArea(new_area):
+    # print('Adding area!')
+    # Find parent for path extension
+    parent = areas_col.find_one({'_id': ObjectId(f'{new_area["parentID"]}')})
+    # Initialize new entry
+    new_entry = areas_col.insert_one({
+        'name': new_area['name'],
+        'parentID': new_area['parentID'],
+        'path': '',
+        'children': [],
+        'properties': {
+            'description': new_area['description'],
+            'images': [],
+            'child_counts': {
+                    'areas': 0,
+                    'boulder': 0,
+                    'sport': 0,
+                    'trad': 0,
+                    'ice': 0
+                },
+                'elevation': '',
+                'coords': {
+                    'lat': '',
+                    'lng': ''
+                }
+        }
+    })
+    # Update new entry path
+    areas_col.update_one({'_id': new_entry.inserted_id}, 
+        {'$set': {
+            'path': parent['path']+'$area/'+str(new_entry.inserted_id)
+            }})
+    # Update parent children
+    areas_col.update_one({'_id': parent['_id']}, 
+        {'$set': {
+            'children': updateChildren(parent, new_entry)
+            # Updates counts??
+            }})
+    print(f'Redirecting to area/{new_entry.inserted_id}')
+    redirect(url_for('area', entry_id=new_entry.inserted_id))
+
+
+
 # Home Route
 # home page with secondary tools/info
 @app.route('/')
@@ -161,17 +216,16 @@ def addEntry(entry_type, parentID):
 # then redirects to new page if successful
 @app.route('/submit-changes', methods=['POST'])
 def submitChanges():
-    inputted_data = request.get_json()
-    print(inputted_data)
-    return inputted_data
+    inputted_data = simplifyArray(request.get_json())
+    # print(inputted_data)
     # Switch for correct actions
-    # change_options = {
-    #     'area': '', # add new area functions plus redirect
-    #     'boulder': '',
-    #     'route': '',
-    #     'edit': ''
-    # }
-    # change_options[inputted_data]['change-type']
+    change_options = {
+        'area': addArea(inputted_data), # add new area functions plus redirect
+        'boulder': '',
+        'route': '',
+        'edit': ''
+    }
+    change_options[inputted_data['change-type']]
     
 
 # editEntry (allows edits to the current entry)
