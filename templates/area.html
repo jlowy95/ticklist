@@ -38,7 +38,19 @@
     <div class="row mx-1 my-1">
         <div class="col-md-9">
             <!-- Flask Area Path -->
-            <h5>All Locations > ParentArea > Name</h5>
+            <div class="row">
+                {% for link in path %}
+                    {% if link['name'] == area['name'] %}
+                    <div class="col-md-2">
+                        <h5><a href="/{{link['route']}}">{{link['name']}}</a></h5>
+                    </div>
+                    {% else %}
+                    <div class="col-md-2">
+                        <h5><a href="/{{link['route']}}">{{link['name']}}</a> > </h5>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
         <!-- Entry Management Tools -->
         <div class="col-md-3">
@@ -69,11 +81,13 @@
             <!-- Flask for each child and for header -->
             <table>
                 <thead>Spots in THISSPOT</thead>
-                <!-- <tr>
-                    <th>Name</th>
+                {% for child in children %}
+                <tr>
+                    <th><a href="/{{child['route']}}">{{child['name']}}</a></th>
                     <th></th>
                     <th></th>
-                </tr> -->
+                </tr>
+                {% endfor %}
                 <!-- tr for each child -->
             </table>
         </div>
@@ -81,7 +95,7 @@
             <!-- Area Title -->
             <div class="row">
                 <div class="col-md-12">
-                    <h1>Area Name</h1>
+                    <h1>{{area['name']}}</h1>
                 </div>
             </div>
             <!-- Location Details + Images -->
@@ -93,7 +107,7 @@
                         </div>
                         <div class="1">
                             <!-- Flask Elevation + ft -->
-                            <p>3200 ft</p>
+                            <p>{{area['properties']['elevation']}} ft</p>
                         </div>
                     </div>
                     <div class="row">
@@ -102,7 +116,7 @@
                             </div>
                             <div class="1">
                                 <!-- Flask GPS -->
-                                <p>-32.892759, 121.28975</p>
+                                <p>{{area['properties']['coords']['lat']}}, {{area['properties']['coords']['lng']}}</p>
                             </div>
                         </div>
                 </div>
@@ -140,7 +154,7 @@
                 <div class="col-md-12">
                     <h6>Description</h6>
                     <!-- Flask Area description -->
-                    <p>This area is an area that is an area that is pretty cool! Did I mention this is an area?  This will repeat now.  This area is an area that is an area that is pretty cool! Did I mention this is an area?  This will repeat now.  This area is an area that is an area that is pretty cool! Did I mention this is an area?  This will repeat now.</p>
+                    <p>{{area['properties']['description']}}</p>
                 </div>
             </div>
         </div>

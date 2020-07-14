@@ -24,13 +24,13 @@ routes_col = mongo.db.routes
 # Sample Entry
 '''
 {
-    _id: ObjectID(5f091fca617c42623517786f),
-    name: 'California',
+    _id: ObjectID(5f0d16cac6b1d534f316b56c),
+    name: 'Wyoming',
     parentID: all-locations,
-    path: all-locations$area/5f091fca617c42623517786f,
+    path: all-locations$area/5f0d16cac6b1d534f316b56c,
     children: [],
     properties: {
-        description: 'California is pretty.'
+        description: 'Wyoming is pretty.'
         images: [],
         'child_counts': {
                 'areas': 0,
@@ -48,6 +48,41 @@ routes_col = mongo.db.routes
 }
 '''
 
+# Global Functions + Variables
+api_routes = {
+    'area': areas_col,
+    'boulder': boulders_col,
+    'route': routes_col
+}
+# getPathNames: For item in entry path, retrieve name
+def getPathNames(entry_path):
+    path_raw = entry_path.split('$')
+    path_clean = []
+    for link in path_raw:
+        if link == 'all-locations':
+            path_clean.append({'name': 'All Locations',
+                'route': 'all-locations'})
+        else:
+            link_split = link.split('/')
+            temp_entry = api_routes[link_split[0]].find_one({'_id': ObjectId(f'{link_split[1]}')})
+            path_clean.append({'name': temp_entry['name'],
+                'route': link
+                })
+    
+    return path_clean
+
+# getChildrenInfo: for item in children, retrieve info
+def getChildrenInfo(children):
+    children_info = []
+    for child in children:
+        link_split = child.split('/')
+        temp_entry = api_routes[link_split[0]].find_one({'_id': ObjectId(f'{link_split[1]}')})
+        children_info.append({'name': temp_entry['name'],
+            'route': child
+            })
+        
+    return children_info
+
 # Home Route
 # home page with secondary tools/info
 @app.route('/')
@@ -64,13 +99,16 @@ def allLocations():
 
 # API Routes
 # Loads the corresponding page type to the entry requested
-@app.route('area/<entry_id>')
+@app.route('/area/<entry_id>')
 def area(entry_id):
     print(f'Entry: {entry_id}')
     try:
+        # Retrieve Entry
         entry = areas_col.find_one({'_id': ObjectId(f'{entry_id}')})
+        path = getPathNames(entry['path'])
+        children = getChildrenInfo(entry['children'])
         print(f'Entry: {entry}')
-        return render_template('area.html')
+        return render_template('area.html', area=entry, path=path, children=children)
     except Exception as e:
         print(e)
         return render_template('index.html')

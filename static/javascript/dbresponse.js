@@ -13,5 +13,10 @@
 // Default to 'This area is currently empty!'
 
 
+// Grab inputted data
+function get_inputs() {
+    return $('#area-form').serializeArray();
+}
+
 // Add new entry
 // function addEntry()
