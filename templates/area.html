@@ -38,15 +38,15 @@
     <div class="row mx-1 my-1">
         <div class="col-md-9">
             <!-- Flask Area Path -->
-            <div class="row">
+            <div class="row justify-content-start no-gutters">
                 {% for link in path %}
                     {% if link['name'] == area['name'] %}
-                    <div class="col-md-2">
+                    <div class="col-sm-auto">
                         <h5><a href="/{{link['route']}}">{{link['name']}}</a></h5>
                     </div>
                     {% else %}
-                    <div class="col-md-2">
-                        <h5><a href="/{{link['route']}}">{{link['name']}}</a> > </h5>
+                    <div class="col-sm-auto">
+                        <h5><a href="/{{link['route']}}">{{link['name']}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;</h5>
                     </div>
                     {% endif %}
                 {% endfor %}
@@ -62,13 +62,13 @@
                         Add Entry
                     </button>
                     <div class="dropdown-menu" aria-labelledby="addEntryDrop">
-                        <a class="dropdown-item" href="/new-area">Area</a>
-                        <a class="dropdown-item" href="/new-boulder">Boulder</a>
-                        <a class="dropdown-item" href="/new-route">Route</a>
+                        <a class="dropdown-item" href="/add-entry/area/{{area['_id']}}">Area</a>
+                        <a class="dropdown-item" href="/add-entry/boulder/{{area['_id']}}">Boulder</a>
+                        <a class="dropdown-item" href="/add-entry/route/{{area['_id']}}">Route</a>
                     </div>
                 </div>
                 <div class="btn-group btn-group-sm" role="group" aria-label="First group">
-                    <button type="button" class="btn btn-secondary">Edit Entry</button>
+                    <a class="btn btn-secondary" href="/edit-entry/area/{{area['_id']}}" role="button">Edit Entry</a>
                     <button type="button" class="btn btn-secondary">Delete Entry</button>
                 </div>
             </div>        

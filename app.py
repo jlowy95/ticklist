@@ -4,7 +4,7 @@
 # Connects to local MongoDB and allows for easy maintenance and logging of
 # ticked climbs and tracking of ascents.
 
-from flask import Flask, render_template, redirect, request, jsonify
+from flask import Flask, render_template, redirect, request, url_for
 from flask_pymongo import PyMongo
 from bson import ObjectId
 import json
@@ -143,21 +143,25 @@ def search(search_terms):
 
 
 # Entry Management
-# addArea (adds a sub-area to the current area)
-@app.route('/new-area/<parentId>')
-def addArea(parentID):
+# addEntry (adds an entry to the current area)
+@app.route('/add-entry/<entry_type>/<parentId>')
+def addEntry(entry_type, parentID):
     parent = areas_col.find_one({'_id', ObjectId(parentID)})
-    return render_template('addArea.html')
+    if entry_type == 'area':
+        return render_template('addArea.html')
+    elif entry_type == 'boulder':
+        return render_template('addBoulder.html')
+    elif entry_type == 'route':
+        return render_template('addRoute.html')
+    else:
+        print('Error: invalid entry_type')
+        redirect(url_for('area', entry_id=parentID))
+    
 
-@app.route('/new-boulder/<parentId>')
-def addBoulder(parentID):
-    parent = areas_col.find_one({'_id', ObjectId(parentID)})
-    return render_template('addBoulder.html')
-
-@app.route('/new-route/<parentId>')
-def addRoute(parentID):
-    parent = areas_col.find_one({'_id', ObjectId(parentID)})
-    return render_template('addRoute.html')
+# editEntry (allows edits to the current entry)
+@app.route('/edit-entry/<entry_type>/<entry_id>')
+def editEntry(entry_type, entry_id):
+    print('placeholder')
 
 
 
