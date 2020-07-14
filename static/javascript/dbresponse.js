@@ -18,5 +18,27 @@ function get_inputs() {
     return $('#area-form').serializeArray();
 }
 
-// Add new entry
-// function addEntry()
+// // Send request to flask and use response(prediction) in page
+function call_API(data) {
+    fetch('/submit-changes', {
+
+            // Specify the method
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            // A JSON payload
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+        .then(function(data) {
+            console.log(data);
+        });
+
+}
+
+function submit_data() {
+    call_API(get_inputs());
+}
+
+var area_form_submit = d3.select('#area-form-submit');
+area_form_submit.on('click', submit_data);

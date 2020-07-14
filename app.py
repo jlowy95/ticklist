@@ -144,11 +144,11 @@ def search(search_terms):
 
 # Entry Management
 # addEntry (adds an entry to the current area)
-@app.route('/add-entry/<entry_type>/<parentId>')
+@app.route('/add-entry/<entry_type>/<parentID>')
 def addEntry(entry_type, parentID):
-    parent = areas_col.find_one({'_id', ObjectId(parentID)})
+    parent = areas_col.find_one({'_id': ObjectId(f'{parentID}')})
     if entry_type == 'area':
-        return render_template('addArea.html')
+        return render_template('addArea.html', parent=parent)
     elif entry_type == 'boulder':
         return render_template('addBoulder.html')
     elif entry_type == 'route':
@@ -156,6 +156,22 @@ def addEntry(entry_type, parentID):
     else:
         print('Error: invalid entry_type')
         redirect(url_for('area', entry_id=parentID))
+
+# submitChanges - POST route processes changes to db
+# then redirects to new page if successful
+@app.route('/submit-changes', methods=['POST'])
+def submitChanges():
+    inputted_data = request.get_json()
+    print(inputted_data)
+    return inputted_data
+    # Switch for correct actions
+    # change_options = {
+    #     'area': '', # add new area functions plus redirect
+    #     'boulder': '',
+    #     'route': '',
+    #     'edit': ''
+    # }
+    # change_options[inputted_data]['change-type']
     
 
 # editEntry (allows edits to the current entry)
