@@ -2,9 +2,11 @@
 ### Personal Ticklist App Project
 
 ## Todo
-1. Decide on final database structure
+1. Decide on final database structure !!IN PROGRESS!!
   - Paths between parents/children, retain redundant info or load multiple items
-2. Integrate Flask to html templates
+  - Clarify images property
+2. Integrate Flask to html templates !!IN PROGRESS!!
+  - Add images to areas template
 3. Begin DB loading through 'add' forms
 
 ## Planned Framework/Dependencies
