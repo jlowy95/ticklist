@@ -23,15 +23,14 @@ routes_col = mongo.db.routes
 
 # Sample Entry
 '''
-Types:  0 - Area, 1 - Boulder, 2 - Route
 {
     _id: ObjectID(5f091fca617c42623517786f),
-    name: 'North America',
-    type: 0,
-    parent: null,
+    name: 'California',
+    parentID: all-locations,
+    path: all-locations$area/5f091fca617c42623517786f,
     children: [],
     properties: {
-        description: 'North America is pretty.'
+        description: 'California is pretty.'
         images: [],
         'child_counts': {
                 'areas': 0,
@@ -50,9 +49,17 @@ Types:  0 - Area, 1 - Boulder, 2 - Route
 '''
 
 # Home Route
+# home page with secondary tools/info
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+# All Locations
+# Route-guide home/full directory
+@app.route('/all-locations')
+def allLocations():
+    return render_template('allLocations.html')
 
 
 # API Routes
@@ -99,16 +106,19 @@ def search(search_terms):
 
 # Entry Management
 # addArea (adds a sub-area to the current area)
-@app.route('/new-area')
-def addArea():
+@app.route('/new-area/<parentId>')
+def addArea(parentID):
+    parent = areas_col.find_one({'_id', ObjectId(parentID)})
     return render_template('addArea.html')
 
-@app.route('/new-boulder')
-def addBoulder():
+@app.route('/new-boulder/<parentId>')
+def addBoulder(parentID):
+    parent = areas_col.find_one({'_id', ObjectId(parentID)})
     return render_template('addBoulder.html')
 
-@app.route('/new-route')
-def addRoute():
+@app.route('/new-route/<parentId>')
+def addRoute(parentID):
+    parent = areas_col.find_one({'_id', ObjectId(parentID)})
     return render_template('addRoute.html')
 
 
