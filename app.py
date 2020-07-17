@@ -134,7 +134,8 @@ def addArea(new_area):
             # Updates counts??
             }})
     print(f'Redirecting to area/{new_entry.inserted_id}')
-    redirect(url_for('area', entry_id=new_entry.inserted_id))
+    return ('area', new_entry.inserted_id)
+    # redirect(url_for('area', entry_id=new_entry.inserted_id))
 
 
 
@@ -225,7 +226,8 @@ def submitChanges():
         'route': '',
         'edit': ''
     }
-    change_options[inputted_data['change-type']]
+    redir_tuple = change_options[inputted_data['change-type']]
+    return redirect(url_for(redir_tuple[0], entry_id=redir_tuple[1]))
     
 
 # editEntry (allows edits to the current entry)
