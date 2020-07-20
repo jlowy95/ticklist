@@ -7,7 +7,9 @@
   - Clarify images property
 2. Integrate Flask to html templates !!IN PROGRESS!!
   - Add images to areas template
-3. Begin DB loading through 'add' forms
+3. Add validation
+  - Both client and server side to changes/additions
+4. Begin DB loading through 'add' forms
 
 ## Planned Framework/Dependencies
 - Description: Flask web-app for tracking/recording climbs
