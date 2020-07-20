@@ -30,10 +30,11 @@ function call_API(data) {
             // A JSON payload
             body: JSON.stringify(data)
         })
-        // .then(response => response.json())
-        // .then(function(data) {
-        //     console.log(data);
-        // });
+        .then(response => response.json())
+        .then(function(data) {
+            console.log(data);
+            window.location.href = data.redirect;
+        });
 
 }
 
