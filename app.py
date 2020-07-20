@@ -73,70 +73,91 @@ def getPathNames(entry_path):
 
 # getChildrenInfo: for item in children, retrieve info
 def getChildrenInfo(children):
-    children_info = []
-    for child in children:
-        link_split = child.split('/')
-        temp_entry = api_routes[link_split[0]].find_one({'_id': ObjectId(f'{link_split[1]}')})
-        children_info.append({'name': temp_entry['name'],
-            'route': child
-            })
-        
-    return children_info
+    if children:
+        children_info = []
+        for child in children:
+            link_split = child.split('/')
+            temp_entry = api_routes[link_split[0]].find_one({'_id': ObjectId(f'{link_split[1]}')})
+            children_info.append({'name': temp_entry['name'],
+                'route': child
+                })
+            
+        return children_info
+    else:
+        return []
 
 # simplifyArray: takes JSON form array and converts it to single python dictionary
 def simplifyArray(json_request):
     return {field['name']: field['value'] for field in json_request}
 
-#updateChildren: update the children property based on if there is or isnt already info there
+# updateChildren: update the children property based on if there is or isnt already info there
 def updateChildren(parent, new_entry):
     if parent['children'] == None:
         return ['area/'+str(new_entry.inserted_id)]
     else:
-        return parent['children'].append(f'area/{str(new_entry.inserted_id)}')
+        parent['children'].append(f'area/{str(new_entry.inserted_id)}')
+        return parent['children']
+
+# validateAddition: checks database for new entry details of parent and name
+# Returns False if a similar entry already exists
+def validateAddition(loc_type, parentID, name):
+    print('Validating...')
+    validated =  api_routes[loc_type].find_one({'parentID': parentID, 'name': name})
+    if validated:
+        return (False, validated['_id'])
+    else:
+        return (True,)
 
 # addArea: inserts new area entry and updates parent area
 def addArea(new_area):
-    # print('Adding area!')
-    # Find parent for path extension
-    parent = areas_col.find_one({'_id': ObjectId(f'{new_area["parentID"]}')})
-    # Initialize new entry
-    new_entry = areas_col.insert_one({
-        'name': new_area['name'],
-        'parentID': new_area['parentID'],
-        'path': '',
-        'children': [],
-        'properties': {
-            'description': new_area['description'],
-            'images': [],
-            'child_counts': {
-                    'areas': 0,
-                    'boulder': 0,
-                    'sport': 0,
-                    'trad': 0,
-                    'ice': 0
-                },
-                'elevation': '',
-                'coords': {
-                    'lat': '',
-                    'lng': ''
-                }
-        }
-    })
-    # Update new entry path
-    areas_col.update_one({'_id': new_entry.inserted_id}, 
-        {'$set': {
-            'path': parent['path']+'$area/'+str(new_entry.inserted_id)
-            }})
-    # Update parent children
-    areas_col.update_one({'_id': parent['_id']}, 
-        {'$set': {
-            'children': updateChildren(parent, new_entry)
-            # Updates counts??
-            }})
-    print(f'Redirecting to area/{new_entry.inserted_id}')
-    return {'redirect': f'/area/{str(new_entry.inserted_id)}'}
-    # redirect(url_for('area', entry_id=new_entry.inserted_id))
+    
+    validated = validateAddition('area', new_area['parentID'], new_area['name'])
+    if validated[0]:
 
+        # Find parent for path extension
+        parent = areas_col.find_one({'_id': ObjectId(f'{new_area["parentID"]}')})
+        # Initialize new entry
+        new_entry = areas_col.insert_one({
+            'name': new_area['name'],
+            'parentID': new_area['parentID'],
+            'path': '',
+            'children': [],
+            'properties': {
+                'description': new_area['description'],
+                'images': [],
+                'child_counts': {
+                        'areas': 0,
+                        'boulder': 0,
+                        'sport': 0,
+                        'trad': 0,
+                        'ice': 0
+                    },
+                    'elevation': '',
+                    'coords': {
+                        'lat': '',
+                        'lng': ''
+                    }
+            }
+        })
+        # Update new entry path
+        areas_col.update_one({'_id': new_entry.inserted_id}, 
+            {'$set': {
+                'path': parent['path']+'$area/'+str(new_entry.inserted_id)
+                }})
+        # Update parent children
+        print('Updating parent...')
+        areas_col.update_one({'_id': parent['_id']}, 
+            {'$set': {
+                'children': updateChildren(parent, new_entry)
+                # Updates counts??
+                }})
+        print(f'Redirecting to area/{new_entry.inserted_id}')
+        return {'redirect': f'/area/{str(new_entry.inserted_id)}',
+            'success': 'New entry added successfully!'}
+    else:
+        print('Error: Entry already exists; redirecting to existing entry...')
+        return {'redirect': f'/area/{str(validated[1])}',
+            'error': 'Entry already exists; redirecting...'}
 
 
 # Home Route

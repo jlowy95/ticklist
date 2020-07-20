@@ -34,7 +34,8 @@ function call_API(data) {
         .then(function(data) {
             console.log(data);
             window.location.href = data.redirect;
-        });
+        })
+        .catch(error => console.log(error));
 
 }
 
