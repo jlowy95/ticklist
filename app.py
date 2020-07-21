@@ -21,10 +21,11 @@ areas_col = mongo.db.areas
 boulders_col = mongo.db.boulders
 routes_col = mongo.db.routes
 
-# Sample Entry
+# Sample Entries
 '''
+Area
 {
-    _id: ObjectID(5f0d16cac6b1d534f316b56c),
+    _id: ObjectId(5f0d16cac6b1d534f316b56c),
     name: 'Wyoming',
     parentID: all-locations,
     path: all-locations$area/5f0d16cac6b1d534f316b56c,
@@ -33,17 +34,61 @@ routes_col = mongo.db.routes
         description: 'Wyoming is pretty.'
         images: [],
         'child_counts': {
-                'areas': 0,
-                'boulder': 0,
-                'sport': 0,
-                'trad': 0,
-                'ice': 0
-            },
-            'elevation': '',
-            'coords': {
-                'lat': '',
-                'lng': ''
-            }
+            'areas': 0,
+            'boulder': 0,
+            'sport': 0,
+            'trad': 0,
+            'ice': 0
+        },
+        'elevation': '',
+        'coords': {
+            'lat': '',
+            'lng': ''
+        }
+    }
+}
+Boulder
+{
+    _id: ObjectId(),
+    name: 'Iron Man Traverse'
+    parentID: '',
+    path: all-locations$area/45398472$area/9287507$area/05275032$boulder/,
+    properties: {
+        grade: 4,
+        quality: 4,
+        danger: 0,
+        height: 10,
+        fa: 'Unknown',
+        description: 'What a classic!',
+        images: [],
+        'elevation': '',
+        'coords': {
+            'lat': '',
+            'lng': ''
+        }
+    }
+}
+Route
+{
+    _id: ObjectId(),
+    name: 'The Grand Wall'
+    parentID: '',
+    path: all-locations$area/45398472$area/9287507$area/05275032$route/,
+    properties: {
+        grade: 11.0,
+        quality: 5,
+        danger: 0,
+        height: 1000,
+        pitches: 8,
+        committment: 3,
+        fa: 'Unknown',
+        description: 'What a classic!',
+        images: [],
+        'elevation': '',
+        'coords': {
+            'lat': '',
+            'lng': ''
+        }
     }
 }
 '''
@@ -92,12 +137,18 @@ def simplifyArray(json_request):
 
 # updateChildren: update the children property based on if there is or isnt already info there
 def updateChildren(parent, new_entry):
-    if parent['children'] == None:
-        return ['area/'+str(new_entry.inserted_id)]
+    if parent['children'] == None: 
+        areas_col.update_one({'_id': parent['_id']}, 
+            {'$set': {
+                'children': ['area/'+str(new_entry.inserted_id)]
+                }})
     else:
         parent['children'].append(f'area/{str(new_entry.inserted_id)}')
-        return parent['children']
-
+        areas_col.update_one({'_id': parent['_id']}, 
+            {'$set': {
+                'children': parent['children']
+                }})
+        
 # validateAddition: checks database for new entry details of parent and name
 # Returns False if a similar entry already exists
 def validateAddition(loc_type, parentID, name):
@@ -110,10 +161,9 @@ def validateAddition(loc_type, parentID, name):
 
 # addArea: inserts new area entry and updates parent area
 def addArea(new_area):
-    
+    # Validate if new entry
     validated = validateAddition('area', new_area['parentID'], new_area['name'])
     if validated[0]:
-
         # Find parent for path extension
         parent = areas_col.find_one({'_id': ObjectId(f'{new_area["parentID"]}')})
         # Initialize new entry
@@ -126,17 +176,17 @@ def addArea(new_area):
                 'description': new_area['description'],
                 'images': [],
                 'child_counts': {
-                        'areas': 0,
-                        'boulder': 0,
-                        'sport': 0,
-                        'trad': 0,
-                        'ice': 0
-                    },
-                    'elevation': '',
-                    'coords': {
-                        'lat': '',
-                        'lng': ''
-                    }
+                    'areas': 0,
+                    'boulder': 0,
+                    'sport': 0,
+                    'trad': 0,
+                    'ice': 0
+                },
+                'elevation': '',
+                'coords': {
+                    'lat': '',
+                    'lng': ''
+                }
             }
         })
         # Update new entry path
@@ -145,14 +195,103 @@ def addArea(new_area):
                 'path': parent['path']+'$area/'+str(new_entry.inserted_id)
                 }})
         # Update parent children
-        print('Updating parent...')
-        areas_col.update_one({'_id': parent['_id']}, 
-            {'$set': {
-                'children': updateChildren(parent, new_entry)
-                # Updates counts??
-                }})
+        updateChildren(parent, new_entry)
+
+        # Return and redirect
         print(f'Redirecting to area/{new_entry.inserted_id}')
         return {'redirect': f'/area/{str(new_entry.inserted_id)}',
+            'success': 'New entry added successfully!'}
+    else:
+        print('Error: Entry already exists; redirecting to existing entry...')
+        return {'redirect': f'/area/{str(validated[1])}',
+            'error': 'Entry already exists; redirecting...'}
+
+# addBoulder: inserts new boulder entry and updates parent area
+def addBoulder(new_boulder):
+    # Validate if new entry
+    validated = validateAddition('boulder', new_boulder['parentID'], new_boulder['name'])
+    if validated[0]:
+        # Find parent for path extension
+        parent = boulders_col.find_one({'_id': ObjectId(f'{new_boulder["parentID"]}')})
+        # Initialize new entry
+        new_entry = boulders_col.insert_one({
+            'name': new_boulder['name'],
+            'parentID': new_boulder['parentID'],
+            'path': '',
+            'children': [],
+            'properties': {
+                'grade': vermin2Int(new_boulder['grade']), # Write vermin2Int!!!
+                'quality': -2,
+                'danger': new_boulder['danger'],
+                'height': new_boulder['height'],
+                'fa': new_boulder['fa'],
+                'description': new_boulder['description'],
+                'images': [],
+                'elevation': '',
+                'coords': {
+                    'lat': '',
+                    'lng': ''
+                }
+            }
+        })
+        # Update new entry path
+        boulders_col.update_one({'_id': new_entry.inserted_id}, 
+            {'$set': {
+                'path': parent['path']+'$boulder/'+str(new_entry.inserted_id)
+                }})
+        # Update parent children
+        updateChildren(parent, new_entry)
+
+        # Return and redirect
+        print(f'Redirecting to boulder/{new_entry.inserted_id}')
+        return {'redirect': f'/boulder/{str(new_entry.inserted_id)}',
+            'success': 'New entry added successfully!'}
+    else:
+        print('Error: Entry already exists; redirecting to existing entry...')
+        return {'redirect': f'/area/{str(validated[1])}',
+            'error': 'Entry already exists; redirecting...'}
+
+# addRoute: inserts new boulder entry and updates parent area
+def addRoute(new_route):
+    # Validate if new entry
+    validated = validateAddition('route', new_route['parentID'], new_route['name'])
+    if validated[0]:
+        # Find parent for path extension
+        parent = routes_col.find_one({'_id': ObjectId(f'{new_route["parentID"]}')})
+        # Initialize new entry
+        new_entry = routes_col.insert_one({
+            'name': new_route['name'],
+            'parentID': new_route['parentID'],
+            'path': '',
+            'children': [],
+            'properties': {
+                'grade': yos2Int(new_route['grade']), # Write yos2Int!!!
+                'quality': -2,
+                'danger': new_route['danger'],
+                'height': new_route['height'],
+                'pitches': new_route['pitches'],
+                'committment': new_route['committment'],
+                'fa': new_route['fa'],
+                'description': new_route['description'],
+                'images': [],
+                'elevation': '',
+                'coords': {
+                    'lat': '',
+                    'lng': ''
+                }
+            }
+        })
+        # Update new entry path
+        routes_col.update_one({'_id': new_entry.inserted_id}, 
+            {'$set': {
+                'path': parent['path']+'$route/'+str(new_entry.inserted_id)
+                }})
+        # Update parent children
+        updateChildren(parent, new_entry)
+
+        # Return and redirect
+        print(f'Redirecting to route/{new_entry.inserted_id}')
+        return {'redirect': f'/route/{str(new_entry.inserted_id)}',
             'success': 'New entry added successfully!'}
     else:
         print('Error: Entry already exists; redirecting to existing entry...')
@@ -171,6 +310,7 @@ def index():
 # Route-guide home/full directory
 @app.route('/all-locations')
 def allLocations():
+    # Template to be filled when database is properly initialized
     return render_template('allLocations.html')
 
 

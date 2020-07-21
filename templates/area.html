@@ -80,7 +80,7 @@
         <div class="col-md-3">
             <!-- Flask for each child and for header -->
             <table>
-                <thead>Spots in THISSPOT</thead>
+                <thead><strong>Locations in {{area['name']}}</strong></thead>
                 {% for child in children %}
                 <tr>
                     <th><a href="/{{child['route']}}">{{child['name']}}</a></th>
