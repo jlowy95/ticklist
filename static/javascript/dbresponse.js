@@ -12,10 +12,29 @@
 // Fill new 'select' options based on user selections
 // Default to 'This area is currently empty!'
 
+// Validate Form
+// Disable form submissions if there are invalid fields
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+      // Get the forms we want to add validation styles to
+      var forms = document.getElementsByClassName('needs-validation');
+      // Loop over them and prevent submission
+      var validation = Array.prototype.filter.call(forms, function(form) {
+        form.addEventListener('submit', function(event) {
+          if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    }, false);
+  })();
 
 // Grab inputted data
 function get_inputs() {
-    return $('#area-form').serializeArray();
+    return $('#entry-form').serializeArray();
 }
 
 // // Send request to flask and use response(prediction) in page

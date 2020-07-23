@@ -60,6 +60,7 @@ Boulder
         height: 10,
         fa: 'Unknown',
         description: 'What a classic!',
+        protection: 'Pads',
         images: [],
         'elevation': '',
         'coords': {
@@ -83,6 +84,7 @@ Route
         committment: 3,
         fa: 'Unknown',
         description: 'What a classic!',
+        protection: 'Double Rack',
         images: [],
         'elevation': '',
         'coords': {
@@ -226,6 +228,7 @@ def addBoulder(new_boulder):
                 'height': new_boulder['height'],
                 'fa': new_boulder['fa'],
                 'description': new_boulder['description'],
+                'protection': new_boulder['protection'],
                 'images': [],
                 'elevation': '',
                 'coords': {
@@ -273,6 +276,7 @@ def addRoute(new_route):
                 'committment': new_route['committment'],
                 'fa': new_route['fa'],
                 'description': new_route['description'],
+                'protection': new_route['protection'],
                 'images': [],
                 'elevation': '',
                 'coords': {

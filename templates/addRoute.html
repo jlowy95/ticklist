@@ -49,22 +49,19 @@
                 <h4><a href="/area/{{parent['_id']}}">{{parent['name']}}</a></h4>
             </div>
         </div>
-        <form id='entry-form' class="needs-validation" novalidate>
-            <input name="parentID" type="text" style="display: none;" value="{{parent['_id']}}" required>
-            <input name="change-type" type="text" style="display: none;" value="area" required>
+        <form id='area-form'>
+            <input name="parentID" type="text" style="display: none;" value="{{parent['_id']}}">
+            <input name="change-type" type="text" style="display: none;" value="area">
             <div class="form-group-row">
                 <div class="col-md-6">
                     <label for="name">Area Name</label>
-                    <input name="name" type="text" class="form-control" placeholder="Area Name" required>
-                    <div class="invalid-feedback">Please give this area a name.</div>
+                    <input name="name" type="text" class="form-control" placeholder="Area Name">
                 </div>
             </div>
-            <br>
             <div class="form-group-row">
                 <div class="col-md-6">
-                    <label for="description">Description</label>
-                    <input name="description" type="text" class="form-control" placeholder="Description" style="height: 150px;" required>
-                    <div class="invalid-feedback">Try to describe what this place looks like and how to get there.</div>
+                    <label for="description">Area Description</label>
+                    <input name="description" type="text" class="form-control" placeholder="Area Description" style="height: 150px;">
                 </div>
             </div>
             <!-- Google Maps API for location -->
@@ -74,7 +71,6 @@
                     <input id="areaDescriptionInput" type="text" class="form-control" placeholder="Area Description" style="height: 150px;">
                 </div>
             </div> -->
-            <br>
             <div class="form-group row mt-2">
                 <div class="col-md-12">
                   <button id="area-form-submit" type="button" class="btn btn-dark">Submit</button>
