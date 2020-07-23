@@ -14,25 +14,23 @@
 
 // Validate Form
 // Disable form submissions if there are invalid fields
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-      // Get the forms we want to add validation styles to
-      var forms = document.getElementsByClassName('needs-validation');
-      // Loop over them and prevent submission
-      var validation = Array.prototype.filter.call(forms, function(form) {
-        form.addEventListener('submit', function(event) {
-          if (form.checkValidity() === false) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          form.classList.add('was-validated');
-        }, false);
-      });
-    }, false);
-  })();
+function validateForms() {
+    // Get the forms we want to add validation styles to
+    var forms = document.getElementsByClassName('needs-validation');
+    // Loop over them and prevent submission
+    var validation = Array.prototype.filter.call(forms, function(form) {
+    if (form.checkValidity() === false) {
+        console.log('Invalid form submission.');
+    } else {
+        // Else form is valid, submit to back-end
+        console.log('Valid form submission.');
+        submit_data();
+    }
+    form.classList.add('was-validated');
+    }, false);   
+}
 
-// Grab inputted data
+// Collect inputted data
 function get_inputs() {
     return $('#entry-form').serializeArray();
 }
@@ -63,4 +61,4 @@ function submit_data() {
 }
 
 var area_form_submit = d3.select('#area-form-submit');
-area_form_submit.on('click', submit_data);
+area_form_submit.on('click', validateForms);
