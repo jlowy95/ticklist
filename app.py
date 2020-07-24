@@ -238,9 +238,9 @@ def addArea(new_area):
         return {'redirect': f'/area/{str(new_entry.inserted_id)}',
             'success': 'New entry added successfully!'}
     else:
-        print('Error: Entry already exists; redirecting to existing entry...')
-        return {'redirect': f'/area/{str(validated[1])}',
-            'error': 'Entry already exists; redirecting...'}
+        # Else, error - handle the error and return
+        print(f"Error Code: {validated[1]}")
+        return validationErrorProtocol(validated[1], validated[2])
 
 
 # addBoulder: inserts new boulder entry and updates parent area
@@ -286,6 +286,7 @@ def addBoulder(new_boulder):
             'success': 'New entry added successfully!'}
     else:
         # Else, error - handle the error and return
+        print(f"Error Code: {validated[1]}")
         return validationErrorProtocol(validated[1], validated[2])
 
 
@@ -333,9 +334,9 @@ def addRoute(new_route):
         return {'redirect': f'/route/{str(new_entry.inserted_id)}',
             'success': 'New entry added successfully!'}
     else:
-        print('Error: Entry already exists; redirecting to existing entry...')
-        return {'redirect': f'/area/{str(validated[1])}',
-            'error': 'Entry already exists; redirecting...'}
+        # Else, error - handle the error and return
+        print(f"Error Code: {validated[1]}")
+        return validationErrorProtocol(validated[1], validated[2])
 
 '''--------------------------------------- ROUTES ---------------------------------------'''
 # Home Route

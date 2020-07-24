@@ -7,6 +7,8 @@
     <title>MyTicks</title>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <!-- Personal Styles -->
+    <link rel="stylesheet" href="{{url_for('static', filename='/css/styles.css')}}">
 </head>
 <body>
     <!-- Navbar -->
@@ -40,6 +42,12 @@
             <div class="col-md-12">
                 <h1>Add New Area</h1>
             </div>
+        </div>
+        <!-- Error Message -->
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" id="error-element" style="display: none;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
         <!-- Add Entry Form -->
         <!-- Header (Current Path) -->

@@ -1,22 +1,25 @@
 // On Load functions (mostly for error handling)
 function handlePOSTError(errorCode) {
-    var error_element = d3.select('#error-popup');
+    console.log("Handling error.");
+    var error_element = d3.select('#error-element');
     if (errorCode == 0) {
         // Unfilled/Invalid Field - likely due to unintended page manipulation
         console.log('Unfilled/Invalid Field - likely due to unintended page manipulation');
-        error_element.style("display: block;");
-        error_element.text("An error occurred, please try again.");
+        error_element.style("display", "block");
+        d3.select("#error-text").text("An error occurred, please try again.");
     } else if (errorCode == 1) {
         // Duplicate Entry
         console.log('Duplicate Entry');
-        error_element.style("display: block;");
-        error_element.text("Duplicate entry found, you have been redirected to the existing entry.");
+        error_element.style("display", "block");
+        d3.select("#error-text").text("Duplicate entry found, you have been redirected to the existing entry.");
     }
 }
 
 window.onload = function() {
+    console.log('Running OnLoad');
     var error = sessionStorage.getItem("error");
     if (error) {
+        console.log('Error Detected');
         sessionStorage.removeItem("error");
         handlePOSTError(sessionStorage.getItem("errorCode"));
         sessionStorage.removeItem("errorCode");
