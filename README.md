@@ -3,11 +3,12 @@
 
 ## Todo
 1. Decide on final database structure !!IN PROGRESS!!
-  - Paths between parents/children, retain redundant info or load multiple items
+  - Paths between parents/children, retain redundant info or load multiple items (Load multiple items)
   - Clarify images property
 2. Integrate Flask to html templates !!IN PROGRESS!!
+  - Pass common html elements for simpler templates
   - Add images to areas template
-3. Add validation
+3. Add validation  !!TESTING!!
   - Both client and server side to changes/additions
 4. Begin DB loading through 'add' forms
 
