@@ -1,16 +1,28 @@
-// Grab current selection based on user navigation of db
-    // Grab selected continent for db collection
-    var collection = d3.select('#continents');
-    collection.on('change', function(){
-        var entry_id = collection.property('value')
-        console.log(entry_id);
-        window.location.href = `/climbs/${entry_id}`;
-        console.log(`localhost:5000/climbs/${entry_id}`);
-    });
-    
+// On Load functions (mostly for error handling)
+function handlePOSTError(errorCode) {
+    var error_element = d3.select('#error-popup');
+    if (errorCode == 0) {
+        // Unfilled/Invalid Field - likely due to unintended page manipulation
+        console.log('Unfilled/Invalid Field - likely due to unintended page manipulation');
+        error_element.style("display: block;");
+        error_element.text("An error occurred, please try again.");
+    } else if (errorCode == 1) {
+        // Duplicate Entry
+        console.log('Duplicate Entry');
+        error_element.style("display: block;");
+        error_element.text("Duplicate entry found, you have been redirected to the existing entry.");
+    }
+}
 
-// Fill new 'select' options based on user selections
-// Default to 'This area is currently empty!'
+window.onload = function() {
+    var error = sessionStorage.getItem("error");
+    if (error) {
+        sessionStorage.removeItem("error");
+        handlePOSTError(sessionStorage.getItem("errorCode"));
+        sessionStorage.removeItem("errorCode");
+    }
+};
+
 
 // Validate Form
 // Disable form submissions if there are invalid fields
@@ -50,7 +62,18 @@ function call_API(data) {
         .then(response => response.json())
         .then(function(data) {
             console.log(data);
-            window.location.href = data.redirect;
+            // Action Tree
+            // 1. Valid submission - redirect to new page
+            // 2. Invalid Fields submitted - refresh with error message
+            // 3. Duplicate Entry submitted - redirect to existing entry
+            if (data.redirect) {
+                if (data.error) {
+                    sessionStorage.setItem("error", "true");
+                    sessionStorage.setItem("errorCode", data.error);
+                }
+                window.location.href = data.redirect;
+            }
+            
         })
         .catch(error => console.log(error));
 

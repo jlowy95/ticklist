@@ -101,6 +101,7 @@ api_routes = {
     'boulder': boulders_col,
     'route': routes_col
 }
+
 # getPathNames: For item in entry path, retrieve name
 def getPathNames(entry_path):
     path_raw = entry_path.split('$')
@@ -118,6 +119,7 @@ def getPathNames(entry_path):
     
     return path_clean
 
+
 # getChildrenInfo: for item in children, retrieve info
 def getChildrenInfo(children):
     if children:
@@ -132,6 +134,7 @@ def getChildrenInfo(children):
         return children_info
     else:
         return []
+
 
 # simplifyArray: takes JSON form array and converts it to single python dictionary
 def simplifyArray(json_request):
@@ -151,20 +154,51 @@ def updateChildren(parent, new_entry):
                 'children': parent['children']
                 }})
         
-# validateAddition: checks database for new entry details of parent and name
-# Returns False if a similar entry already exists
-def validateAddition(loc_type, parentID, name):
+
+# validateAddition: re-checks all fields are filled and valid,
+# then checks database for new entry details of parent and name
+# Returns a tuple corresponding to the following:
+# (validated boolean, error code if error, additional info for error handling)
+def validateAddition(loc_type, new_loc):
     print('Validating...')
-    validated =  api_routes[loc_type].find_one({'parentID': parentID, 'name': name})
+    # Check for all fields filled
+    for field in new_loc.keys():
+        if new_loc[field] == '':
+            # Invalid field - An Error occurred, please try again.
+            return (False, 0, (loc_type, new_loc['parentID']))
+    # Else continue
+
+    # Check for valid grade, danger, committment based on loc_type
+
+    # Check for duplicate entry
+    validated =  api_routes[loc_type].find_one({'parentID': new_loc['parentID'], 'name': new_loc['name']})
     if validated:
-        return (False, validated['_id'])
+        return (False, 1, (loc_type, validated['_id']))
     else:
         return (True,)
+
+
+# validationErrorProtocol: handles any errors found by validateAddition
+def validationErrorProtocol(error_code, data):
+    print("Handling Error")
+    if error_code == 0:
+        # Unfilled/Invalid Field - likely due to unintended page manipulation
+        # data = (loc_type, new_loc['parentID'])
+        # Redirect to addEntry of loc_type of the parent area
+        return {'redirect': f'/add-entry/{data[0]}/{str(data[1])}',
+            'error': 0}
+    elif error_code == 1:
+        # Duplicate Entry
+        # data = (loc_type, validated['_id']) (the _id of the existing entry)
+        # Redirect to existing entry's page
+        return {'redirect': f'/{data[0]}/{str(data[1])}',
+            'error': 1}
+
 
 # addArea: inserts new area entry and updates parent area
 def addArea(new_area):
     # Validate if new entry
-    validated = validateAddition('area', new_area['parentID'], new_area['name'])
+    validated = validateAddition('area', new_area)
     if validated[0]:
         # Find parent for path extension
         parent = areas_col.find_one({'_id': ObjectId(f'{new_area["parentID"]}')})
@@ -208,10 +242,11 @@ def addArea(new_area):
         return {'redirect': f'/area/{str(validated[1])}',
             'error': 'Entry already exists; redirecting...'}
 
+
 # addBoulder: inserts new boulder entry and updates parent area
 def addBoulder(new_boulder):
     # Validate if new entry
-    validated = validateAddition('boulder', new_boulder['parentID'], new_boulder['name'])
+    validated = validateAddition('boulder', new_boulder)
     if validated[0]:
         # Find parent for path extension
         parent = boulders_col.find_one({'_id': ObjectId(f'{new_boulder["parentID"]}')})
@@ -250,14 +285,14 @@ def addBoulder(new_boulder):
         return {'redirect': f'/boulder/{str(new_entry.inserted_id)}',
             'success': 'New entry added successfully!'}
     else:
-        print('Error: Entry already exists; redirecting to existing entry...')
-        return {'redirect': f'/area/{str(validated[1])}',
-            'error': 'Entry already exists; redirecting...'}
+        # Else, error - handle the error and return
+        return validationErrorProtocol(validated[1], validated[2])
+
 
 # addRoute: inserts new boulder entry and updates parent area
 def addRoute(new_route):
     # Validate if new entry
-    validated = validateAddition('route', new_route['parentID'], new_route['name'])
+    validated = validateAddition('route', new_route)
     if validated[0]:
         # Find parent for path extension
         parent = routes_col.find_one({'_id': ObjectId(f'{new_route["parentID"]}')})
@@ -302,7 +337,7 @@ def addRoute(new_route):
         return {'redirect': f'/area/{str(validated[1])}',
             'error': 'Entry already exists; redirecting...'}
 
-
+'''--------------------------------------- ROUTES ---------------------------------------'''
 # Home Route
 # home page with secondary tools/info
 @app.route('/')
