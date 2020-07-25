@@ -2,12 +2,12 @@
 function handlePOSTError(errorCode) {
     console.log("Handling error.");
     var error_element = d3.select('#error-element');
-    if (errorCode == 0) {
+    if (errorCode == 1) {
         // Unfilled/Invalid Field - likely due to unintended page manipulation
         console.log('Unfilled/Invalid Field - likely due to unintended page manipulation');
         error_element.style("display", "block");
         d3.select("#error-text").text("An error occurred, please try again.");
-    } else if (errorCode == 1) {
+    } else if (errorCode == 2) {
         // Duplicate Entry
         console.log('Duplicate Entry');
         error_element.style("display", "block");

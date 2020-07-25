@@ -165,7 +165,7 @@ def validateAddition(loc_type, new_loc):
     for field in new_loc.keys():
         if new_loc[field] == '':
             # Invalid field - An Error occurred, please try again.
-            return (False, 0, (loc_type, new_loc['parentID']))
+            return (False, 1, (loc_type, new_loc['parentID']))
     # Else continue
 
     # Check for valid grade, danger, committment based on loc_type
@@ -173,7 +173,7 @@ def validateAddition(loc_type, new_loc):
     # Check for duplicate entry
     validated =  api_routes[loc_type].find_one({'parentID': new_loc['parentID'], 'name': new_loc['name']})
     if validated:
-        return (False, 1, (loc_type, validated['_id']))
+        return (False, 2, (loc_type, validated['_id']))
     else:
         return (True,)
 
@@ -181,18 +181,18 @@ def validateAddition(loc_type, new_loc):
 # validationErrorProtocol: handles any errors found by validateAddition
 def validationErrorProtocol(error_code, data):
     print("Handling Error")
-    if error_code == 0:
+    if error_code == 1:
         # Unfilled/Invalid Field - likely due to unintended page manipulation
         # data = (loc_type, new_loc['parentID'])
         # Redirect to addEntry of loc_type of the parent area
         return {'redirect': f'/add-entry/{data[0]}/{str(data[1])}',
-            'error': 0}
-    elif error_code == 1:
+            'error': 1}
+    elif error_code == 2:
         # Duplicate Entry
         # data = (loc_type, validated['_id']) (the _id of the existing entry)
         # Redirect to existing entry's page
         return {'redirect': f'/{data[0]}/{str(data[1])}',
-            'error': 1}
+            'error': 2}
 
 
 # addArea: inserts new area entry and updates parent area
