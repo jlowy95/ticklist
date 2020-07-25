@@ -3,9 +3,9 @@
 
 ## Todo
 1. Decide on final database structure !!IN PROGRESS!!
-  1. MongoDB
+  - MongoDB
     - Paths between parents/children, retain redundant info or load multiple items (Load multiple items)
-  2. MySQL
+  - MySQL
     - All parent info stored in child
     - All child info retrieved by simple query
     - Uneven layering/depth between items???
