@@ -102,6 +102,50 @@ api_routes = {
     'route': routes_col
 }
 
+common_html = {
+    'nav': '''<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">MyTicks</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Link</a>
+            </li>
+            <!-- <li class="nav-item">
+              <a class="nav-link disabled" href="#">Disabled</a>
+            </li> -->
+          </ul>
+          <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search MyTicks" aria-label="Search">
+            <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>
+          </form>
+        </div>
+        </nav>''',
+    'title_start': '<title>MyTicks',
+    'title_end': '</title>',
+    'error': '''<div class="alert alert-warning alert-dismissible fade show" role="alert" id="error-element">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <strong>Warning!</strong>&nbsp;&nbsp;<p id="error-text" style="display: inline"></p>
+        </div>''',
+    'scripts': '''<!-- Ajax/Jquery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <!-- Bootstrap -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+        <!-- D3 -->
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <!-- Personal JS -->
+        <script src="{{url_for('static', filename='javascript/dbresponse.js')}}"></script>'''
+}
+
 # getPathNames: For item in entry path, retrieve name
 def getPathNames(entry_path):
     path_raw = entry_path.split('$')
@@ -343,7 +387,7 @@ def addRoute(new_route):
 # home page with secondary tools/info
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', common=common_html)
 
 
 # All Locations
@@ -351,7 +395,7 @@ def index():
 @app.route('/all-locations')
 def allLocations():
     # Template to be filled when database is properly initialized
-    return render_template('allLocations.html')
+    return render_template('allLocations.html', common=common_html)
 
 
 # API Routes
@@ -365,10 +409,10 @@ def area(entry_id):
         path = getPathNames(entry['path'])
         children = getChildrenInfo(entry['children'])
         print(f'Entry: {entry}')
-        return render_template('area.html', area=entry, path=path, children=children)
+        return render_template('area.html', area=entry, path=path, children=children, common=common_html)
     except Exception as e:
         print(e)
-        return render_template('index.html')
+        return render_template('404.html', common=common_html)
 
 @app.route('/boulder/<entry_id>')
 def boulder(entry_id):
@@ -376,10 +420,10 @@ def boulder(entry_id):
     try:
         entry = boulders_col.find_one({'_id': ObjectId(f'{entry_id}')})
         print(f'Entry: {entry}')
-        return render_template('boulder.html')
+        return render_template('boulder.html', common=common_html)
     except Exception as e:
         print(e)
-        return render_template('index.html')
+        return render_template('404.html', common=common_html)
 
 @app.route('/route/<entry_id>')
 def routeClimb(entry_id):
@@ -387,10 +431,10 @@ def routeClimb(entry_id):
     try:
         entry = routes_col.find_one({'_id': ObjectId(f'{entry_id}')})
         print(f'Entry: {entry}')
-        return render_template('route.html')
+        return render_template('route.html', common=common_html)
     except Exception as e:
         print(e)
-        return render_template('index.html')
+        return render_template('404.html', common=common_html)
 
 
 # Search query route
@@ -405,11 +449,11 @@ def search(search_terms):
 def addEntry(entry_type, parentID):
     parent = areas_col.find_one({'_id': ObjectId(f'{parentID}')})
     if entry_type == 'area':
-        return render_template('addArea.html', parent=parent)
+        return render_template('addArea.html', parent=parent, common=common_html)
     elif entry_type == 'boulder':
-        return render_template('addBoulder.html')
+        return render_template('addBoulder.html', common=common_html)
     elif entry_type == 'route':
-        return render_template('addRoute.html')
+        return render_template('addRoute.html', common=common_html)
     else:
         print('Error: invalid entry_type')
         redirect(url_for('area', entry_id=parentID))
