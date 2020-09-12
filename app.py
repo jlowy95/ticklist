@@ -5,41 +5,233 @@
 # ticked climbs and tracking of ascents.
 
 from flask import Flask, render_template, redirect, request, url_for
-from flask_pymongo import PyMongo
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+# from flask_pymongo import PyMongo
+import mysql.connector
 from bson import ObjectId
+import datetime
 import json
 import pprint
 
 app = Flask(__name__)
 
+# Initialize SQLAlchemy connection
+# MySQL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:cZechmat3@localhost/MyTicksClimbs"
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+# Postrgesql
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://Josh:lowy@localhost/MyTicksClimbs"
+# db = SQLAlchemy(app)
+# migrate = Migrate(app, db)
+ 
+
+# SQL Models
+class AreaModel(db.Model):
+    __tablename__ = 'areas'
+
+    # area_type: {
+    # 0: No children,
+    # 1: Areas,
+    # 2: Boulders/Routes}
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(35), nullable=False, primary_key=True)
+    parent_id = db.Column(db.Integer, nullable=False)
+    parent_name = db.Column(db.String(35), nullable=False)
+    description = db.Column(db.String(500))
+    elevation = db.Column(db.Integer)
+    lat = db.Column(db.Float())
+    lng = db.Column(db.Float())
+    area_type = db.Column(db.Integer)
+    date_inserted = db.Column(db.DateTime)
+
+    def __init__(self, name, parent_id, parent_name, description, elevation, lat, lng):
+        self.name = name
+        self.parent_id = parent_id
+        self.parent_name = parent_name
+        self.description = description
+        self.elevation = elevation
+        self.lat = lat
+        self.lng = lng
+        self.area_type = 0
+        self.date_inserted = datetime.datetime.now()
+    
+    def toJSON(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'parent': {
+                'id': self.parent_id,
+                'name': self.parent_name
+            },
+            'properties': {
+                'description': self.description,
+                'elevation': self.elevation,
+                'coords': {
+                    'lat': self.lat,
+                    'lng': self.lng
+                }
+            },
+            'area_type': self.area_type,
+            'date_inserted': self.date_inserted
+        }
+
+class BoulderModel(db.Model):
+    __tablename__ = 'boulders'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(35), nullable=False, primary_key=True)
+    parent_id = db.Column(db.Integer, nullable=False)
+    parent_name = db.Column(db.String(35), nullable=False)
+    order = db.Column(db.Integer)
+    grade = db.Column(db.Integer, nullable=False)
+    quality = db.Column(db.Integer, nullable=False)
+    danger = db.Column(db.Integer, nullable=False)
+    height = db.Column(db.Integer)
+    fa = db.Column(db.String(50))
+    description = db.Column(db.String(500))
+    pro = db.Column(db.String(100))
+    elevation = db.Column(db.Integer)
+    lat = db.Column(db.Float())
+    lng = db.Column(db.Float())
+    date_inserted = db.Column(db.DateTime)
+
+    def __init__(self, name, parent_id, parent_name, order, grade, quality, danger, height, fa, description, pro, elevation, lat, lng):
+        self.name = name
+        self.parent_id = parent_id
+        self.parent_name = parent_name
+        self.order = 0
+        self.grade = grade
+        self.quality = quality
+        self.danger = danger
+        self.height = height
+        self.fa = fa
+        self.description = description
+        self.pro = pro
+        self.elevation = elevation
+        self.lat = lat
+        self.lng = lng
+        self.date_inserted = datetime.datetime.now()
+
+    def toJSON(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'parent': {
+                'id': self.parent_id,
+                'name': self.parent_name,
+                'order': self.order
+            },
+            'properties': {
+                'grade': self.grade,
+                'danger': self.danger,
+                'height': self.height,
+                'fa': self.fa,
+                'description': self.description,
+                'pro': self.pro,
+                'elevation': self.elevation,
+                'coords': {
+                    'lat': self.lat,
+                    'lng': self.lng
+                }
+            },                
+            'date_inserted': self.date_inserted
+        }
+
+class RouteModel(db.Model):
+    __tablename__ = 'routes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(35), nullable=False, primary_key=True)
+    parent_id = db.Column(db.Integer, nullable=False)
+    parent_name = db.Column(db.String(35), nullable=False)
+    order = db.Column(db.Integer)
+    grade = db.Column(db.Integer, nullable=False)
+    quality = db.Column(db.Integer, nullable=False)
+    danger = db.Column(db.Integer, nullable=False)
+    height = db.Column(db.Integer)
+    pitches = db.Column(db.Integer)
+    committment = db.Column(db.String(3))
+    fa = db.Column(db.String(50))
+    description = db.Column(db.String(500))
+    pro = db.Column(db.String(100))
+    elevation = db.Column(db.Integer)
+    lat = db.Column(db.Float())
+    lng = db.Column(db.Float())
+    date_inserted = db.Column(db.DateTime)
+
+    def __init__(self, name, parent_id, parent_name, order, grade, quality, danger, height, pitches, committment, fa, description, pro, elevation, lat, lng):
+        self.name = name
+        self.parent_id = parent_id
+        self.parent_name = parent_name
+        self.order = 0
+        self.grade = grade
+        self.quality = quality
+        self.danger = danger
+        self.height = height
+        self.pitches = pitches
+        self.committment
+        self.fa = fa
+        self.description = description
+        self.pro = pro
+        self.elevation = elevation
+        self.lat = lat
+        self.lng = lng
+        self.date_inserted = datetime.datetime.now()
+
+    def toJSON(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'parent': {
+                'id': self.parent_id,
+                'name': self.parent_name,
+                'order': self.order
+            },
+            'properties': {
+                'grade': self.grade,
+                'danger': self.danger,
+                'height': self.height,
+                'pitches': self.pitches,
+                'committment': self.committment,
+                'fa': self.fa,
+                'description': self.description,
+                'pro': self.pro,
+                'elevation': self.elevation,
+                'coords': {
+                    'lat': self.lat,
+                    'lng': self.lng
+                }
+            },                
+            'date_inserted': self.date_inserted
+        }
+
 # Use flask_pymongo to set up mongo connection
-app.config["MONGO_URI"] = "mongodb://localhost:27017/MyTicks"
-mongo = PyMongo(app)
+# app.config["MONGO_URI"] = "mongodb://localhost:27017/MyTicks"
+# mongo = PyMongo(app)
 
 # Define collections for primary use
-areas_col = mongo.db.areas
-boulders_col = mongo.db.boulders
-routes_col = mongo.db.routes
+# areas_col = mongo.db.areas
+# boulders_col = mongo.db.boulders
+# routes_col = mongo.db.routes
 
 # Sample Entries
 '''
 Area
 {
-    _id: ObjectId(5f0d16cac6b1d534f316b56c),
+    id: 756,
     name: 'Wyoming',
-    parentID: all-locations,
-    path: all-locations$area/5f0d16cac6b1d534f316b56c,
-    children: [],
+    parent_id: 1,
+    parent_name: 'All Locations',
     properties: {
         description: 'Wyoming is pretty.'
         images: [],
-        'child_counts': {
-            'areas': 0,
-            'boulder': 0,
-            'sport': 0,
-            'trad': 0,
-            'ice': 0
-        },
         'elevation': '',
         'coords': {
             'lat': '',
@@ -49,10 +241,10 @@ Area
 }
 Boulder
 {
-    _id: ObjectId(),
+    id: 4234,
     name: 'Iron Man Traverse'
-    parentID: '',
-    path: all-locations$area/45398472$area/9287507$area/05275032$boulder/,
+    parent_id: 43,
+    parent_name: 'Buttermilks',
     properties: {
         grade: 4,
         quality: 4,
@@ -71,10 +263,10 @@ Boulder
 }
 Route
 {
-    _id: ObjectId(),
+    id: 98753,
     name: 'The Grand Wall'
-    parentID: '',
-    path: all-locations$area/45398472$area/9287507$area/05275032$route/,
+    parent_id: 64,
+    parent_name: 'The Chief',
     properties: {
         grade: 11.0,
         quality: 5,
@@ -96,11 +288,11 @@ Route
 '''
 
 # Global Functions + Variables
-api_routes = {
-    'area': areas_col,
-    'boulder': boulders_col,
-    'route': routes_col
-}
+# api_routes = {
+#     'area': areas_col,
+#     'boulder': boulders_col,
+#     'route': routes_col
+# }
 
 common_html = {
     'nav': '''<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -147,37 +339,77 @@ common_html = {
 }
 
 # getPathNames: For item in entry path, retrieve name
-def getPathNames(entry_path):
-    path_raw = entry_path.split('$')
-    path_clean = []
-    for link in path_raw:
-        if link == 'all-locations':
-            path_clean.append({'name': 'All Locations',
-                'route': 'all-locations'})
+def getPathNames(parent):
+    path = []
+    flag = False
+    while not flag:
+        if parent['id'] == 1 and parent['name'] == 'All Locations':
+            path.append({'name': parent['name'],
+            'route': f"area/{parent['id']}/{parent['name']}"})
+            flag = True
+            # print('getPathNames flagged')
         else:
-            link_split = link.split('/')
-            temp_entry = api_routes[link_split[0]].find_one({'_id': ObjectId(f'{link_split[1]}')})
-            path_clean.append({'name': temp_entry['name'],
-                'route': link
-                })
-    
-    return path_clean
+            path.append({'name': parent['name'],
+            'route': f"area/{parent['id']}/{parent['name']}"})
+            parent = db.session.query(AreaModel)\
+                .filter(AreaModel.parent_id==parent['id'])\
+                .filter(AreaModel.parent_name==parent['name'])\
+                .toJSON()['parent']
+    # print(f'getPathNames pre-return: {path.reverse()}')
+    path.reverse()
+    return path
 
 
 # getChildrenInfo: for item in children, retrieve info
-def getChildrenInfo(children):
-    if children:
-        children_info = []
-        for child in children:
-            link_split = child.split('/')
-            temp_entry = api_routes[link_split[0]].find_one({'_id': ObjectId(f'{link_split[1]}')})
-            children_info.append({'name': temp_entry['name'],
-                'route': child
-                })
-            
-        return children_info
-    else:
+def getChildrenInfo(entry):
+    if entry['area_type'] == 0:
         return []
+    elif entry['area_type'] == 1:
+        children_info = []
+        children = db.session.query(AreaModel)\
+            .filter(AreaModel.parent_id==entry['id'])\
+            .filter(AreaModel.parent_name==entry['name'])\
+            .all()
+        if type(children)==list:
+            for child in children:
+                children_info.append({'name': child.name,
+                    'route': f"area/{child.id}/{child.name}"})
+        else:
+            children_info.append({'name': children.name,
+                    'route': f"area/{children.id}/{children.name}"})
+        return {'sorted': children_info}
+    elif entry['area_type'] == 2:
+        #
+        # ADD BOULDER/ROUTE API ROUTE PREFIX
+        #
+        sorted_info = []
+        unsorted_info = []
+        # Check boulders
+        boulders = db.session.query(BoulderModel.id, BoulderModel.name, BoulderModel.order)\
+            .filter(BoulderModel.parent_id==entry['id'])\
+            .filter(BoulderModel.parent_name==entry['name'])\
+            .all()
+        # Check routes
+        routes = db.session.query(RouteModel.id, RouteModel.name, RouteModel.order)\
+            .filter(RouteModel.parent_id==entry['id'])\
+            .filter(RouteModel.parent_name==entry['name'])\
+            .all()
+        # Union boulders + routes and sort
+        children = boulders.union(routes).order_by(BoulderModel.order)
+        # Append info to corresponding lists
+        for child in children:
+            if child.order == 0:
+                unsorted_info.append({'name': child['name'],
+                'route': f"{child['id']}/{child['name']}"})
+            else:
+                children_info.append({'name': child['name'],
+                    'route': f"{child['id']}/{child['name']}"})
+
+        if unsorted_info == []:
+            return {'sorted': sorted_info}
+        else:
+            return {'sorted': sorted_info, 'unsorted': unsorted_info}
+        
 
 
 # simplifyArray: takes JSON form array and converts it to single python dictionary
@@ -392,7 +624,7 @@ def index():
 
 # All Locations
 # Route-guide home/full directory
-@app.route('/all-locations')
+@app.route('/1/All-Locations')
 def allLocations():
     # Template to be filled when database is properly initialized
     return render_template('allLocations.html', common=common_html)
@@ -400,14 +632,20 @@ def allLocations():
 
 # API Routes
 # Loads the corresponding page type to the entry requested
-@app.route('/area/<entry_id>')
-def area(entry_id):
-    print(f'Entry: {entry_id}')
+@app.route('/area/<entry_id>/<entry_name>')
+def area(entry_id, entry_name):
+    print(f'Entry: {entry_id}/{entry_name}')
     try:
         # Retrieve Entry
-        entry = areas_col.find_one({'_id': ObjectId(f'{entry_id}')})
-        path = getPathNames(entry['path'])
-        children = getChildrenInfo(entry['children'])
+        # entry = areas_col.find_one({'_id': ObjectId(f'{entry_id}')})
+        entry = db.session.query(AreaModel)\
+            .filter(AreaModel.id==entry_id)\
+            .filter(AreaModel.name==entry_name)\
+            .first().toJSON()
+        path = getPathNames(entry['parent'])
+        print(f'Path: {path}')
+        children = getChildrenInfo(entry)
+        print(f'Children: {children}')
         print(f'Entry: {entry}')
         return render_template('area.html', area=entry, path=path, children=children, common=common_html)
     except Exception as e:

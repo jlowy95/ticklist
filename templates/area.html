@@ -19,16 +19,19 @@
             <!-- Flask Area Path -->
             <div class="row justify-content-start no-gutters">
                 {% for link in path %}
-                    {% if link['name'] == area['name'] %}
+                    <!-- {% if link['name'] == area['name'] %}
                     <div class="col-sm-auto">
                         <h5><a href="/{{link['route']}}">{{link['name']}}</a></h5>
                     </div>
-                    {% else %}
+                    {% else %} -->
                     <div class="col-sm-auto">
                         <h5><a href="/{{link['route']}}">{{link['name']}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;</h5>
                     </div>
-                    {% endif %}
+                    <!-- {% endif %} -->
                 {% endfor %}
+                <div class="col-sm-auto">
+                    <h5><a href="/area/{{area['id']}}/{{area['name']}}">{{area['name']}}</a></h5>
+                </div>
             </div>
         </div>
         <!-- Entry Management Tools -->
@@ -62,13 +65,23 @@
             <!-- Flask for each child and for header -->
             <table>
                 <thead><strong>Locations in {{area['name']}}</strong></thead>
-                {% for child in children %}
+                {% for child in children['sorted'] %}
                 <tr>
                     <th><a href="/{{child['route']}}">{{child['name']}}</a></th>
                     <th></th>
                     <th></th>
                 </tr>
                 {% endfor %}
+                {% if children['unsorted'] %}
+                <thead><strong>Unsorted Climbs</strong></thead>
+                {% for child in children['unsorted'] %}
+                <tr>
+                    <th><a href="/{{child['route']}}">{{child['name']}}</a></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                {% endfor %}
+                {% endif %}
                 <!-- tr for each child -->
             </table>
         </div>
