@@ -12,6 +12,7 @@ CREATE TABLE `areas` (
     `name` VARCHAR(35) NOT NULL,
     `parent_id` INT NOT NULL,
     `parent_name` VARCHAR(35) NOT NULL,
+    `path` VARCHAR(150),
     `description` VARCHAR(500),
     `elevation` INT,
     `lat` DOUBLE(9,6),
@@ -22,8 +23,8 @@ CREATE TABLE `areas` (
     FOREIGN KEY (parent_id,parent_name) REFERENCES areas(id,name)
 );
 -- Initialize with 'All Locations'
-INSERT INTO areas (name, parent_id, parent_name)
-	VALUES ('All Locations',1,'All Locations');
+INSERT INTO areas (name, parent_id, parent_name, path, area_type)
+	VALUES ('All Locations',1,'All Locations', '1/All Locations', 1);
 
 
 -- Boulder Grades Reference Table
@@ -72,6 +73,7 @@ CREATE TABLE `boulders` (
     `name` VARCHAR(35) NOT NULL,
     `parent_id` INT NOT NULL,
     `parent_name` VARCHAR(35) NOT NULL,
+    `path` VARCHAR(150),
     `grade` INT NOT NULL,
     `quality` INT NOT NULL,
     `danger` INT NOT NULL,
@@ -95,6 +97,7 @@ CREATE TABLE `routes` (
     `name` VARCHAR(35) NOT NULL,
     `parent_id` INT NOT NULL,
     `parent_name` VARCHAR(35) NOT NULL,
+    `path` VARCHAR(150),
     `grade` INT NOT NULL,
     `quality` INT NOT NULL,
     `danger` INT NOT NULL,
@@ -114,5 +117,4 @@ CREATE TABLE `routes` (
     FOREIGN KEY (danger) REFERENCES danger(int_id)
 );
 
-SELECT * FROM areas;
-		
+SELECT * FROM areas;		

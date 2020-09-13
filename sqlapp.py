@@ -35,6 +35,7 @@ class AreaModel(db.Model):
     name = db.Column(db.String(35), nullable=False, primary_key=True)
     parent_id = db.Column(db.Integer, nullable=False)
     parent_name = db.Column(db.String(35), nullable=False)
+    path = db.Column(db.String(150))
     description = db.Column(db.String(500))
     elevation = db.Column(db.Integer)
     lat = db.Column(db.Float())
@@ -42,10 +43,11 @@ class AreaModel(db.Model):
     area_type = db.Column(db.Integer)
     date_inserted = db.Column(db.DateTime)
 
-    def __init__(self, name, parent_id, parent_name, description, elevation, lat, lng):
+    def __init__(self, name, parent_id, parent_name, path, description, elevation, lat, lng):
         self.name = name
         self.parent_id = parent_id
         self.parent_name = parent_name
+        self.path = path
         self.description = description
         self.elevation = elevation
         self.lat = lat
@@ -59,6 +61,7 @@ class AreaModel(db.Model):
             'name': self.name,
             'parent_id': self.parent_id,
             'parent_name': self.parent_name,
+            'path': self.path,
             'properties': {
                 'description': self.description,
                 'elevation': self.elevation,
@@ -75,6 +78,7 @@ class AreaModel(db.Model):
 new_car = AreaModel(name='North America',
     parent_id=1, 
     parent_name='All Locations',
+    path='1/All Locations',
     description='This is North America babyyyyyyy', 
     elevation=None, 
     lat=121.7860, 

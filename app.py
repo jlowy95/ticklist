@@ -44,6 +44,7 @@ class AreaModel(db.Model):
     name = db.Column(db.String(35), nullable=False, primary_key=True)
     parent_id = db.Column(db.Integer, nullable=False)
     parent_name = db.Column(db.String(35), nullable=False)
+    path = db.Column(db.String(150))
     description = db.Column(db.String(500))
     elevation = db.Column(db.Integer)
     lat = db.Column(db.Float())
@@ -51,10 +52,11 @@ class AreaModel(db.Model):
     area_type = db.Column(db.Integer)
     date_inserted = db.Column(db.DateTime)
 
-    def __init__(self, name, parent_id, parent_name, description, elevation, lat, lng):
+    def __init__(self, name, parent_id, parent_name, path, description, elevation, lat, lng):
         self.name = name
         self.parent_id = parent_id
         self.parent_name = parent_name
+        self.path = path
         self.description = description
         self.elevation = elevation
         self.lat = lat
@@ -68,7 +70,8 @@ class AreaModel(db.Model):
             'name': self.name,
             'parent': {
                 'id': self.parent_id,
-                'name': self.parent_name
+                'name': self.parent_name,
+                'path': self.path
             },
             'properties': {
                 'description': self.description,
@@ -89,6 +92,7 @@ class BoulderModel(db.Model):
     name = db.Column(db.String(35), nullable=False, primary_key=True)
     parent_id = db.Column(db.Integer, nullable=False)
     parent_name = db.Column(db.String(35), nullable=False)
+    path = db.Column(db.String(150))
     order = db.Column(db.Integer)
     grade = db.Column(db.Integer, nullable=False)
     quality = db.Column(db.Integer, nullable=False)
@@ -102,10 +106,11 @@ class BoulderModel(db.Model):
     lng = db.Column(db.Float())
     date_inserted = db.Column(db.DateTime)
 
-    def __init__(self, name, parent_id, parent_name, order, grade, quality, danger, height, fa, description, pro, elevation, lat, lng):
+    def __init__(self, name, parent_id, parent_name, path, order, grade, quality, danger, height, fa, description, pro, elevation, lat, lng):
         self.name = name
         self.parent_id = parent_id
         self.parent_name = parent_name
+        self.path = path
         self.order = 0
         self.grade = grade
         self.quality = quality
@@ -126,6 +131,7 @@ class BoulderModel(db.Model):
             'parent': {
                 'id': self.parent_id,
                 'name': self.parent_name,
+                'path': self.path,
                 'order': self.order
             },
             'properties': {
@@ -151,6 +157,7 @@ class RouteModel(db.Model):
     name = db.Column(db.String(35), nullable=False, primary_key=True)
     parent_id = db.Column(db.Integer, nullable=False)
     parent_name = db.Column(db.String(35), nullable=False)
+    path = db.Column(db.String(150))
     order = db.Column(db.Integer)
     grade = db.Column(db.Integer, nullable=False)
     quality = db.Column(db.Integer, nullable=False)
@@ -166,10 +173,11 @@ class RouteModel(db.Model):
     lng = db.Column(db.Float())
     date_inserted = db.Column(db.DateTime)
 
-    def __init__(self, name, parent_id, parent_name, order, grade, quality, danger, height, pitches, committment, fa, description, pro, elevation, lat, lng):
+    def __init__(self, name, parent_id, parent_name, path, order, grade, quality, danger, height, pitches, committment, fa, description, pro, elevation, lat, lng):
         self.name = name
         self.parent_id = parent_id
         self.parent_name = parent_name
+        self.path = path
         self.order = 0
         self.grade = grade
         self.quality = quality
@@ -192,6 +200,7 @@ class RouteModel(db.Model):
             'parent': {
                 'id': self.parent_id,
                 'name': self.parent_name,
+                'path': self.path,
                 'order': self.order
             },
             'properties': {
@@ -339,25 +348,30 @@ common_html = {
 }
 
 # getPathNames: For item in entry path, retrieve name
-def getPathNames(parent):
-    path = []
-    flag = False
-    while not flag:
-        if parent['id'] == 1 and parent['name'] == 'All Locations':
-            path.append({'name': parent['name'],
-            'route': f"area/{parent['id']}/{parent['name']}"})
-            flag = True
-            # print('getPathNames flagged')
-        else:
-            path.append({'name': parent['name'],
-            'route': f"area/{parent['id']}/{parent['name']}"})
-            parent = db.session.query(AreaModel)\
-                .filter(AreaModel.parent_id==parent['id'])\
-                .filter(AreaModel.parent_name==parent['name'])\
-                .toJSON()['parent']
-    # print(f'getPathNames pre-return: {path.reverse()}')
-    path.reverse()
-    return path
+def getPathNames(path):
+    path_raw = [step.split('/') for step in path.split('$')]
+    print(f'path_raw: {path_raw}')
+    path_clean = []
+    for step in path_raw:
+        path_clean.append({'name': step[1], 'route':f"area/{step[0]}/{step[1]}"})
+    return path_clean
+    # flag = False
+    # while not flag:
+    #     if parent['id'] == 1 and parent['name'] == 'All Locations':
+    #         path.append({'name': parent['name'],
+    #         'route': f"area/{parent['id']}/{parent['name']}"})
+    #         flag = True
+    #         # print('getPathNames flagged')
+    #     else:
+    #         path.append({'name': parent['name'],
+    #         'route': f"area/{parent['id']}/{parent['name']}"})
+    #         parent = db.session.query(AreaModel)\
+    #             .filter(AreaModel.parent_id==parent['id'])\
+    #             .filter(AreaModel.parent_name==parent['name'])\
+    #             .toJSON()['parent']
+    # # print(f'getPathNames pre-return: {path.reverse()}')
+    # path.reverse()
+    # return path
 
 
 # getChildrenInfo: for item in children, retrieve info
@@ -637,16 +651,15 @@ def area(entry_id, entry_name):
     print(f'Entry: {entry_id}/{entry_name}')
     try:
         # Retrieve Entry
-        # entry = areas_col.find_one({'_id': ObjectId(f'{entry_id}')})
         entry = db.session.query(AreaModel)\
             .filter(AreaModel.id==entry_id)\
             .filter(AreaModel.name==entry_name)\
             .first().toJSON()
-        path = getPathNames(entry['parent'])
-        print(f'Path: {path}')
+        path = getPathNames(entry['parent']['path'])
+        # print(f'Path: {path}')
         children = getChildrenInfo(entry)
-        print(f'Children: {children}')
-        print(f'Entry: {entry}')
+        # print(f'Children: {children}')
+        # print(f'Entry: {entry}')
         return render_template('area.html', area=entry, path=path, children=children, common=common_html)
     except Exception as e:
         print(e)
