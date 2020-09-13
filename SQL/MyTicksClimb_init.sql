@@ -117,4 +117,7 @@ CREATE TABLE `routes` (
     FOREIGN KEY (danger) REFERENCES danger(int_id)
 );
 
+UPDATE areas
+SET path='1/All Locations'
+WHERE id = 2 OR id = 3 AND name='North America';
 SELECT * FROM areas;		

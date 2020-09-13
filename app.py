@@ -19,7 +19,7 @@ app = Flask(__name__)
 # Initialize SQLAlchemy connection
 # MySQL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:cZechmat3@localhost/MyTicksClimbs"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:joshstemppassword@localhost/MyTicksClimbs"
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -40,7 +40,7 @@ class AreaModel(db.Model):
     # 1: Areas,
     # 2: Boulders/Routes}
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(35), nullable=False, primary_key=True)
     parent_id = db.Column(db.Integer, nullable=False)
     parent_name = db.Column(db.String(35), nullable=False)
@@ -343,14 +343,12 @@ common_html = {
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
         <!-- D3 -->
         <script src="https://d3js.org/d3.v5.min.js"></script>
-        <!-- Personal JS -->
-        <script src="{{url_for('static', filename='javascript/dbresponse.js')}}"></script>'''
+        '''
 }
 
 # getPathNames: For item in entry path, retrieve name
 def getPathNames(path):
     path_raw = [step.split('/') for step in path.split('$')]
-    print(f'path_raw: {path_raw}')
     path_clean = []
     for step in path_raw:
         path_clean.append({'name': step[1], 'route':f"area/{step[0]}/{step[1]}"})
@@ -430,19 +428,19 @@ def getChildrenInfo(entry):
 def simplifyArray(json_request):
     return {field['name']: field['value'] for field in json_request}
 
-# updateChildren: update the children property based on if there is or isnt already info there
-def updateChildren(parent, new_entry):
-    if parent['children'] == None: 
-        areas_col.update_one({'_id': parent['_id']}, 
-            {'$set': {
-                'children': ['area/'+str(new_entry.inserted_id)]
-                }})
-    else:
-        parent['children'].append(f'area/{str(new_entry.inserted_id)}')
-        areas_col.update_one({'_id': parent['_id']}, 
-            {'$set': {
-                'children': parent['children']
-                }})
+# # updateChildren: update the children property based on if there is or isnt already info there
+# def updateChildren(parent, new_entry):
+#     if parent['children'] == None: 
+#         areas_col.update_one({'_id': parent['_id']}, 
+#             {'$set': {
+#                 'children': ['area/'+str(new_entry.inserted_id)]
+#                 }})
+#     else:
+#         parent['children'].append(f'area/{str(new_entry.inserted_id)}')
+#         areas_col.update_one({'_id': parent['_id']}, 
+#             {'$set': {
+#                 'children': parent['children']
+#                 }})
         
 
 # validateAddition: re-checks all fields are filled and valid,
@@ -455,15 +453,21 @@ def validateAddition(loc_type, new_loc):
     for field in new_loc.keys():
         if new_loc[field] == '':
             # Invalid field - An Error occurred, please try again.
-            return (False, 1, (loc_type, new_loc['parentID']))
+            return (False, 1, (loc_type, new_loc))
     # Else continue
 
     # Check for valid grade, danger, committment based on loc_type
 
     # Check for duplicate entry
-    validated =  api_routes[loc_type].find_one({'parentID': new_loc['parentID'], 'name': new_loc['name']})
+    type2model = {'area': AreaModel,'boulders': BoulderModel, 'route': RouteModel}
+    model = type2model[loc_type]
+    validated =  db.session.query(model)\
+        .filter(model.parent_id == new_loc['parent_id'])\
+        .filter(model.parent_name==new_loc['parent_name'])\
+        .filter(model.name==new_loc['name'])\
+        .first()
     if validated:
-        return (False, 2, (loc_type, validated['_id']))
+        return (False, 2, (loc_type, validated))
     else:
         return (True,)
 
@@ -475,13 +479,13 @@ def validationErrorProtocol(error_code, data):
         # Unfilled/Invalid Field - likely due to unintended page manipulation
         # data = (loc_type, new_loc['parentID'])
         # Redirect to addEntry of loc_type of the parent area
-        return {'redirect': f'/add-entry/{data[0]}/{str(data[1])}',
+        return {'redirect': f"/add-entry/{data[0]}/{str(data[1]['parent_id'])}/{str(data[1]['parent_name'])}",
             'error': 1}
     elif error_code == 2:
         # Duplicate Entry
         # data = (loc_type, validated['_id']) (the _id of the existing entry)
         # Redirect to existing entry's page
-        return {'redirect': f'/{data[0]}/{str(data[1])}',
+        return {'redirect': f"/{data[0]}/{str(data[1]['id'])}/{str(data[1]['name'])}",
             'error': 2}
 
 
@@ -490,42 +494,25 @@ def addArea(new_area):
     # Validate if new entry
     validated = validateAddition('area', new_area)
     if validated[0]:
-        # Find parent for path extension
-        parent = areas_col.find_one({'_id': ObjectId(f'{new_area["parentID"]}')})
         # Initialize new entry
-        new_entry = areas_col.insert_one({
-            'name': new_area['name'],
-            'parentID': new_area['parentID'],
-            'path': '',
-            'children': [],
-            'properties': {
-                'description': new_area['description'],
-                'images': [],
-                'child_counts': {
-                    'areas': 0,
-                    'boulder': 0,
-                    'sport': 0,
-                    'trad': 0,
-                    'ice': 0
-                },
-                'elevation': '',
-                'coords': {
-                    'lat': '',
-                    'lng': ''
-                }
-            }
-        })
-        # Update new entry path
-        areas_col.update_one({'_id': new_entry.inserted_id}, 
-            {'$set': {
-                'path': parent['path']+'$area/'+str(new_entry.inserted_id)
-                }})
-        # Update parent children
-        updateChildren(parent, new_entry)
+        new_entry = AreaModel(
+            name=new_area['name'],
+            parent_id=new_area['parent_id'],
+            parent_name=new_area['parent_name'],
+            path=new_area['parent_path']+f"${new_area['parent_id']}/{new_area['parent_name']}",
+            description=new_area['description'],
+            elevation=None,
+            lat=None,
+            lng=None
+        )
+
+        # Commit
+        db.session.add(new_entry)
+        db.session.commit()
 
         # Return and redirect
-        print(f'Redirecting to area/{new_entry.inserted_id}')
-        return {'redirect': f'/area/{str(new_entry.inserted_id)}',
+        print(f"Redirecting to area/{new_entry.id}/{new_entry.name}")
+        return {'redirect': f"/area/{str(new_entry.id)}/{str(new_entry.name)}",
             'success': 'New entry added successfully!'}
     else:
         # Else, error - handle the error and return
@@ -656,10 +643,7 @@ def area(entry_id, entry_name):
             .filter(AreaModel.name==entry_name)\
             .first().toJSON()
         path = getPathNames(entry['parent']['path'])
-        # print(f'Path: {path}')
         children = getChildrenInfo(entry)
-        # print(f'Children: {children}')
-        # print(f'Entry: {entry}')
         return render_template('area.html', area=entry, path=path, children=children, common=common_html)
     except Exception as e:
         print(e)
@@ -696,9 +680,13 @@ def search(search_terms):
 
 # Entry Management
 # addEntry (adds an entry to the current area)
-@app.route('/add-entry/<entry_type>/<parentID>')
-def addEntry(entry_type, parentID):
-    parent = areas_col.find_one({'_id': ObjectId(f'{parentID}')})
+@app.route('/add-entry/<entry_type>/<parent_id>/<parent_name>')
+def addEntry(entry_type, parent_id, parent_name):
+    parent = db.session.query(AreaModel)\
+            .filter(AreaModel.id==parent_id)\
+            .filter(AreaModel.name==parent_name)\
+            .first().toJSON()
+    print(parent)
     if entry_type == 'area':
         return render_template('addArea.html', parent=parent, common=common_html)
     elif entry_type == 'boulder':
@@ -707,7 +695,7 @@ def addEntry(entry_type, parentID):
         return render_template('addRoute.html', common=common_html)
     else:
         print('Error: invalid entry_type')
-        redirect(url_for('area', entry_id=parentID))
+        redirect(url_for('area', entry_id=parent_id, entry_name=parent_name))
 
 # submitChanges - POST route processes changes to db
 # then redirects to new page if successful

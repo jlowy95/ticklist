@@ -44,13 +44,13 @@
                         Add Entry
                     </button>
                     <div class="dropdown-menu" aria-labelledby="addEntryDrop">
-                        <a class="dropdown-item" href="/add-entry/area/{{area['_id']}}">Area</a>
-                        <a class="dropdown-item" href="/add-entry/boulder/{{area['_id']}}">Boulder</a>
-                        <a class="dropdown-item" href="/add-entry/route/{{area['_id']}}">Route</a>
+                        <a class="dropdown-item" href="/add-entry/area/{{area['id']}}/{{area['name']}}">Area</a>
+                        <a class="dropdown-item" href="/add-entry/boulder/{{area['id']}}/{{area['name']}}">Boulder</a>
+                        <a class="dropdown-item" href="/add-entry/route/{{area['id']}}/{{area['name']}}">Route</a>
                     </div>
                 </div>
                 <div class="btn-group btn-group-sm" role="group" aria-label="First group">
-                    <a class="btn btn-secondary" href="/edit-entry/area/{{area['_id']}}" role="button">Edit Entry</a>
+                    <a class="btn btn-secondary" href="/edit-entry/area/{{area['id']}}/{{area['name']}}" role="button">Edit Entry</a>
                     <button type="button" class="btn btn-secondary">Delete Entry</button>
                 </div>
             </div>        
