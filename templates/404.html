@@ -1,27 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    {{common['title_start']|safe}}{{common['title_end']|safe}}
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-</head>
-<body>
-    <!-- Navbar -->
-    {{common['nav']|safe}}
+{% extends 'base.html' %}
+
+{% block content %}
     <div class="row">
         <div class="col-md-6 offset-3">
             <div class="jumbotron">
-                <h1 class="display-3">Woops, bad topo!</h1>
-                <p class="lead">We couldn't find that spot in our guidebooks, try double checking your spelling or check out the search.</p>
+                <h1 class="display-3">{{status_code['title']}}</h1>
+                <p class="lead">{{status_code['description']}}</p>
                 <hr class="my-2">
-                <p>If what you're looking for still isn't there, consider adding it!</p>
+                <p>{{status_code['secondary']}}</p>
                 </div>
         </div>
     </div>
-</body>
-<!-- Scripts -->
-{{common['scripts']|safe}}
-</html>
+{% endblock %}

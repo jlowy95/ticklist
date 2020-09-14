@@ -1,10 +1,19 @@
-{% extends 'base.html' %}
-
-{% block title %}
-    {{area['name']}}
-{% endblock %}
-
-{% block header %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {{common['title_start']|safe}} - {{area['name']}}{{common['title_end']|safe}}
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <!-- Personal Styles -->
+    <link rel="stylesheet" href="{{url_for('static', filename='/css/styles.css')}}">
+</head>
+<body>
+    <!-- Navbar -->
+    {{common['nav'] | safe}}
+    <!-- Page Header -->
     <div class="row mx-1 my-1">
         <div class="col-md-9">
             <!-- Flask Area Path -->
@@ -51,9 +60,9 @@
             </div>        
         </div>
     </div>
-{% endblock %}
-
-{% block content %}
+    <!-- Error Message -->
+    {{common['error']|safe}}
+    <!-- Page Info -->
     <div class="row mx-1">
         <!-- Children -->
         <div class="col-md-3">
@@ -148,4 +157,7 @@
             </div>
         </div>
     </div>
-{% endblock %}
+</body>
+<!-- Scripts -->
+{{common['scripts']|safe}}
+</html>

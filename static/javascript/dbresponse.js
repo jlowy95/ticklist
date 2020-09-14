@@ -12,6 +12,11 @@ function handlePOSTError(errorCode) {
         console.log('Duplicate Entry');
         error_element.style("display", "block");
         d3.select("#error-text").text("Duplicate entry found, you have been redirected to the existing entry.");
+    } else if (errorCode == 2) {
+        // Prohibited Entry Type
+        console.log('Prohibited Entry Type');
+        error_element.style("display", "block");
+        d3.select("#error-text").text("Prohibited Entry Type: Areas may only contain sub-areas OR boulders and routes.");
     }
 }
 

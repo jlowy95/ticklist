@@ -1,91 +1,128 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>MyTicks</title>
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">MyTicks</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-      
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <!-- <li class="nav-item">
-              <a class="nav-link disabled" href="#">Disabled</a>
-            </li> -->
-          </ul>
-          <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="Search MyTicks" aria-label="Search">
-            <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>
-          </form>
+{% extends 'base.html' %}
+
+{% block title %}
+    {{parent['name']}}
+{% endblock %}
+
+{% block header %}
+    <div class="row ml-4">
+        <div class="col-md-12">
+            <h1>Add New Route</h1>
         </div>
-    </nav>
-    <div class="ml-4">
-        <!-- Page Header -->
-        <div class="row">
-            <div class="col-md-12">
-                <h1>Add New Area</h1>
-            </div>
-        </div>
-        <!-- Add Entry Form -->
-        <!-- Header (Current Path) -->
-        <div class="row">
-            <div class="col-md-12">
-                <!-- Flask for href to link back to parent -->
-                <h4><a href="/area/{{parent['_id']}}">{{parent['name']}}</a></h4>
-            </div>
-        </div>
-        <form id='area-form'>
-            <input name="parentID" type="text" style="display: none;" value="{{parent['_id']}}">
-            <input name="change-type" type="text" style="display: none;" value="area">
-            <div class="form-group-row">
-                <div class="col-md-6">
-                    <label for="name">Area Name</label>
-                    <input name="name" type="text" class="form-control" placeholder="Area Name">
-                </div>
-            </div>
-            <div class="form-group-row">
-                <div class="col-md-6">
-                    <label for="description">Area Description</label>
-                    <input name="description" type="text" class="form-control" placeholder="Area Description" style="height: 150px;">
-                </div>
-            </div>
-            <!-- Google Maps API for location -->
-            <!-- <div class="form-group-row">
-                <div class="col-md-6">
-                    <label for="areaDescriptionInput">Area Description</label>
-                    <input id="areaDescriptionInput" type="text" class="form-control" placeholder="Area Description" style="height: 150px;">
-                </div>
-            </div> -->
-            <div class="form-group row mt-2">
-                <div class="col-md-12">
-                  <button id="area-form-submit" type="button" class="btn btn-dark">Submit</button>
-                </div>
-              </div>
-        </form>
     </div>
-</body>
-<!-- Ajax/Jquery -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<!-- Bootstrap -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-<!-- D3 -->
-<script src="https://d3js.org/d3.v5.min.js"></script>
-<!-- Personal JS -->
-<script src="{{url_for('static', filename='javascript/dbresponse.js')}}"></script>
-</html>
+{% endblock %}
+
+{% block content %}
+    <!-- Add Entry Form -->
+    <!-- Header (Current Path) -->
+    <div class="row ml-4">
+        <div class="col-md-12">
+            <!-- Flask for href to link back to parent -->
+            <h4><a href="/area/{{parent['id']}}/{{parent['name']}}">{{parent['name']}}</a></h4>
+        </div>
+    </div>
+    <form id='entry-form' class="needs-validation ml-4" novalidate>
+        <input name="parent_id" type="text" style="display: none;" value="{{parent['id']}}" required>
+        <input name="parent_name" type="text" style="display: none;" value="{{parent['name']}}" required>
+        <input name="parent_path" type="text" style="display: none;" value="{{parent['parent']['path']}}" required>
+        <input name="change-type" type="text" style="display: none;" value="boulder" required>
+        <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="name">Name</label>
+                <input name="name" type="text" class="form-control" placeholder="Route Name" required>
+                <div class="invalid-feedback">Can't think of a name? Use 'Unnamed' for now.</div>
+            </div>
+        </div>
+        <br>
+        <div class="form-row">
+            <div class="col-md-1">
+                <!-- <label for="grade">V Grade</label> -->
+                <select class="custom-select" name="grade" style="width: auto" required>
+                    <option selected>Yosemite Grade</option>
+                    <option value="B">B</option>
+                    <option value="0-">0-</option>
+                    <option value="0">0</option>
+                    <option value="0+">0+</option>
+                    <option value="1">1</option>
+                    <option value="1-2">1-2</option>
+                    <option value="2">2</option>
+                    <option value="2-3">2-3</option>
+                    <option value="3">3</option>
+                    <option value="3-4">3-4</option>
+                    <option value="4">4</option>
+                    <option value="4-5">4-5</option>
+                    <option value="5">5</option>
+                    <option value="5-6">5-6</option>
+                    <option value="6">6</option>
+                    <option value="6-7">6-7</option>
+                    <option value="7">7</option>
+                    <option value="7-8">7-8</option>
+                    <option value="8">8</option>
+                    <option value="8-9">8-9</option>
+                    <option value="9">9</option>
+                    <option value="9-10">9-10</option>
+                    <option value="10">10</option>
+                    <option value="10-11">10-11</option>
+                    <option value="11">11</option>
+                    <option value="11-12">11-12</option>
+                    <option value="12">12</option>
+                    <option value="12-13">12-13</option>
+                    <option value="13">13</option>
+                    <option value="13-14">13-14</option>
+                    <option value="14">14</option>
+                    </select>
+            </div>
+            <div class="col-md-1">
+                <!-- <label for="danger">Danger</label> -->
+                <select name="danger" class="custom-select" style="width: auto" required>
+                    <option selected>Danger</option>
+                    <option value="G">G</option>
+                    <option value="PG-13">PG-13</option>
+                    <option value="R">R</option>
+                    <option value="X">X</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <!-- <label for="height">Height (ft)</label> -->
+                <input name="height" type="text" class="form-control" placeholder="Height (ft)"  style="width: auto" required>
+            </div>
+        </div>
+        <br>
+        <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="fa">First Ascenscionist</label>
+                <input name="fa" type="text" class="form-control" placeholder="First Ascenscionist" required>
+                <div class="invalid-feedback">Unsure? Just put 'Unknown'.</div>
+            </div>
+        </div>
+        <br>
+        <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="description">Description</label>
+                <input name="description" type="text" class="form-control" placeholder="Boulder Description" style="height: 150px;" required>
+                <div class="invalid-feedback">Try describing some obvious features or where this climb is on the wall.</div>
+            </div>
+        </div>
+        <br>
+        <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="protection">Protection</label>
+                <input name="protection" type="text" class="form-control" placeholder="Protection" required>
+                <div class="invalid-feedback">How many pads should someone bring?</div>
+            </div>
+        </div>
+        <!-- Google Maps API for location -->
+        <!-- <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="areaDescriptionInput">Area Description</label>
+                <input id="areaDescriptionInput" type="text" class="form-control" placeholder="Area Description" style="height: 150px;">
+            </div>
+        </div> -->
+        <br>
+        <div class="form-group row mt-2">
+            <div class="col-md-12">
+                <button id="area-form-submit" type="button" class="btn btn-dark">Submit</button>
+            </div>
+            </div>
+    </form>
+{% endblock %}

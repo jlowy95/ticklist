@@ -297,53 +297,18 @@ Route
 '''
 
 # Global Functions + Variables
-# api_routes = {
-#     'area': areas_col,
-#     'boulder': boulders_col,
-#     'route': routes_col
-# }
 
-common_html = {
-    'nav': '''<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">MyTicks</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-      
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <!-- <li class="nav-item">
-              <a class="nav-link disabled" href="#">Disabled</a>
-            </li> -->
-          </ul>
-          <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="Search MyTicks" aria-label="Search">
-            <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>
-          </form>
-        </div>
-        </nav>''',
-    'title_start': '<title>MyTicks',
-    'title_end': '</title>',
-    'error': '''<div class="alert alert-warning alert-dismissible fade show" role="alert" id="error-element">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            <strong>Warning!</strong>&nbsp;&nbsp;<p id="error-text" style="display: inline"></p>
-        </div>''',
-    'scripts': '''<!-- Ajax/Jquery -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-        <!-- Bootstrap -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-        <!-- D3 -->
-        <script src="https://d3js.org/d3.v5.min.js"></script>
-        '''
+errors = {
+    '403': {
+        'title':'403 - Forbidden',
+        'description':"That action is prohibited, please contact an administrator if you have questions about this page.",
+        'secondary':"Attempting to add an area or boulder/route to an area designated for the other can result in this redirect."
+    },
+    '404': {
+        'title':'404 - Woops, bad topo!',
+        'description':"We couldn't find that spot in our guidebooks, try double checking your spelling or check out the search.",
+        'secondary':"If what you're looking for still isn't there, consider adding it!"
+    }
 }
 
 # getPathNames: For item in entry path, retrieve name
@@ -459,7 +424,7 @@ def validateAddition(loc_type, new_loc):
     # Check for valid grade, danger, committment based on loc_type
 
     # Check for duplicate entry
-    type2model = {'area': AreaModel,'boulders': BoulderModel, 'route': RouteModel}
+    type2model = {'area': AreaModel,'boulder': BoulderModel, 'route': RouteModel}
     model = type2model[loc_type]
     validated =  db.session.query(model)\
         .filter(model.parent_id == new_loc['parent_id'])\
@@ -477,15 +442,15 @@ def validationErrorProtocol(error_code, data):
     print("Handling Error")
     if error_code == 1:
         # Unfilled/Invalid Field - likely due to unintended page manipulation
-        # data = (loc_type, new_loc['parentID'])
+        # data = (loc_type, new_loc)
         # Redirect to addEntry of loc_type of the parent area
         return {'redirect': f"/add-entry/{data[0]}/{str(data[1]['parent_id'])}/{str(data[1]['parent_name'])}",
             'error': 1}
     elif error_code == 2:
         # Duplicate Entry
-        # data = (loc_type, validated['_id']) (the _id of the existing entry)
+        # data = (loc_type, validated) (the Model of the existing entry)
         # Redirect to existing entry's page
-        return {'redirect': f"/{data[0]}/{str(data[1]['id'])}/{str(data[1]['name'])}",
+        return {'redirect': f"/{data[0]}/{str(data[1].id)}/{str(data[1].name)}",
             'error': 2}
 
 
@@ -506,6 +471,14 @@ def addArea(new_area):
             lng=None
         )
 
+        # Update parent area_type if necessary (1 for Areas)
+        parent = db.session.query(AreaModel)\
+            .filter(AreaModel.id==new_area['parent_id'])\
+            .filter(AreaModel.name==new_area['parent_name'])\
+            .first()
+        if parent.area_type == 0:
+            parent.area_type = 1
+
         # Commit
         db.session.add(new_entry)
         db.session.commit()
@@ -525,41 +498,40 @@ def addBoulder(new_boulder):
     # Validate if new entry
     validated = validateAddition('boulder', new_boulder)
     if validated[0]:
-        # Find parent for path extension
-        parent = boulders_col.find_one({'_id': ObjectId(f'{new_boulder["parentID"]}')})
         # Initialize new entry
-        new_entry = boulders_col.insert_one({
-            'name': new_boulder['name'],
-            'parentID': new_boulder['parentID'],
-            'path': '',
-            'children': [],
-            'properties': {
-                'grade': vermin2Int(new_boulder['grade']), # Write vermin2Int!!!
-                'quality': -2,
-                'danger': new_boulder['danger'],
-                'height': new_boulder['height'],
-                'fa': new_boulder['fa'],
-                'description': new_boulder['description'],
-                'protection': new_boulder['protection'],
-                'images': [],
-                'elevation': '',
-                'coords': {
-                    'lat': '',
-                    'lng': ''
-                }
-            }
-        })
-        # Update new entry path
-        boulders_col.update_one({'_id': new_entry.inserted_id}, 
-            {'$set': {
-                'path': parent['path']+'$boulder/'+str(new_entry.inserted_id)
-                }})
-        # Update parent children
-        updateChildren(parent, new_entry)
+        new_entry = BoulderModel(
+            name=new_boulder['name'],
+            parent_id=new_boulder['parent_id'],
+            parent_name=new_boulder['parent_name'],
+            path=new_boulder['parent_path']+f"${new_boulder['parent_id']}/{new_boulder['parent_name']}",
+            order=0,
+            grade=new_boulder['grade'],
+            quality=new_boulder['quality'],
+            danger=new_boulder['danger'],
+            height=new_boulder['height'],
+            fa=new_boulder['fa'],
+            description=new_boulder['description'],
+            pro=new_boulder['pro'],
+            elevation=None,
+            lat=None,
+            lng=None
+        )
+
+        # Update parent area_type if necessary (2 for Boulders/Routes)
+        parent = db.session.query(AreaModel)\
+            .filter(AreaModel.id==new_area['parent_id'])\
+            .filter(AreaModel.name==new_area['parent_name'])\
+            .first()
+        if parent.area_type == 0:
+            parent.area_type = 2
+
+        # Commit
+        db.session.add(new_entry)
+        db.session.commit()
 
         # Return and redirect
-        print(f'Redirecting to boulder/{new_entry.inserted_id}')
-        return {'redirect': f'/boulder/{str(new_entry.inserted_id)}',
+        print(f'Redirecting to boulder/{new_entry.id}/{new_entry.name}')
+        return {'redirect': f'/boulder/{str(new_entry.id)}/{new_entry.name}',
             'success': 'New entry added successfully!'}
     else:
         # Else, error - handle the error and return
@@ -620,7 +592,7 @@ def addRoute(new_route):
 # home page with secondary tools/info
 @app.route('/')
 def index():
-    return render_template('index.html', common=common_html)
+    return render_template('index.html')
 
 
 # All Locations
@@ -628,7 +600,7 @@ def index():
 @app.route('/1/All-Locations')
 def allLocations():
     # Template to be filled when database is properly initialized
-    return render_template('allLocations.html', common=common_html)
+    return render_template('allLocations.html')
 
 
 # API Routes
@@ -641,35 +613,55 @@ def area(entry_id, entry_name):
         entry = db.session.query(AreaModel)\
             .filter(AreaModel.id==entry_id)\
             .filter(AreaModel.name==entry_name)\
-            .first().toJSON()
+            .first()
+        if entry:
+            entry = entry.toJSON()
+        else:
+            return render_template('404.html', status_code=errors['404'])
         path = getPathNames(entry['parent']['path'])
         children = getChildrenInfo(entry)
-        return render_template('area.html', area=entry, path=path, children=children, common=common_html)
+        return render_template('area.html', area=entry, path=path, children=children)
     except Exception as e:
         print(e)
-        return render_template('404.html', common=common_html)
+        return render_template('404.html', status_code=errors['404'])
 
-@app.route('/boulder/<entry_id>')
-def boulder(entry_id):
-    print(f'Entry: {entry_id}')
+@app.route('/boulder/<entry_id>/<entry_name>')
+def boulder(entry_id, entry_name):
+    print(f'Entry: {entry_id}/{entry_name}')
     try:
-        entry = boulders_col.find_one({'_id': ObjectId(f'{entry_id}')})
+        entry = db.session.query(BoulderModel)\
+            .filter(BoulderModel.id==entry_id)\
+            .filter(BoulderModel.name==entry_name)\
+            .first()
+        if entry:
+            entry = entry.toJSON()
+        else:
+            return render_template('404.html', status_code=errors['404'])
+        path = getPathNames(entry['parent']['path'])
         print(f'Entry: {entry}')
-        return render_template('boulder.html', common=common_html)
+        return render_template('boulder.html', area=entry, path=path)
     except Exception as e:
         print(e)
-        return render_template('404.html', common=common_html)
+        return render_template('404.html', status_code=errors['404'])
 
-@app.route('/route/<entry_id>')
-def routeClimb(entry_id):
-    print(f'Entry: {entry_id}')
+@app.route('/route/<entry_id>/<entry_name>')
+def routeClimb(entry_id, entry_name):
+    print(f'Entry: {entry_id}/{entry_name}')
     try:
-        entry = routes_col.find_one({'_id': ObjectId(f'{entry_id}')})
+        entry = db.session.query(RouteModel)\
+            .filter(RouteModel.id==entry_id)\
+            .filter(RouteModel.name==entry_name)\
+            .first()
+        if entry:
+            entry = entry.toJSON()
+        else:
+            return render_template('404.html', status_code=errors['404'])
+        path = getPathNames(entry['parent']['path'])
         print(f'Entry: {entry}')
-        return render_template('route.html', common=common_html)
+        return render_template('route.html', area=entry, path=path)
     except Exception as e:
         print(e)
-        return render_template('404.html', common=common_html)
+        return render_template('404.html', status_code=errors['404'])
 
 
 # Search query route
@@ -685,14 +677,23 @@ def addEntry(entry_type, parent_id, parent_name):
     parent = db.session.query(AreaModel)\
             .filter(AreaModel.id==parent_id)\
             .filter(AreaModel.name==parent_name)\
-            .first().toJSON()
-    print(parent)
+            .first()
+    if parent:
+        if parent.area_type == 0:
+            parent = parent.toJSON()
+        # Forbidden - areas may only have child areas OR boulders/routes
+        elif (parent.area_type == 1 and entry_type != 'area') or (parent.area_type == 2 and entry_type == 'area'):
+            return render_template('404.html', status_code=errors['403'])
+        else:
+            parent = parent.toJSON()
+    else:
+        return render_template('404.html', status_code=errors['404'])
     if entry_type == 'area':
-        return render_template('addArea.html', parent=parent, common=common_html)
+        return render_template('addArea.html', parent=parent)
     elif entry_type == 'boulder':
-        return render_template('addBoulder.html', common=common_html)
+        return render_template('addBoulder.html', parent=parent)
     elif entry_type == 'route':
-        return render_template('addRoute.html', common=common_html)
+        return render_template('addRoute.html', parent=parent)
     else:
         print('Error: invalid entry_type')
         redirect(url_for('area', entry_id=parent_id, entry_name=parent_name))
