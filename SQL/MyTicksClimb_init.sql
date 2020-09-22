@@ -24,7 +24,9 @@ CREATE TABLE `areas` (
 );
 -- Initialize with 'All Locations'
 INSERT INTO areas (name, parent_id, parent_name, path, area_type)
-	VALUES ('All Locations',1,'All Locations', '1/All Locations', 1);
+	VALUES ('All Locations',1,'All Locations', '1/All Locations', 1),
+		('North America', 1, 'All Locations', '1/All Locations', 1),
+        ('Wyoming', 2, 'North America', '1/All Locations$2/North America', 2);
 
 
 -- Boulder Grades Reference Table
@@ -64,7 +66,7 @@ CREATE TABLE `danger` (
 );
 INSERT INTO danger
 	VALUES 
-		(0, ''), (1, 'PG-13'), (2, 'R'), (3, 'X')
+		(0, 'G'), (1, 'PG-13'), (2, 'R'), (3, 'X')
 	;
 
 -- Boulders
@@ -74,6 +76,7 @@ CREATE TABLE `boulders` (
     `parent_id` INT NOT NULL,
     `parent_name` VARCHAR(35) NOT NULL,
     `path` VARCHAR(150),
+    `position` INT NOT NULL DEFAULT 0,
     `grade` INT NOT NULL,
     `quality` INT NOT NULL,
     `danger` INT NOT NULL,
@@ -84,6 +87,7 @@ CREATE TABLE `boulders` (
     `elevation` INT,
     `lat` DOUBLE(9,6),
     `lng` DOUBLE(9,6),
+    `climb_type` VARCHAR(10) NOT NULL DEFAULT 'boulder',
     `date_inserted` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id,name),
     FOREIGN KEY (parent_id,parent_name) REFERENCES areas(id,name),
@@ -98,6 +102,7 @@ CREATE TABLE `routes` (
     `parent_id` INT NOT NULL,
     `parent_name` VARCHAR(35) NOT NULL,
     `path` VARCHAR(150),
+    `position` INT NOT NULL DEFAULT 0,
     `grade` INT NOT NULL,
     `quality` INT NOT NULL,
     `danger` INT NOT NULL,
@@ -110,6 +115,7 @@ CREATE TABLE `routes` (
     `elevation` INT,
     `lat` DOUBLE(9,6),
     `lng` DOUBLE(9,6),
+    `climb_type` VARCHAR(10) NOT NULL DEFAULT 'route',
     `date_inserted` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id,name),
     FOREIGN KEY (parent_id,parent_name) REFERENCES areas(id,name),
@@ -117,7 +123,5 @@ CREATE TABLE `routes` (
     FOREIGN KEY (danger) REFERENCES danger(int_id)
 );
 
-UPDATE areas
-SET path='1/All Locations'
-WHERE id = 2 OR id = 3 AND name='North America';
-SELECT * FROM areas;		
+
+SELECT * FROM areas;

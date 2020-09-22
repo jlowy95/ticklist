@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {{area['name']}}
+    {{boulder['name']}}
 {% endblock %}
 
 {% block header %}
@@ -21,31 +21,15 @@
                     <!-- {% endif %} -->
                 {% endfor %}
                 <div class="col-sm-auto">
-                    <h5><a href="/area/{{area['id']}}/{{area['name']}}">{{area['name']}}</a></h5>
+                    <h5><a href="/boulder/{{boulder['id']}}/{{boulder['name']}}">{{boulder['name']}}</a></h5>
                 </div>
             </div>
         </div>
         <!-- Entry Management Tools -->
         <div class="col-md-3">
             <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-                <div class="btn-group btn-group-sm" role="group">
-                    <button id="addEntry" type="button"
-                            class="btn btn-secondary dropdown-toggle"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Add Entry
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="addEntryDrop">
-                        {% if area['area_type'] == 0 or area['area_type'] == 1 %}
-                        <a class="dropdown-item" href="/add-entry/area/{{area['id']}}/{{area['name']}}">Area</a>
-                        {% endif %}
-                        {% if area['area_type'] == 0 or area['area_type'] == 2 %}
-                        <a class="dropdown-item" href="/add-entry/boulder/{{area['id']}}/{{area['name']}}">Boulder</a>
-                        <a class="dropdown-item" href="/add-entry/route/{{area['id']}}/{{area['name']}}">Route</a>
-                        {% endif %}
-                    </div>
-                </div>
                 <div class="btn-group btn-group-sm" role="group" aria-label="First group">
-                    <a class="btn btn-secondary" href="/edit-entry/area/{{area['id']}}/{{area['name']}}" role="button">Edit Entry</a>
+                    <a class="btn btn-secondary" href="/edit-entry/boulder/{{boulder['id']}}/{{boulder['name']}}" role="button">Edit Entry</a>
                     <button type="button" class="btn btn-secondary">Delete Entry</button>
                 </div>
             </div>        
@@ -59,7 +43,7 @@
         <div class="col-md-3">
             <!-- Flask for each child and for header -->
             <table>
-                <thead><strong>Locations in {{area['name']}}</strong></thead>
+                <thead><strong>Locations in {{boulder['parent']['name']}}</strong></thead>
                 {% for child in children['sorted'] %}
                 <tr>
                     <th><a href="/{{child['route']}}">{{child['name']}}</a></th>
@@ -67,9 +51,7 @@
                     <th></th>
                 </tr>
                 {% endfor %}
-            </table>
-            {% if children['unsorted'] %}
-            <table>
+                {% if children['unsorted'] %}
                 <thead><strong>Unsorted Climbs</strong></thead>
                 {% for child in children['unsorted'] %}
                 <tr>
@@ -78,14 +60,15 @@
                     <th></th>
                 </tr>
                 {% endfor %}
+                {% endif %}
+                <!-- tr for each child -->
             </table>
-            {% endif %}
         </div>
         <div class="col-md-9">
-            <!-- Area Title -->
+            <!-- Boulder Title -->
             <div class="row">
                 <div class="col-md-12">
-                    <h1>{{area['name']}}</h1>
+                    <h1>{{boulder['name']}}</h1>
                 </div>
             </div>
             <!-- Location Details + Images -->
@@ -97,7 +80,7 @@
                         </div>
                         <div class="1">
                             <!-- Flask Elevation + ft -->
-                            <p>{{area['properties']['elevation']}} ft</p>
+                            <p>{{boulder['properties']['elevation']}} ft</p>
                         </div>
                     </div>
                     <div class="row">
@@ -106,11 +89,11 @@
                             </div>
                             <div class="1">
                                 <!-- Flask GPS -->
-                                <p>{{area['properties']['coords']['lat']}}, {{area['properties']['coords']['lng']}}</p>
+                                <p>{{boulder['properties']['coords']['lat']}}, {{boulder['properties']['coords']['lng']}}</p>
                             </div>
                         </div>
                 </div>
-                <!-- Area Images Carousel -->
+                <!-- Boulder Images Carousel -->
                 <div class="col-md-6">
                     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
                         <div class="carousel-inner" role="listbox">
@@ -144,7 +127,7 @@
                 <div class="col-md-12">
                     <h6>Description</h6>
                     <!-- Flask Area description -->
-                    <p>{{area['properties']['description']}}</p>
+                    <p>{{boulder['properties']['description']}}</p>
                 </div>
             </div>
         </div>

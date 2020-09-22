@@ -88,12 +88,12 @@ class AreaModel(db.Model):
 class BoulderModel(db.Model):
     __tablename__ = 'boulders'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(35), nullable=False, primary_key=True)
     parent_id = db.Column(db.Integer, nullable=False)
     parent_name = db.Column(db.String(35), nullable=False)
     path = db.Column(db.String(150))
-    order = db.Column(db.Integer)
+    position = db.Column(db.Integer)
     grade = db.Column(db.Integer, nullable=False)
     quality = db.Column(db.Integer, nullable=False)
     danger = db.Column(db.Integer, nullable=False)
@@ -104,14 +104,15 @@ class BoulderModel(db.Model):
     elevation = db.Column(db.Integer)
     lat = db.Column(db.Float())
     lng = db.Column(db.Float())
+    climb_type = db.Column(db.String())
     date_inserted = db.Column(db.DateTime)
 
-    def __init__(self, name, parent_id, parent_name, path, order, grade, quality, danger, height, fa, description, pro, elevation, lat, lng):
+    def __init__(self, name, parent_id, parent_name, path, position, grade, quality, danger, height, fa, description, pro, elevation, lat, lng):
         self.name = name
         self.parent_id = parent_id
         self.parent_name = parent_name
         self.path = path
-        self.order = 0
+        self.position = 0
         self.grade = grade
         self.quality = quality
         self.danger = danger
@@ -122,6 +123,7 @@ class BoulderModel(db.Model):
         self.elevation = elevation
         self.lat = lat
         self.lng = lng
+        self.climb_type = 'boulder'
         self.date_inserted = datetime.datetime.now()
 
     def toJSON(self):
@@ -132,11 +134,12 @@ class BoulderModel(db.Model):
                 'id': self.parent_id,
                 'name': self.parent_name,
                 'path': self.path,
-                'order': self.order
+                'position': self.position
             },
             'properties': {
-                'grade': self.grade,
-                'danger': self.danger,
+                'grade': boulderInt2Grade(self.grade),
+                'quality': self.quality,
+                'danger': dangerInt2Movie[self.danger],
                 'height': self.height,
                 'fa': self.fa,
                 'description': self.description,
@@ -146,19 +149,20 @@ class BoulderModel(db.Model):
                     'lat': self.lat,
                     'lng': self.lng
                 }
-            },                
+            },        
+            'climb_type': self.climb_type,        
             'date_inserted': self.date_inserted
         }
 
 class RouteModel(db.Model):
     __tablename__ = 'routes'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(35), nullable=False, primary_key=True)
     parent_id = db.Column(db.Integer, nullable=False)
     parent_name = db.Column(db.String(35), nullable=False)
     path = db.Column(db.String(150))
-    order = db.Column(db.Integer)
+    position = db.Column(db.Integer)
     grade = db.Column(db.Integer, nullable=False)
     quality = db.Column(db.Integer, nullable=False)
     danger = db.Column(db.Integer, nullable=False)
@@ -171,14 +175,15 @@ class RouteModel(db.Model):
     elevation = db.Column(db.Integer)
     lat = db.Column(db.Float())
     lng = db.Column(db.Float())
+    climb_type = db.Column(db.String())
     date_inserted = db.Column(db.DateTime)
 
-    def __init__(self, name, parent_id, parent_name, path, order, grade, quality, danger, height, pitches, committment, fa, description, pro, elevation, lat, lng):
+    def __init__(self, name, parent_id, parent_name, path, position, grade, quality, danger, height, pitches, committment, fa, description, pro, elevation, lat, lng):
         self.name = name
         self.parent_id = parent_id
         self.parent_name = parent_name
         self.path = path
-        self.order = 0
+        self.position = 0
         self.grade = grade
         self.quality = quality
         self.danger = danger
@@ -191,6 +196,7 @@ class RouteModel(db.Model):
         self.elevation = elevation
         self.lat = lat
         self.lng = lng
+        self.climb_type = 'route'
         self.date_inserted = datetime.datetime.now()
 
     def toJSON(self):
@@ -201,10 +207,11 @@ class RouteModel(db.Model):
                 'id': self.parent_id,
                 'name': self.parent_name,
                 'path': self.path,
-                'order': self.order
+                'position': self.position
             },
             'properties': {
                 'grade': self.grade,
+                'quality': self.quality,
                 'danger': self.danger,
                 'height': self.height,
                 'pitches': self.pitches,
@@ -217,84 +224,12 @@ class RouteModel(db.Model):
                     'lat': self.lat,
                     'lng': self.lng
                 }
-            },                
+            },       
+            'climb_type': self.climb_type,        
             'date_inserted': self.date_inserted
         }
 
-# Use flask_pymongo to set up mongo connection
-# app.config["MONGO_URI"] = "mongodb://localhost:27017/MyTicks"
-# mongo = PyMongo(app)
 
-# Define collections for primary use
-# areas_col = mongo.db.areas
-# boulders_col = mongo.db.boulders
-# routes_col = mongo.db.routes
-
-# Sample Entries
-'''
-Area
-{
-    id: 756,
-    name: 'Wyoming',
-    parent_id: 1,
-    parent_name: 'All Locations',
-    properties: {
-        description: 'Wyoming is pretty.'
-        images: [],
-        'elevation': '',
-        'coords': {
-            'lat': '',
-            'lng': ''
-        }
-    }
-}
-Boulder
-{
-    id: 4234,
-    name: 'Iron Man Traverse'
-    parent_id: 43,
-    parent_name: 'Buttermilks',
-    properties: {
-        grade: 4,
-        quality: 4,
-        danger: 0,
-        height: 10,
-        fa: 'Unknown',
-        description: 'What a classic!',
-        protection: 'Pads',
-        images: [],
-        'elevation': '',
-        'coords': {
-            'lat': '',
-            'lng': ''
-        }
-    }
-}
-Route
-{
-    id: 98753,
-    name: 'The Grand Wall'
-    parent_id: 64,
-    parent_name: 'The Chief',
-    properties: {
-        grade: 11.0,
-        quality: 5,
-        danger: 0,
-        height: 1000,
-        pitches: 8,
-        committment: 3,
-        fa: 'Unknown',
-        description: 'What a classic!',
-        protection: 'Double Rack',
-        images: [],
-        'elevation': '',
-        'coords': {
-            'lat': '',
-            'lng': ''
-        }
-    }
-}
-'''
 
 # Global Functions + Variables
 
@@ -310,6 +245,80 @@ errors = {
         'secondary':"If what you're looking for still isn't there, consider adding it!"
     }
 }
+
+dangerInt2Movie = {
+    0:'',
+    1:'PG-13',
+    2:'R',
+    3:'X'
+}
+
+def boulderInt2Grade(floatDifficulty):
+    if floatDifficulty < -0.66:
+        return {'vermin':'VB', 'font':'3'}
+    elif floatDifficulty < -0.33:
+        return {'vermin':'V0-', 'font':'3+'}
+    elif floatDifficulty < 0.33:
+        return {'vermin':'V0', 'font':'4'}
+    elif floatDifficulty < 0.66:
+        return {'vermin':'V0+', 'font':'4+'}
+    elif floatDifficulty < 1.33:
+        return {'vermin':'V1', 'font':'5'}
+    elif floatDifficulty < 1.66:
+        return {'vermin':'V1-2', 'font':'5+'}
+    elif floatDifficulty < 2.33:
+        return {'vermin':'V2', 'font':'5+'}
+    elif floatDifficulty < 2.66:
+        return {'vermin':'V2-3', 'font':'6A'}
+    elif floatDifficulty < 3.33:
+        return {'vermin':'V3', 'font':'6A'}
+    elif floatDifficulty < 3.66:
+        return {'vermin':'V3-4', 'font':'6A+'}
+    elif floatDifficulty < 4.33:
+        return {'vermin':'V4', 'font':'6B'}
+    elif floatDifficulty < 4.66:
+        return {'vermin':'V4-5', 'font':'6B+'}
+    elif floatDifficulty < 5.33:
+        return {'vermin':'V5', 'font':'6C'}
+    elif floatDifficulty < 5.66:
+        return {'vermin':'V5-6', 'font':'6C+'}
+    elif floatDifficulty < 6.33:
+        return {'vermin':'V6', 'font':'7A'}
+    elif floatDifficulty < 6.66:
+        return {'vermin':'V6-7', 'font':'7A+'}
+    elif floatDifficulty < 7.33:
+        return {'vermin':'V7', 'font':'7A+'}
+    elif floatDifficulty < 7.66:
+        return {'vermin':'V7-8', 'font':'7B'}
+    elif floatDifficulty < 8.33:
+        return {'vermin':'V8', 'font':'7B'}
+    elif floatDifficulty < 8.66:
+        return {'vermin':'V8-9', 'font':'7B+'}
+    elif floatDifficulty < 9.33:
+        return {'vermin':'V9', 'font':'7C'}
+    elif floatDifficulty < 9.66:
+        return {'vermin':'V9-10', 'font':'7C'}
+    elif floatDifficulty < 10.33:
+        return {'vermin':'V10', 'font':'7C+'}
+    elif floatDifficulty < 10.66:
+        return {'vermin':'V10-11', 'font':'7C+'}
+    elif floatDifficulty < 11.33:
+        return {'vermin':'V11', 'font':'8A'}
+    elif floatDifficulty < 11.66:
+        return {'vermin':'V11-12', 'font':'8A'}
+    elif floatDifficulty < 12.33:
+        return {'vermin':'V12', 'font':'8A+'}
+    elif floatDifficulty < 12.66:
+        return {'vermin':'V12-13', 'font':'8A+'}
+    elif floatDifficulty < 13.33:
+        return {'vermin':'V13', 'font':'8B'}
+    elif floatDifficulty < 13.66:
+        return {'vermin':'V13-14', 'font':'8B'}
+    elif floatDifficulty < 14.33:
+        return {'vermin':'V14', 'font':'8B+'}
+    else:
+        return {'vermin':'V14+', 'font':'8B+'}
+    
 
 # getPathNames: For item in entry path, retrieve name
 def getPathNames(path):
@@ -339,6 +348,7 @@ def getPathNames(path):
 
 # getChildrenInfo: for item in children, retrieve info
 def getChildrenInfo(entry):
+    print("getChildrenInfo")
     if entry['area_type'] == 0:
         return []
     elif entry['area_type'] == 1:
@@ -362,25 +372,25 @@ def getChildrenInfo(entry):
         sorted_info = []
         unsorted_info = []
         # Check boulders
-        boulders = db.session.query(BoulderModel.id, BoulderModel.name, BoulderModel.order)\
+        boulders = db.session.query(BoulderModel.id.label('id'), BoulderModel.name.label('name'), BoulderModel.position.label('position'), BoulderModel.climb_type.label('climb_type'))\
             .filter(BoulderModel.parent_id==entry['id'])\
-            .filter(BoulderModel.parent_name==entry['name'])\
-            .all()
+            .filter(BoulderModel.parent_name==entry['name'])
         # Check routes
-        routes = db.session.query(RouteModel.id, RouteModel.name, RouteModel.order)\
+        routes = db.session.query(RouteModel.id.label('id'), RouteModel.name.label('name'), RouteModel.position.label('position'), RouteModel.climb_type.label('climb_type'))\
             .filter(RouteModel.parent_id==entry['id'])\
-            .filter(RouteModel.parent_name==entry['name'])\
-            .all()
+            .filter(RouteModel.parent_name==entry['name'])
         # Union boulders + routes and sort
-        children = boulders.union(routes).order_by(BoulderModel.order)
+        q = boulders.union(routes)
+        children = q.order_by('position')
         # Append info to corresponding lists
         for child in children:
-            if child.order == 0:
-                unsorted_info.append({'name': child['name'],
-                'route': f"{child['id']}/{child['name']}"})
+            # (id, name, position, climb_type)
+            if child[2] == 0:
+                unsorted_info.append({'name': child[1],
+                'route': f"{child[3]}/{child[0]}/{child[1]}"})
             else:
-                children_info.append({'name': child['name'],
-                    'route': f"{child['id']}/{child['name']}"})
+                sorted_info.append({'name': child[1],
+                    'route': f"{child[3]}/{child[0]}/{child[1]}"})
 
         if unsorted_info == []:
             return {'sorted': sorted_info}
@@ -393,21 +403,14 @@ def getChildrenInfo(entry):
 def simplifyArray(json_request):
     return {field['name']: field['value'] for field in json_request}
 
-# # updateChildren: update the children property based on if there is or isnt already info there
-# def updateChildren(parent, new_entry):
-#     if parent['children'] == None: 
-#         areas_col.update_one({'_id': parent['_id']}, 
-#             {'$set': {
-#                 'children': ['area/'+str(new_entry.inserted_id)]
-#                 }})
-#     else:
-#         parent['children'].append(f'area/{str(new_entry.inserted_id)}')
-#         areas_col.update_one({'_id': parent['_id']}, 
-#             {'$set': {
-#                 'children': parent['children']
-#                 }})
-        
+# convertFormDatatypes: Some HTML form values are submitted as strings, not ints, this converts them
+def convertFormDatatypes(new_loc):
+    for i in ['grade', 'quality', 'danger', 'height', 'pitches']:
+        if i in new_loc.keys():
+            new_loc[i] = int(new_loc[i])
+    return new_loc
 
+        
 # validateAddition: re-checks all fields are filled and valid,
 # then checks database for new entry details of parent and name
 # Returns a tuple corresponding to the following:
@@ -422,6 +425,22 @@ def validateAddition(loc_type, new_loc):
     # Else continue
 
     # Check for valid grade, danger, committment based on loc_type
+    if loc_type == 'boulder':
+        new_loc = convertFormDatatypes(new_loc)
+        if new_loc['grade'] > 14 or new_loc['grade'] < -1:
+            return (False, 1, (loc_type, new_loc))
+        if int(new_loc['danger']) != new_loc['danger'] or new_loc['danger'] > 3 or new_loc['danger'] < 0:
+            return (False, 1, (loc_type, new_loc))
+    
+    if loc_type == 'route':
+        if new_loc['grade'] > 40 or new_loc['grade'] < -1:
+            return (False, 1, (loc_type, new_loc))
+        if int(new_loc['danger']) != new_loc['danger'] or new_loc['danger'] > 3 or new_loc['danger'] < 0:
+            return (False, 1, (loc_type, new_loc))
+        if int(new_loc['pitches']) != new_loc['pitches']:
+            return (False, 1, (loc_type, new_loc))
+        if new_loc['committment'] not in ['I','II','III','IV','V','VI']:
+            return (False, 1, (loc_type, new_loc))
 
     # Check for duplicate entry
     type2model = {'area': AreaModel,'boulder': BoulderModel, 'route': RouteModel}
@@ -434,7 +453,7 @@ def validateAddition(loc_type, new_loc):
     if validated:
         return (False, 2, (loc_type, validated))
     else:
-        return (True,)
+        return (True, new_loc)
 
 
 # validationErrorProtocol: handles any errors found by validateAddition
@@ -478,6 +497,8 @@ def addArea(new_area):
             .first()
         if parent.area_type == 0:
             parent.area_type = 1
+        elif parent.area_type == 2:
+            return render_template('404.html', status_code=errors['403'])
 
         # Commit
         db.session.add(new_entry)
@@ -498,13 +519,14 @@ def addBoulder(new_boulder):
     # Validate if new entry
     validated = validateAddition('boulder', new_boulder)
     if validated[0]:
+        new_boulder = validated[1]
         # Initialize new entry
         new_entry = BoulderModel(
             name=new_boulder['name'],
             parent_id=new_boulder['parent_id'],
             parent_name=new_boulder['parent_name'],
             path=new_boulder['parent_path']+f"${new_boulder['parent_id']}/{new_boulder['parent_name']}",
-            order=0,
+            position=0,
             grade=new_boulder['grade'],
             quality=new_boulder['quality'],
             danger=new_boulder['danger'],
@@ -519,11 +541,13 @@ def addBoulder(new_boulder):
 
         # Update parent area_type if necessary (2 for Boulders/Routes)
         parent = db.session.query(AreaModel)\
-            .filter(AreaModel.id==new_area['parent_id'])\
-            .filter(AreaModel.name==new_area['parent_name'])\
+            .filter(AreaModel.id==new_boulder['parent_id'])\
+            .filter(AreaModel.name==new_boulder['parent_name'])\
             .first()
         if parent.area_type == 0:
             parent.area_type = 2
+        elif parent.area_type == 1:
+            return render_template('404.html', status_code=errors['403'])
 
         # Commit
         db.session.add(new_entry)
@@ -638,8 +662,19 @@ def boulder(entry_id, entry_name):
         else:
             return render_template('404.html', status_code=errors['404'])
         path = getPathNames(entry['parent']['path'])
+        # Get neighboring climbs from parent
+        print(db.session.query(AreaModel)\
+                .filter(AreaModel.parent_id==entry['parent']['id'])\
+                .filter(AreaModel.parent_name==entry['parent']['name'])\
+                .first())
+        neighbors = getChildrenInfo(
+            db.session.query(AreaModel)\
+                .filter(AreaModel.parent_id==entry['parent']['id'])\
+                .filter(AreaModel.parent_name==entry['parent']['name'])\
+                .first().toJSON()
+            )
         print(f'Entry: {entry}')
-        return render_template('boulder.html', area=entry, path=path)
+        return render_template('boulder.html', boulder=entry, path=path, children=neighbors)
     except Exception as e:
         print(e)
         return render_template('404.html', status_code=errors['404'])
@@ -706,12 +741,13 @@ def submitChanges():
     # print(inputted_data)
     # Switch for correct actions
     change_options = {
-        'area': addArea(inputted_data), # add new area functions plus returns redirect to new area
-        'boulder': '',
+        'area': addArea, # add new area functions plus returns redirect to new area
+        'boulder': addBoulder,
         'route': '',
         'edit': ''
     }
-    return change_options[inputted_data['change-type']]
+    
+    return change_options[inputted_data['change-type']](inputted_data)
 
 # editEntry (allows edits to the current entry)
 @app.route('/edit-entry/<entry_type>/<entry_id>')
