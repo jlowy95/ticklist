@@ -255,69 +255,167 @@ dangerInt2Movie = {
 
 def boulderInt2Grade(floatDifficulty):
     if floatDifficulty < -0.66:
-        return {'vermin':'VB', 'font':'3'}
-    elif floatDifficulty < -0.33:
-        return {'vermin':'V0-', 'font':'3+'}
-    elif floatDifficulty < 0.33:
-        return {'vermin':'V0', 'font':'4'}
+        return {'usa':'VB', 'euro':'3'}
+    elif floatDifficulty < -0.34:
+        return {'usa':'V0-', 'euro':'3+'}
+    elif floatDifficulty < 0.34:
+        return {'usa':'V0', 'euro':'4'}
     elif floatDifficulty < 0.66:
-        return {'vermin':'V0+', 'font':'4+'}
-    elif floatDifficulty < 1.33:
-        return {'vermin':'V1', 'font':'5'}
+        return {'usa':'V0+', 'euro':'4+'}
+    elif floatDifficulty < 1.34:
+        return {'usa':'V1', 'euro':'5'}
     elif floatDifficulty < 1.66:
-        return {'vermin':'V1-2', 'font':'5+'}
-    elif floatDifficulty < 2.33:
-        return {'vermin':'V2', 'font':'5+'}
+        return {'usa':'V1-2', 'euro':'5+'}
+    elif floatDifficulty < 2.34:
+        return {'usa':'V2', 'euro':'5+'}
     elif floatDifficulty < 2.66:
-        return {'vermin':'V2-3', 'font':'6A'}
-    elif floatDifficulty < 3.33:
-        return {'vermin':'V3', 'font':'6A'}
+        return {'usa':'V2-3', 'euro':'6A'}
+    elif floatDifficulty < 3.34:
+        return {'usa':'V3', 'euro':'6A'}
     elif floatDifficulty < 3.66:
-        return {'vermin':'V3-4', 'font':'6A+'}
-    elif floatDifficulty < 4.33:
-        return {'vermin':'V4', 'font':'6B'}
+        return {'usa':'V3-4', 'euro':'6A+'}
+    elif floatDifficulty < 4.34:
+        return {'usa':'V4', 'euro':'6B'}
     elif floatDifficulty < 4.66:
-        return {'vermin':'V4-5', 'font':'6B+'}
-    elif floatDifficulty < 5.33:
-        return {'vermin':'V5', 'font':'6C'}
+        return {'usa':'V4-5', 'euro':'6B+'}
+    elif floatDifficulty < 5.34:
+        return {'usa':'V5', 'euro':'6C'}
     elif floatDifficulty < 5.66:
-        return {'vermin':'V5-6', 'font':'6C+'}
-    elif floatDifficulty < 6.33:
-        return {'vermin':'V6', 'font':'7A'}
+        return {'usa':'V5-6', 'euro':'6C+'}
+    elif floatDifficulty < 6.34:
+        return {'usa':'V6', 'euro':'7A'}
     elif floatDifficulty < 6.66:
-        return {'vermin':'V6-7', 'font':'7A+'}
-    elif floatDifficulty < 7.33:
-        return {'vermin':'V7', 'font':'7A+'}
+        return {'usa':'V6-7', 'euro':'7A+'}
+    elif floatDifficulty < 7.34:
+        return {'usa':'V7', 'euro':'7A+'}
     elif floatDifficulty < 7.66:
-        return {'vermin':'V7-8', 'font':'7B'}
-    elif floatDifficulty < 8.33:
-        return {'vermin':'V8', 'font':'7B'}
+        return {'usa':'V7-8', 'euro':'7B'}
+    elif floatDifficulty < 8.34:
+        return {'usa':'V8', 'euro':'7B'}
     elif floatDifficulty < 8.66:
-        return {'vermin':'V8-9', 'font':'7B+'}
-    elif floatDifficulty < 9.33:
-        return {'vermin':'V9', 'font':'7C'}
+        return {'usa':'V8-9', 'euro':'7B+'}
+    elif floatDifficulty < 9.34:
+        return {'usa':'V9', 'euro':'7C'}
     elif floatDifficulty < 9.66:
-        return {'vermin':'V9-10', 'font':'7C'}
-    elif floatDifficulty < 10.33:
-        return {'vermin':'V10', 'font':'7C+'}
+        return {'usa':'V9-10', 'euro':'7C'}
+    elif floatDifficulty < 10.34:
+        return {'usa':'V10', 'euro':'7C+'}
     elif floatDifficulty < 10.66:
-        return {'vermin':'V10-11', 'font':'7C+'}
-    elif floatDifficulty < 11.33:
-        return {'vermin':'V11', 'font':'8A'}
+        return {'usa':'V10-11', 'euro':'7C+'}
+    elif floatDifficulty < 11.34:
+        return {'usa':'V11', 'euro':'8A'}
     elif floatDifficulty < 11.66:
-        return {'vermin':'V11-12', 'font':'8A'}
-    elif floatDifficulty < 12.33:
-        return {'vermin':'V12', 'font':'8A+'}
+        return {'usa':'V11-12', 'euro':'8A'}
+    elif floatDifficulty < 12.34:
+        return {'usa':'V12', 'euro':'8A+'}
     elif floatDifficulty < 12.66:
-        return {'vermin':'V12-13', 'font':'8A+'}
-    elif floatDifficulty < 13.33:
-        return {'vermin':'V13', 'font':'8B'}
+        return {'usa':'V12-13', 'euro':'8A+'}
+    elif floatDifficulty < 13.34:
+        return {'usa':'V13', 'euro':'8B'}
     elif floatDifficulty < 13.66:
-        return {'vermin':'V13-14', 'font':'8B'}
-    elif floatDifficulty < 14.33:
-        return {'vermin':'V14', 'font':'8B+'}
+        return {'usa':'V13-14', 'euro':'8B'}
+    elif floatDifficulty < 14.34:
+        return {'usa':'V14', 'euro':'8B+'}
     else:
-        return {'vermin':'V14+', 'font':'8B+'}
+        return {'usa':'V14+', 'euro':'8B+'}
+
+def routeInt2Grade(floatDifficulty):
+    if floatDifficulty < -0.66:
+        return {'usa':'Easy 5th', 'euro':'1'}
+    elif floatDifficulty < -0.34:
+        return {'usa':'5.4', 'euro':'1'}
+    elif floatDifficulty < 0.34:
+        return {'usa':'5.4', 'euro':'2'}
+    elif floatDifficulty < 0.66:
+        return {'usa':'5.5', 'euro':'3'}
+    elif floatDifficulty < 1.34:
+        return {'usa':'5.5', 'euro':'3'}
+    elif floatDifficulty < 1.66:
+        return {'usa':'5.6', 'euro':'4'}
+    elif floatDifficulty < 2.34:
+        return {'usa':'5.6', 'euro':'4'}
+    elif floatDifficulty < 2.66:
+        return {'usa':'5.7', 'euro':'4+'}
+    elif floatDifficulty < 3.34:
+        return {'usa':'5.7', 'euro':'4+'}
+    elif floatDifficulty < 3.66:
+        return {'usa':'5.8', 'euro':'5a'}
+    elif floatDifficulty < 4.34:
+        return {'usa':'5.8', 'euro':'5a'}
+    elif floatDifficulty < 4.66:
+        return {'usa':'5.9', 'euro':'5b'}
+    elif floatDifficulty < 5.34:
+        return {'usa':'5.9', 'euro':'5b'}
+    elif floatDifficulty < 5.66:
+        return {'usa':'5.9+', 'euro':'5b/+'}
+    elif floatDifficulty < 6.34:
+        return {'usa':'5.10a', 'euro':'6a'}
+    elif floatDifficulty < 6.66:
+        return {'usa':'5.10b', 'euro':'6a/+'}
+    elif floatDifficulty < 7.34:
+        return {'usa':'5.10b', 'euro':'6a+'}
+    elif floatDifficulty < 7.66:
+        return {'usa':'5.10c', 'euro':'6a+/b'}
+    elif floatDifficulty < 8.34:
+        return {'usa':'5.10c', 'euro':'6b'}
+    elif floatDifficulty < 8.66:
+        return {'usa':'5.10d', 'euro':'6b/+'}
+    elif floatDifficulty < 9.34:
+        return {'usa':'5.10d', 'euro':'6b+'}
+    elif floatDifficulty < 9.66:
+        return {'usa':'5.11a', 'euro':'6b+/c'}
+    elif floatDifficulty < 10.34:
+        return {'usa':'5.11a', 'euro':'6c'}
+    elif floatDifficulty < 10.66:
+        return {'usa':'5.11b', 'euro':'6c/+'}
+    elif floatDifficulty < 11.34:
+        return {'usa':'5.11b', 'euro':'6c+'}
+    elif floatDifficulty < 11.66:
+        return {'usa':'5.11c', 'euro':'6c+'}
+    elif floatDifficulty < 12.34:
+        return {'usa':'5.11c', 'euro':'6c+/7a'}
+    elif floatDifficulty < 12.66:
+        return {'usa':'5.11d', 'euro':'7a'}
+    elif floatDifficulty < 13.34:
+        return {'usa':'5.11d', 'euro':'7a'}
+    elif floatDifficulty < 13.66:
+        return {'usa':'5.12a', 'euro':'7a/+'}
+    elif floatDifficulty < 14.34:
+        return {'usa':'5.12a', 'euro':'7a+'}
+    elif floatDifficulty < 14.66:
+        return {'usa':'5.12b', 'euro':'7a+/b'}
+    elif floatDifficulty < 15.34:
+        return {'usa':'5.12b', 'euro':'7b'}
+    elif floatDifficulty < 15.66:
+        return {'usa':'5.12c', 'euro':'7b/+'}
+    elif floatDifficulty < 16.34:
+        return {'usa':'5.12c', 'euro':'7b+'}
+    elif floatDifficulty < 16.66:
+        return {'usa':'5.12d', 'euro':'7b+/c'}
+    elif floatDifficulty < 17.34:
+        return {'usa':'5.12d', 'euro':'7c'}
+    elif floatDifficulty < 17.66:
+        return {'usa':'5.13a', 'euro':'7c/+'}
+    elif floatDifficulty < 18.34:
+        return {'usa':'5.13a', 'euro':'7c+'}
+    elif floatDifficulty < 18.66:
+        return {'usa':'5.13b', 'euro':'7c+/8a'}
+    elif floatDifficulty < 19.34:
+        return {'usa':'5.13b', 'euro':'8a'}
+    elif floatDifficulty < 19.66:
+        return {'usa':'5.13c', 'euro':'8a/+'}
+    elif floatDifficulty < 20.34:
+        return {'usa':'5.13c', 'euro':'8a+'}
+    elif floatDifficulty < 20.66:
+        return {'usa':'5.13d', 'euro':'8a+/b'}
+    elif floatDifficulty < 21.34:
+        return {'usa':'5.13d', 'euro':'8b'}
+    elif floatDifficulty < 21.66:
+        return {'usa':'5.14a', 'euro':'8b/+'}
+    elif floatDifficulty < 22.34:
+        return {'usa':'5.14a', 'euro':'8b+'}    
+    else:
+        return {'usa':'5.14+', 'euro':'8+'}
     
 
 # getPathNames: For item in entry path, retrieve name
@@ -348,7 +446,7 @@ def getPathNames(path):
 
 # getChildrenInfo: for item in children, retrieve info
 def getChildrenInfo(entry):
-    print("getChildrenInfo")
+    # print("getChildrenInfo")
     if entry['area_type'] == 0:
         return []
     elif entry['area_type'] == 1:
@@ -372,25 +470,32 @@ def getChildrenInfo(entry):
         sorted_info = []
         unsorted_info = []
         # Check boulders
-        boulders = db.session.query(BoulderModel.id.label('id'), BoulderModel.name.label('name'), BoulderModel.position.label('position'), BoulderModel.climb_type.label('climb_type'))\
+        boulders = db.session.query(BoulderModel.id.label('id'), BoulderModel.name.label('name'), BoulderModel.grade.label('grade'), BoulderModel.quality.label('quality'), BoulderModel.position.label('position'), BoulderModel.climb_type.label('climb_type'))\
             .filter(BoulderModel.parent_id==entry['id'])\
             .filter(BoulderModel.parent_name==entry['name'])
         # Check routes
-        routes = db.session.query(RouteModel.id.label('id'), RouteModel.name.label('name'), RouteModel.position.label('position'), RouteModel.climb_type.label('climb_type'))\
+        routes = db.session.query(RouteModel.id.label('id'), RouteModel.name.label('name'), RouteModel.grade.label('grade'), RouteModel.quality.label('quality'), RouteModel.position.label('position'), RouteModel.climb_type.label('climb_type'))\
             .filter(RouteModel.parent_id==entry['id'])\
             .filter(RouteModel.parent_name==entry['name'])
         # Union boulders + routes and sort
         q = boulders.union(routes)
         children = q.order_by('position')
+
+        gradeByClimb_type = {'boulder': boulderInt2Grade, 'route': routeInt2Grade}
         # Append info to corresponding lists
         for child in children:
-            # (id, name, position, climb_type)
-            if child[2] == 0:
+            # (id, name, grade, quality, position, climb_type)
+            # print(child)
+            if child[4] == 0:
                 unsorted_info.append({'name': child[1],
-                'route': f"{child[3]}/{child[0]}/{child[1]}"})
+                    'grade': gradeByClimb_type[child[5]](child[2]),
+                    'quality': child[3],
+                    'route': f"{child[5]}/{child[0]}/{child[1]}"})
             else:
                 sorted_info.append({'name': child[1],
-                    'route': f"{child[3]}/{child[0]}/{child[1]}"})
+                    'grade': gradeByClimb_type[child[5]](child[2]),
+                    'quality': child[3],
+                    'route': f"{child[5]}/{child[0]}/{child[1]}"})
 
         if unsorted_info == []:
             return {'sorted': sorted_info}
@@ -663,17 +768,12 @@ def boulder(entry_id, entry_name):
             return render_template('404.html', status_code=errors['404'])
         path = getPathNames(entry['parent']['path'])
         # Get neighboring climbs from parent
-        print(db.session.query(AreaModel)\
-                .filter(AreaModel.parent_id==entry['parent']['id'])\
-                .filter(AreaModel.parent_name==entry['parent']['name'])\
-                .first())
         neighbors = getChildrenInfo(
             db.session.query(AreaModel)\
-                .filter(AreaModel.parent_id==entry['parent']['id'])\
-                .filter(AreaModel.parent_name==entry['parent']['name'])\
+                .filter(AreaModel.id==entry['parent']['id'])\
+                .filter(AreaModel.name==entry['parent']['name'])\
                 .first().toJSON()
             )
-        print(f'Entry: {entry}')
         return render_template('boulder.html', boulder=entry, path=path, children=neighbors)
     except Exception as e:
         print(e)
@@ -692,8 +792,14 @@ def routeClimb(entry_id, entry_name):
         else:
             return render_template('404.html', status_code=errors['404'])
         path = getPathNames(entry['parent']['path'])
-        print(f'Entry: {entry}')
-        return render_template('route.html', area=entry, path=path)
+        # Get neighboring climbs from parent
+        neighbors = getChildrenInfo(
+            db.session.query(AreaModel)\
+                .filter(AreaModel.id==entry['parent']['id'])\
+                .filter(AreaModel.name==entry['parent']['name'])\
+                .first().toJSON()
+            )
+        return render_template('route.html', route=entry, path=path, children=neighbors)
     except Exception as e:
         print(e)
         return render_template('404.html', status_code=errors['404'])

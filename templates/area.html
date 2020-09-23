@@ -56,32 +56,41 @@
 {% block content %}
     <div class="row mx-1">
         <!-- Children -->
-        <div class="col-md-3">
-            <!-- Flask for each child and for header -->
-            <table>
-                <thead><strong>Locations in {{area['name']}}</strong></thead>
-                {% for child in children['sorted'] %}
-                <tr>
-                    <th><a href="/{{child['route']}}">{{child['name']}}</a></th>
-                    <th></th>
-                    <th></th>
-                </tr>
-                {% endfor %}
-            </table>
-            {% if children['unsorted'] %}
-            <table>
-                <thead><strong>Unsorted Climbs</strong></thead>
-                {% for child in children['unsorted'] %}
-                <tr>
-                    <th><a href="/{{child['route']}}">{{child['name']}}</a></th>
-                    <th></th>
-                    <th></th>
-                </tr>
-                {% endfor %}
-            </table>
-            {% endif %}
-        </div>
-        <div class="col-md-9">
+        <div class="col-md-2">
+                <div class="row">
+                    <div class="col-md bg-light py-2">
+                        <!-- Flask for each child and for header -->
+                        <p class="text-center mb-2"><strong>Climbs in {{area['name']}}</strong></p>
+                        <table>
+                            {% for child in children['sorted'] %}
+                            <tr>
+                                <td class="text-right">{% for i in range(child['quality'])  %}
+                                    &#11089;
+                                    {% endfor %}&nbsp;</th>
+                                <td><a href="/{{child['route']}}">{{child['name']}}</a></th>
+                                <td>&nbsp;&nbsp;{{child['grade']['usa']}}</th>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                        {% if children['unsorted'] %}
+                        <p class="text-center my-1"><strong>Unsorted Climbs</strong></p>
+                        <table>
+                            {% for child in children['unsorted'] %}
+                            <tr>
+                                <td>{% for i in range(child['quality'])  %}
+                                    &#11089;
+                                    {% endfor %}&nbsp;</th>
+                                <td><a href="/{{child['route']}}">{{child['name']}}</a></th>
+                                <td>&nbsp;&nbsp;{{child['grade']['usa']}}</th>
+                                
+                            </tr>
+                            {% endfor %}
+                        </table>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        <div class="col-md-10">
             <!-- Area Title -->
             <div class="row">
                 <div class="col-md-12">
