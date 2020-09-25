@@ -1,3 +1,20 @@
 #error-element {
     display: none;
 }
+
+.nav-pills-custom .nav-link {
+    color: #000;
+    /* background: #fff; */
+    position: relative;
+}
+
+.nav-pills-custom .nav-link.active {
+    color: #000;
+    background: #26abff;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.nav-pills-custom .nav-link.active::before {
+    opacity: 1;
+}

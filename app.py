@@ -470,11 +470,11 @@ def getChildrenInfo(entry):
         sorted_info = []
         unsorted_info = []
         # Check boulders
-        boulders = db.session.query(BoulderModel.id.label('id'), BoulderModel.name.label('name'), BoulderModel.grade.label('grade'), BoulderModel.quality.label('quality'), BoulderModel.position.label('position'), BoulderModel.climb_type.label('climb_type'))\
+        boulders = db.session.query(BoulderModel.id.label('id'), BoulderModel.name.label('name'), BoulderModel.grade.label('grade'), BoulderModel.quality.label('quality'), BoulderModel.danger.label('danger'), BoulderModel.position.label('position'), BoulderModel.climb_type.label('climb_type'))\
             .filter(BoulderModel.parent_id==entry['id'])\
             .filter(BoulderModel.parent_name==entry['name'])
         # Check routes
-        routes = db.session.query(RouteModel.id.label('id'), RouteModel.name.label('name'), RouteModel.grade.label('grade'), RouteModel.quality.label('quality'), RouteModel.position.label('position'), RouteModel.climb_type.label('climb_type'))\
+        routes = db.session.query(RouteModel.id.label('id'), RouteModel.name.label('name'), RouteModel.grade.label('grade'), RouteModel.quality.label('quality'), RouteModel.danger.label('danger'), RouteModel.position.label('position'), RouteModel.climb_type.label('climb_type'))\
             .filter(RouteModel.parent_id==entry['id'])\
             .filter(RouteModel.parent_name==entry['name'])
         # Union boulders + routes and sort
@@ -484,18 +484,20 @@ def getChildrenInfo(entry):
         gradeByClimb_type = {'boulder': boulderInt2Grade, 'route': routeInt2Grade}
         # Append info to corresponding lists
         for child in children:
-            # (id, name, grade, quality, position, climb_type)
+            # (id, name, grade, quality, danger, position, climb_type)
             # print(child)
-            if child[4] == 0:
+            if child[5] == 0:
                 unsorted_info.append({'name': child[1],
-                    'grade': gradeByClimb_type[child[5]](child[2]),
+                    'grade': gradeByClimb_type[child[6]](child[2]),
                     'quality': child[3],
-                    'route': f"{child[5]}/{child[0]}/{child[1]}"})
+                    'danger': dangerInt2Movie[child[4]],
+                    'route': f"{child[6]}/{child[0]}/{child[1]}"})
             else:
                 sorted_info.append({'name': child[1],
-                    'grade': gradeByClimb_type[child[5]](child[2]),
+                    'grade': gradeByClimb_type[child[6]](child[2]),
                     'quality': child[3],
-                    'route': f"{child[5]}/{child[0]}/{child[1]}"})
+                    'danger': dangerInt2Movie[child[4]],
+                    'route': f"{child[6]}/{child[0]}/{child[1]}"})
 
         if unsorted_info == []:
             return {'sorted': sorted_info}
@@ -749,7 +751,7 @@ def area(entry_id, entry_name):
             return render_template('404.html', status_code=errors['404'])
         path = getPathNames(entry['parent']['path'])
         children = getChildrenInfo(entry)
-        return render_template('area.html', area=entry, path=path, children=children)
+        return render_template('area_2.html', area=entry, path=path, children=children)
     except Exception as e:
         print(e)
         return render_template('404.html', status_code=errors['404'])

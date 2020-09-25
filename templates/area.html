@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block header %}
-    <div class="row mx-1 my-1">
+    <div class="row mx-1 my-2">
         <div class="col-md-9">
             <!-- Flask Area Path -->
             <div class="row justify-content-start no-gutters">
@@ -56,33 +56,44 @@
 {% block content %}
     <div class="row mx-1">
         <!-- Children -->
-        <div class="col-md-2">
+        <div class="col-md-3">
                 <div class="row">
                     <div class="col-md bg-light py-2">
                         <!-- Flask for each child and for header -->
-                        <p class="text-center mb-2"><strong>Climbs in {{area['name']}}</strong></p>
+                        {% if area['area_type'] == 2 %}
+                            <p class="text-center mb-2"><strong>Climbs in {{area['name']}}</strong></p>
+                            <table class="mx-auto">
+                                {% for child in children['sorted'] %}
+                                <tr>
+                                    <td class="text-right">{% for i in range(child['quality'])  %}
+                                        &#11089;
+                                        {% endfor %}&nbsp;&nbsp;</td>
+                                    <td><a href="/{{child['route']}}">{{child['name']}}</a></td>
+                                    <td>&nbsp;&nbsp;{{child['grade']['usa']}} {{child['danger']}}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                            {% if children['unsorted'] %}
+                            <p class="text-center my-1"><strong>Unsorted Climbs</strong></p>
+                            <table class="mx-auto">
+                                {% for child in children['unsorted'] %}
+                                <tr>
+                                    <td>{% for i in range(child['quality'])  %}
+                                        &#11089;
+                                        {% endfor %}&nbsp;&nbsp;</th>
+                                    <td><a href="/{{child['route']}}">{{child['name']}}</a></th>
+                                    <td>&nbsp;&nbsp;{{child['grade']['usa']}} {{child['danger']}}</th>
+                                    
+                                </tr>
+                                {% endfor %}
+                            </table>
+                            {% endif %}
+                        {% else %}
+                        <p class="text-center mb-2"><strong>Area in {{area['name']}}</strong></p>
                         <table>
                             {% for child in children['sorted'] %}
                             <tr>
-                                <td class="text-right">{% for i in range(child['quality'])  %}
-                                    &#11089;
-                                    {% endfor %}&nbsp;</th>
-                                <td><a href="/{{child['route']}}">{{child['name']}}</a></th>
-                                <td>&nbsp;&nbsp;{{child['grade']['usa']}}</th>
-                            </tr>
-                            {% endfor %}
-                        </table>
-                        {% if children['unsorted'] %}
-                        <p class="text-center my-1"><strong>Unsorted Climbs</strong></p>
-                        <table>
-                            {% for child in children['unsorted'] %}
-                            <tr>
-                                <td>{% for i in range(child['quality'])  %}
-                                    &#11089;
-                                    {% endfor %}&nbsp;</th>
-                                <td><a href="/{{child['route']}}">{{child['name']}}</a></th>
-                                <td>&nbsp;&nbsp;{{child['grade']['usa']}}</th>
-                                
+                                <td><a href="/{{child['route']}}">{{child['name']}}</a></td>
                             </tr>
                             {% endfor %}
                         </table>
@@ -90,10 +101,10 @@
                     </div>
                 </div>
             </div>
-        <div class="col-md-10">
+        <div class="col-md-9">
             <!-- Area Title -->
-            <div class="row">
-                <div class="col-md-12">
+            <div class="row mb-2">
+                <div class="col-md">
                     <h1>{{area['name']}}</h1>
                 </div>
             </div>
@@ -101,23 +112,21 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="row">
-                        <div class="col-md-2">
-                            <h6>Elevation</h6>
-                        </div>
-                        <div class="1">
-                            <!-- Flask Elevation + ft -->
-                            <p>{{area['properties']['elevation']}} ft</p>
+                        <div class="col-md">
+                            <p class="my-0"><strong>Elevation </strong>{{area['properties']['elevation']}} ft</p>
                         </div>
                     </div>
                     <div class="row">
-                            <div class="col-md-2">
-                                <h6>GPS</h6>
-                            </div>
-                            <div class="1">
-                                <!-- Flask GPS -->
-                                <p>{{area['properties']['coords']['lat']}}, {{area['properties']['coords']['lng']}}</p>
-                            </div>
+                        <div class="col-md">
+                            <p class=""><strong>GPS </strong>{{area['properties']['coords']['lat']}}, {{area['properties']['coords']['lng']}}</p>
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            <h6>Description</h6>
+                            <p>{{area['properties']['description']}}</p>
+                        </div>
+                    </div>
                 </div>
                 <!-- Area Images Carousel -->
                 <div class="col-md-6">
@@ -151,9 +160,9 @@
             <br>
             <div class="row">
                 <div class="col-md-12">
-                    <h6>Description</h6>
-                    <!-- Flask Area description -->
-                    <p>{{area['properties']['description']}}</p>
+                    <h6>Getting There</h6>
+                    <!-- Flask Area Directions -->
+                    <p></p>
                 </div>
             </div>
         </div>

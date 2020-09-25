@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block header %}
-    <div class="row mx-1 my-1">
+    <div class="row mx-1 my-2">
         <div class="col-md-9">
             <!-- Flask Area Path -->
             <div class="row justify-content-start no-gutters">
@@ -34,32 +34,54 @@
 {% block content %}
     <div class="row mx-2">
         <!-- Children -->
-        <div class="col-md-2">
+        <div class="col-md-3">
             <div class="row">
                 <div class="col-md bg-light py-2">
                     <!-- Flask for each child and for header -->
                     <p class="text-center mb-2"><strong>Climbs in {{boulder['parent']['name']}}</strong></p>
-                    <table>
+                    <table class="mx-auto">
                         {% for child in children['sorted'] %}
                         <tr>
-                            <td class="text-right">{% for i in range(child['quality'])  %}
-                                &#11089;
-                                {% endfor %}&nbsp;</th>
-                            <td><a href="/{{child['route']}}">{{child['name']}}</a></th>
-                            <td>&nbsp;&nbsp;{{child['grade']['usa']}}</th>
+                            <td class="text-right">
+                                {% if child['quality'] == 5 %}
+                                    &#11088;
+                                {% else %}
+                                    {% for i in range(child['quality'])  %}
+                                    &#9733;
+                                    {% endfor %}
+                                {% endif %}&nbsp;&nbsp;</td>
+                            <td><a href="/{{child['route']}}">
+                                {% if child['name']|length > 18 %}
+                                    {{child['name'][:17]}}...
+                                {% else %}
+                                    {{child['name']}}
+                                {% endif %}
+                                </a>
+                            </td>
+                            <td>&nbsp;&nbsp;{{child['grade']['usa']}} {{child['danger']}}</td>
                         </tr>
                         {% endfor %}
                     </table>
                     {% if children['unsorted'] %}
                     <p class="text-center my-1"><strong>Unsorted Climbs</strong></p>
-                    <table>
+                    <table class="mx-auto">
                         {% for child in children['unsorted'] %}
                         <tr>
-                            <td>{% for i in range(child['quality'])  %}
-                                &#11089;
-                                {% endfor %}&nbsp;</th>
-                            <td><a href="/{{child['route']}}">{{child['name']}}</a></th>
-                            <td>&nbsp;&nbsp;{{child['grade']['usa']}}</th>
+                            <td class="text-right"><small>
+                                {% for i in range(child['quality'])  %}
+                                &#9733;
+                                {% endfor %}
+                                &nbsp;&nbsp;
+                            </td>
+                            <td><a href="/{{child['route']}}">
+                                {% if child['name']|length > 18 %}
+                                    {{child['name'][:17]}}...
+                                {% else %}
+                                    {{child['name']}}
+                                {% endif %}
+                                </a>&nbsp;
+                            </td>
+                            <td>{{child['grade']['usa']}} <small>{{child['danger']}}</small></td>
                             
                         </tr>
                         {% endfor %}
@@ -69,29 +91,44 @@
             </div>
         </div>
         <!-- Climb Info + Images -->
-        <div class="col-md-10">
+        <div class="col-md-9">
             <!-- Title Info + Images -->
             <div class="row">
                 <!-- Title Info -->
-                <div class="col-md-5">
+                <div class="col-md">
                     <!-- Boulder Title -->
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md">
                             <h1>{{boulder['name']}}</h1>
                         </div>
                     </div>
+                </div>
+            </div>
+            <!-- Detail Info + Images -->
+            <div class="row">
+                <!-- Detail Info -->
+                <div class="col-md-5">
                     <!-- Basic Details -->
                     <div class="row">
                         <!-- Grade/Danger -->
-                        <div class="col-md-1">
-                            <h3>{{boulder['properties']['grade']['usa']}} {{boulder['properties']['danger']}}</h3>
+                        <div class="col-md-auto">
+                            <h3>{{boulder['properties']['grade']['usa']}} <small><small>{{boulder['properties']['danger']}}</small></small></h3>
                         </div>
                         <!-- Quality -->
-                        <div class="col-md-6">
-                            <h4>&nbsp;&nbsp;{% for i in range(boulder['properties']['quality'])  %}
+                        <div class="col-md-auto">
+                            <h4>{% for i in range(boulder['properties']['quality'])  %}
                                 &#9733;
                                 {% endfor %}
                             </h4>
+                        </div>
+                    </div>
+                    <!-- Height / Pitches + FA -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <small>Height: {{boulder['properties']['height']}} ft</small>
+                        </div>
+                        <div class="col-md-9">
+                            <small>FA: {{boulder['properties']['fa']}}</small>
                         </div>
                     </div>
                     <br>
@@ -100,12 +137,12 @@
                         <div class="col-md">
                             <div class="row">
                                 <div class="col-md">
-                                    <p><strong>Elevation&nbsp;</strong>  {{boulder['properties']['elevation']}} ft</p>
+                                    <small><strong>Elevation&nbsp;</strong>  {{boulder['properties']['elevation']}} ft</small>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md">
-                                    <p><strong>GPS&nbsp;</strong>  {{boulder['properties']['coords']['lat']}}, {{boulder['properties']['coords']['lng']}}</p>
+                                    <p><small><strong>GPS&nbsp;</strong>  {{boulder['properties']['coords']['lat']}}, {{boulder['properties']['coords']['lng']}}</small></p>
                                 </div>
                             </div>
                         </div>
