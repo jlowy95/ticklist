@@ -6,6 +6,8 @@
 
 from flask import Flask, render_template, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy
+import sqlalchemy as sa
+from sqlalchemy import func
 from flask_migrate import Migrate
 # from flask_pymongo import PyMongo
 import mysql.connector
@@ -176,9 +178,10 @@ class RouteModel(db.Model):
     lat = db.Column(db.Float())
     lng = db.Column(db.Float())
     climb_type = db.Column(db.String())
+    route_type = db.Column(db.Integer, nullable=False)
     date_inserted = db.Column(db.DateTime)
 
-    def __init__(self, name, parent_id, parent_name, path, position, grade, quality, danger, height, pitches, committment, fa, description, pro, elevation, lat, lng):
+    def __init__(self, name, parent_id, parent_name, path, position, grade, quality, danger, height, pitches, committment, fa, description, pro, elevation, lat, lng, route_type):
         self.name = name
         self.parent_id = parent_id
         self.parent_name = parent_name
@@ -197,6 +200,7 @@ class RouteModel(db.Model):
         self.lat = lat
         self.lng = lng
         self.climb_type = 'route'
+        self.route_type = route_type
         self.date_inserted = datetime.datetime.now()
 
     def toJSON(self):
@@ -211,6 +215,7 @@ class RouteModel(db.Model):
             },
             'properties': {
                 'grade': self.grade,
+                'route_type': self.route_type,
                 'quality': self.quality,
                 'danger': self.danger,
                 'height': self.height,
@@ -251,6 +256,13 @@ dangerInt2Movie = {
     1:'PG-13',
     2:'R',
     3:'X'
+}
+
+route_types = {
+    None: {'short':'','long':''},
+    0: {'short':'S','long':'Sport'},
+    1: {'short':'T','long':'Trad'},
+    2: {'short':'DWS','long':'Deep Water Solo'}
 }
 
 def boulderInt2Grade(floatDifficulty):
@@ -425,24 +437,49 @@ def getPathNames(path):
     for step in path_raw:
         path_clean.append({'name': step[1], 'route':f"area/{step[0]}/{step[1]}"})
     return path_clean
-    # flag = False
-    # while not flag:
-    #     if parent['id'] == 1 and parent['name'] == 'All Locations':
-    #         path.append({'name': parent['name'],
-    #         'route': f"area/{parent['id']}/{parent['name']}"})
-    #         flag = True
-    #         # print('getPathNames flagged')
-    #     else:
-    #         path.append({'name': parent['name'],
-    #         'route': f"area/{parent['id']}/{parent['name']}"})
-    #         parent = db.session.query(AreaModel)\
-    #             .filter(AreaModel.parent_id==parent['id'])\
-    #             .filter(AreaModel.parent_name==parent['name'])\
-    #             .toJSON()['parent']
-    # # print(f'getPathNames pre-return: {path.reverse()}')
-    # path.reverse()
-    # return path
 
+# countClimbs: recursive function for querying and counting number of climbs by type
+def countClimbs(area_model):
+    boulders, sport, trad, dws, total = 0,0,0,0,0
+    # Check area_type to determine search
+    if area_model.area_type == 0:
+        # Empty area, return all 0s
+        return {'boulders':0,'sport':0,'trad':0,'dws':0,'total':0}
+    elif area_model.area_type == 1:
+        # Sub areas, recursively call on children
+        children = db.session.query(AreaModel)\
+            .filter(AreaModel.parent_id==area_model.id)\
+            .filter(AreaModel.parent_name==area_model.name)\
+            .all()
+        for child in children:
+            counts = countClimbs(child)
+            boulders += counts['boulders']
+            sport += counts['sport']
+            trad += counts['trad']
+            dws += counts['dws']
+            total += counts['total']
+        return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
+    elif area_model.area_type == 2:
+        # Climbs, get counts of climb types
+        boulders = db.session.query(func.count(BoulderModel.id))\
+            .filter(BoulderModel.parent_id==area_model.id)\
+            .filter(BoulderModel.parent_name==area_model.name)\
+            .scalar()
+        routes_q = db.session.query(RouteModel.route_type, func.count(RouteModel.id))\
+            .filter(RouteModel.parent_id==area_model.id)\
+            .filter(RouteModel.parent_name==area_model.name)\
+            .group_by(RouteModel.route_type)\
+            .all()
+        for rt in routes_q:
+            if rt[0] == 0:
+                sport = rt[1]
+            elif rt[0] == 1:
+                trad = rt[1]
+            elif rt[0] == 2:
+                dws = rt[1]
+        total = boulders+sport+trad+dws
+        return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
+ 
 
 # getChildrenInfo: for item in children, retrieve info
 def getChildrenInfo(entry):
@@ -457,26 +494,58 @@ def getChildrenInfo(entry):
             .all()
         if type(children)==list:
             for child in children:
+                counts = countClimbs(child)
                 children_info.append({'name': child.name,
-                    'route': f"area/{child.id}/{child.name}"})
+                    'route': f"/area/{child.id}/{child.name}",
+                    'counts': counts})
         else:
-            children_info.append({'name': children.name,
-                    'route': f"area/{children.id}/{children.name}"})
-        return {'sorted': children_info}
+            counts = countClimbs(child)
+            children_info.append({'name': child.name,
+                'route': f"/area/{child.id}/{child.name}",
+                'counts': counts})
+        return children_info
+
     elif entry['area_type'] == 2:
-        #
-        # ADD BOULDER/ROUTE API ROUTE PREFIX
-        #
         sorted_info = []
         unsorted_info = []
         # Check boulders
-        boulders = db.session.query(BoulderModel.id.label('id'), BoulderModel.name.label('name'), BoulderModel.grade.label('grade'), BoulderModel.quality.label('quality'), BoulderModel.danger.label('danger'), BoulderModel.position.label('position'), BoulderModel.climb_type.label('climb_type'))\
-            .filter(BoulderModel.parent_id==entry['id'])\
-            .filter(BoulderModel.parent_name==entry['name'])
+        boulders = db.session.query(BoulderModel.position.label('position'),\
+            BoulderModel.climb_type.label('climb_type'),\
+            BoulderModel.id.label('id'),\
+            BoulderModel.name.label('name'),\
+            BoulderModel.grade.label('grade'),\
+            BoulderModel.quality.label('quality'),\
+            BoulderModel.danger.label('danger'),\
+            BoulderModel.height.label('height'),\
+            sa.null().label('pitches'),\
+            sa.null().label('committment'),\
+            BoulderModel.fa.label('fa'),\
+            BoulderModel.description.label('description'),\
+            BoulderModel.pro.label('pro'),\
+            BoulderModel.elevation.label('elevation'),\
+            BoulderModel.lat.label('lat'),\
+            BoulderModel.lng.label('lng'),\
+            sa.null().label('route_type'))\
+            .filter(BoulderModel.parent_id==entry['id']).filter(BoulderModel.parent_name==entry['name'])
         # Check routes
-        routes = db.session.query(RouteModel.id.label('id'), RouteModel.name.label('name'), RouteModel.grade.label('grade'), RouteModel.quality.label('quality'), RouteModel.danger.label('danger'), RouteModel.position.label('position'), RouteModel.climb_type.label('climb_type'))\
-            .filter(RouteModel.parent_id==entry['id'])\
-            .filter(RouteModel.parent_name==entry['name'])
+        routes = db.session.query(RouteModel.position.label('position'),\
+            RouteModel.climb_type.label('climb_type'),\
+            RouteModel.id.label('id'),\
+            RouteModel.name.label('name'),\
+            RouteModel.grade.label('grade'),\
+            RouteModel.quality.label('quality'),\
+            RouteModel.danger.label('danger'),\
+            RouteModel.height.label('height'),\
+            RouteModel.pitches.label('pitches'),\
+            RouteModel.committment.label('committment'),\
+            RouteModel.fa.label('fa'),\
+            RouteModel.description.label('description'),\
+            RouteModel.pro.label('pro'),\
+            RouteModel.elevation.label('elevation'),\
+            RouteModel.lat.label('lat'),\
+            RouteModel.lng.label('lng'),\
+            RouteModel.route_type.label('route_type'))\
+            .filter(RouteModel.parent_id==entry['id']).filter(RouteModel.parent_name==entry['name'])
         # Union boulders + routes and sort
         q = boulders.union(routes)
         children = q.order_by('position')
@@ -484,25 +553,37 @@ def getChildrenInfo(entry):
         gradeByClimb_type = {'boulder': boulderInt2Grade, 'route': routeInt2Grade}
         # Append info to corresponding lists
         for child in children:
-            # (id, name, grade, quality, danger, position, climb_type)
-            # print(child)
-            if child[5] == 0:
-                unsorted_info.append({'name': child[1],
-                    'grade': gradeByClimb_type[child[6]](child[2]),
-                    'quality': child[3],
-                    'danger': dangerInt2Movie[child[4]],
-                    'route': f"{child[6]}/{child[0]}/{child[1]}"})
+            # (position, climb_type, id, name, grade, quality, danger, height pitches, committment, fa, desc, pro, elev, lat, lng, route_type)
+            child_entry = {
+                'id': child[2],
+                'name': child[3],
+                'properties': {
+                    'grade': gradeByClimb_type[child[1]](child[4]),
+                    'route_type': route_types[child[16]],
+                    'quality': child[5],
+                    'danger': dangerInt2Movie[child[6]],
+                    'height': child[7],
+                    'pitches': child[8],
+                    'committment': child[9],
+                    'fa': child[10],
+                    'description': child[11],
+                    'pro': child[12],
+                    'elevation': child[13],
+                    'coords': {
+                        'lat': child[14],
+                        'lng': child[15]
+                    }
+                },
+                'climb_type': child[1],
+                'route': f"{child[1]}/{child[2]}/{child[3]}"
+            }
+            if child[0] == 0:
+                print(f"Unsorted - {child[2]}")
+                unsorted_info.append(child_entry)
             else:
-                sorted_info.append({'name': child[1],
-                    'grade': gradeByClimb_type[child[6]](child[2]),
-                    'quality': child[3],
-                    'danger': dangerInt2Movie[child[4]],
-                    'route': f"{child[6]}/{child[0]}/{child[1]}"})
-
-        if unsorted_info == []:
-            return {'sorted': sorted_info}
-        else:
-            return {'sorted': sorted_info, 'unsorted': unsorted_info}
+                sorted_info.append(child_entry)
+        
+        return {'sorted': sorted_info, 'unsorted': unsorted_info}
         
 
 
@@ -576,8 +657,12 @@ def validationErrorProtocol(error_code, data):
         # Duplicate Entry
         # data = (loc_type, validated) (the Model of the existing entry)
         # Redirect to existing entry's page
-        return {'redirect': f"/{data[0]}/{str(data[1].id)}/{str(data[1].name)}",
-            'error': 2}
+        if data[0] == 'area':
+            return {'redirect': f"/area/{str(data[1].id)}/{str(data[1].name)}",
+                'error': 2}
+        else:
+            return {'redirect': f"/area/{str(data[1].parent_id)}/{str(data[1].parent_name)}#v-pills-{data[0]}-{data[1].id}",
+                'error': 2}
 
 
 # addArea: inserts new area entry and updates parent area
@@ -662,7 +747,7 @@ def addBoulder(new_boulder):
 
         # Return and redirect
         print(f'Redirecting to boulder/{new_entry.id}/{new_entry.name}')
-        return {'redirect': f'/boulder/{str(new_entry.id)}/{new_entry.name}',
+        return {'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}/#v-pills-boulder-{new_entry.id}',
             'success': 'New entry added successfully!'}
     else:
         # Else, error - handle the error and return
@@ -751,7 +836,13 @@ def area(entry_id, entry_name):
             return render_template('404.html', status_code=errors['404'])
         path = getPathNames(entry['parent']['path'])
         children = getChildrenInfo(entry)
-        return render_template('area_2.html', area=entry, path=path, children=children)
+        
+        # Return correct template (areas / climbs)
+        if entry['area_type'] == 2:
+            return render_template('area_2.html', area=entry, path=path, children=children)
+        else:
+            return render_template('area.html', area=entry, path=path, children=children)
+
     except Exception as e:
         print(e)
         return render_template('404.html', status_code=errors['404'])

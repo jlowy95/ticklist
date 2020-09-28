@@ -116,6 +116,7 @@ CREATE TABLE `routes` (
     `lat` DOUBLE(9,6),
     `lng` DOUBLE(9,6),
     `climb_type` VARCHAR(10) NOT NULL DEFAULT 'route',
+    `route_type` INT NOT NULL,
     `date_inserted` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id,name),
     FOREIGN KEY (parent_id,parent_name) REFERENCES areas(id,name),

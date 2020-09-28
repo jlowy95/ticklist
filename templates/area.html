@@ -16,12 +16,12 @@
                     </div>
                     {% else %} -->
                     <div class="col-sm-auto">
-                        <h5><a href="/{{link['route']}}">{{link['name']}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;</h5>
+                        <h5><a style="color: #26abff" href="/{{link['route']}}">{{link['name']}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;</h5>
                     </div>
                     <!-- {% endif %} -->
                 {% endfor %}
                 <div class="col-sm-auto">
-                    <h5><a href="/area/{{area['id']}}/{{area['name']}}">{{area['name']}}</a></h5>
+                    <h5><a style="color: #26abff" href="/area/{{area['id']}}/{{area['name']}}">{{area['name']}}</a></h5>
                 </div>
             </div>
         </div>
@@ -36,11 +36,11 @@
                     </button>
                     <div class="dropdown-menu" aria-labelledby="addEntryDrop">
                         {% if area['area_type'] == 0 or area['area_type'] == 1 %}
-                        <a class="dropdown-item" href="/add-entry/area/{{area['id']}}/{{area['name']}}">Area</a>
+                        <a style="color: #26abff" class="dropdown-item" href="/add-entry/area/{{area['id']}}/{{area['name']}}">Area</a>
                         {% endif %}
                         {% if area['area_type'] == 0 or area['area_type'] == 2 %}
-                        <a class="dropdown-item" href="/add-entry/boulder/{{area['id']}}/{{area['name']}}">Boulder</a>
-                        <a class="dropdown-item" href="/add-entry/route/{{area['id']}}/{{area['name']}}">Route</a>
+                        <a style="color: #26abff" class="dropdown-item" href="/add-entry/boulder/{{area['id']}}/{{area['name']}}">Boulder</a>
+                        <a style="color: #26abff" class="dropdown-item" href="/add-entry/route/{{area['id']}}/{{area['name']}}">Route</a>
                         {% endif %}
                     </div>
                 </div>
@@ -54,53 +54,29 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row mx-1">
+    <div class="row mx-2 pl-1">
         <!-- Children -->
         <div class="col-md-3">
-                <div class="row">
-                    <div class="col-md bg-light py-2">
-                        <!-- Flask for each child and for header -->
-                        {% if area['area_type'] == 2 %}
-                            <p class="text-center mb-2"><strong>Climbs in {{area['name']}}</strong></p>
-                            <table class="mx-auto">
-                                {% for child in children['sorted'] %}
-                                <tr>
-                                    <td class="text-right">{% for i in range(child['quality'])  %}
-                                        &#11089;
-                                        {% endfor %}&nbsp;&nbsp;</td>
-                                    <td><a href="/{{child['route']}}">{{child['name']}}</a></td>
-                                    <td>&nbsp;&nbsp;{{child['grade']['usa']}} {{child['danger']}}</td>
-                                </tr>
-                                {% endfor %}
-                            </table>
-                            {% if children['unsorted'] %}
-                            <p class="text-center my-1"><strong>Unsorted Climbs</strong></p>
-                            <table class="mx-auto">
-                                {% for child in children['unsorted'] %}
-                                <tr>
-                                    <td>{% for i in range(child['quality'])  %}
-                                        &#11089;
-                                        {% endfor %}&nbsp;&nbsp;</th>
-                                    <td><a href="/{{child['route']}}">{{child['name']}}</a></th>
-                                    <td>&nbsp;&nbsp;{{child['grade']['usa']}} {{child['danger']}}</th>
-                                    
-                                </tr>
-                                {% endfor %}
-                            </table>
-                            {% endif %}
-                        {% else %}
-                        <p class="text-center mb-2"><strong>Area in {{area['name']}}</strong></p>
-                        <table>
-                            {% for child in children['sorted'] %}
-                            <tr>
-                                <td><a href="/{{child['route']}}">{{child['name']}}</a></td>
-                            </tr>
-                            {% endfor %}
-                        </table>
-                        {% endif %}
+            <div class="row">
+                <div class="col-md bg-light py-2 pr-0 pl-1">
+                    <!-- Flask for each child and for header -->
+                    <div class="nav-link" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    {% if children %}
+                        <p class="text-center mb-2"><strong>Areas in {{area['name']}}</strong></p>
+                        {% for child in children %}
+                        <a style="color: #26abff" class="nav-link mb-1 py-1 pl-2 ml-2" id="v-pills-{{child['name']}}-tab" href="{{child['route']}}" aria-selected="false">
+                            <span class="text-right pr-2">{{child['name']}}</span>           
+                            <span style="color: #000" class="text-right pr-2">({{child['counts']['total']}})</span>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center mb-2"><strong>{{area['name']}} currently doesn't have any child entries.</strong></p>
+                        <p class="text-center">If you are familiar with this area, please consider adding to it!</p>
+                    {% endif %}
                     </div>
                 </div>
             </div>
+        </div>
         <div class="col-md-9">
             <!-- Area Title -->
             <div class="row mb-2">

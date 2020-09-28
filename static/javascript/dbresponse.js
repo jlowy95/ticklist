@@ -12,6 +12,7 @@ function handlePOSTError(errorCode) {
         console.log('Duplicate Entry');
         error_element.style("display", "block");
         d3.select("#error-text").text("Duplicate entry found, you have been redirected to the existing entry.");
+        $(`#v-pills-tab a[href="${window.location.hash}"]`).tab('show');
     } else if (errorCode == 2) {
         // Prohibited Entry Type
         console.log('Prohibited Entry Type');
