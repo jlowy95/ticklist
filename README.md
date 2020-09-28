@@ -3,71 +3,51 @@
 
 ## Todo
 1. Decide on final database structure !!IN PROGRESS!!
-  - MongoDB
-    - Paths between parents/children, retain redundant info or load multiple items (Load multiple items)
-  - MySQL
-    - All parent info stored in child
-    - All child info retrieved by simple query
-    - Uneven layering/depth between items???
   - Clarify images property
-2. Integrate Flask to html templates !!IN PROGRESS!!
-  - Pass common html elements for simpler templates
-  - Add images to areas template
-3. Add validation
-  - Both client and server side to changes/additions (DONE)
-  - Add validation for difficulty/numeric values
+  - Research forum/comment nesting
+  - Research userbase storage
+2. Integrate Flask to html templates (DONE)
+  - Flask templating used for area pages
+3. Add functionality for rope climbs
+  - Add entry routes/functions
+  - Necessary validation
+4. Add validation
+  - Both client and server side to changes/additions (Areas+Boulders DONE)
+  - Add validation for difficulty/numeric values (Areas+Boulders DONE)
 4. Begin DB loading through 'add' forms
+5. Add GPS UI
+  - Front-end interactive map
 
-## Planned Framework/Dependencies
+## Framework/Dependencies
 - Description: Flask web-app for tracking/recording climbs
 - Primary Language: Python
-- Database: MongoDB
-  - Because of unknown/unpredictable hierarchy, NOSQL allows for more flexibility
-  - Assign parent (Mongo \_id) to each climb/area for lookup based on parents/children without true nesting
-- Functionailty
-  - Setup API based on entry ids of climbs/areas
-  - Different page templates will load for each 'datatype'
+- Database: MySQL
+
 ## Planned Functionality
 - Userbase
   - Personal Ticks
   - Password Protected
   - Statistics
   - Wishlist
-- Climbs/Areas
-  - Different 'type' attribute for custom pages for areas, boulders, routes, etc.
-  - Sample object:
-  ```
-  {
-    _id: ObjectId(5f0d16cac6b1d534f316b56c),
-    name: 'Wyoming',
-    parentID: all-locations,
-    path: all-locations$area/5f0d16cac6b1d534f316b56c,
-    children: [],
-    properties: {
-        description: 'Wyoming is pretty.'
-        images: [],
-        'child_counts': {
-            'areas': 0,
-            'boulder': 0,
-            'sport': 0,
-            'trad': 0,
-            'ice': 0
-        },
-        'elevation': '',
-        'coords': {
-            'lat': '',
-            'lng': ''
-        }
-     }
-  }
-  ```
+  - Beta mapping/noting
+- Database
+  - Area-focused navigation
+    - All climbs of a wall/boulder viewable on the same page
+    - Primary image planned as interactive 'map' of climbs
+  - Unique templates based on climb type
+    - Better distinction between climb types
+    - No extraneous/irrelevant data
+    - Cleaner/more direct layouts to priority information
 - Characteristics
   - Climbs
     - Grade
     - Name
     - Danger
+    - Characteristic Attributes (i.e. Reachy, Thought-provoking, Chossy)
     - Quality
     - Description
+    - Directions/Getting there
+    - Protection
     - \# of times climbed/repeats
     - Height/Pitches
     - Committment
@@ -76,6 +56,8 @@
   - Areas
     - Name
     - Description
+    - Location Data/GPS
+    - Directions/ Getting there
     - Parent area/country
 
 ## Navigation
@@ -84,5 +66,3 @@
     
     Hosts areas and climbs with their attributes
   - MyTicksUsers
-    
-    Holds users and their ticks tracked by climb \_id
