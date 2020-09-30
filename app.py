@@ -585,8 +585,6 @@ def getChildrenInfo(entry):
         
         return {'sorted': sorted_info, 'unsorted': unsorted_info}
         
-
-
 # simplifyArray: takes JSON form array and converts it to single python dictionary
 def simplifyArray(json_request):
     return {field['name']: field['value'] for field in json_request}
@@ -925,7 +923,7 @@ def addEntry(entry_type, parent_id, parent_name):
     if entry_type == 'area':
         return render_template('addArea.html', parent=parent)
     elif entry_type == 'boulder':
-        return render_template('addBoulder.html', parent=parent)
+        return render_template('addBoulder2.html', parent=parent)
     elif entry_type == 'route':
         return render_template('addRoute.html', parent=parent)
     else:

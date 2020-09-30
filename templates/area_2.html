@@ -71,8 +71,8 @@
                             <span class="text-right pr-2" style="color:black">{% for i in range(child['properties']['quality'])  %}
                                 <span style="margin-right: -5px">&#11089;</span>
                                 {% endfor %}</span>
-                            <span>{% if child['name']|length > 18 %}
-                                    {{child['name'][:17]}}...
+                            <span>{% if child['name']|length > 19 %}
+                                    {{child['name'][:18]}}...
                                 {% else %}
                                     {{child['name']}}
                                 {% endif %}</span>
@@ -89,8 +89,8 @@
                                 <span class="text-right" style="color:black">{% for i in range(child['properties']['quality'])  %}
                                     <span style="margin-right: -5px">&#11089;</span>
                                     {% endfor %}&nbsp;&nbsp;</span>
-                                <span>{% if child['name']|length > 18 %}
-                                        {{child['name'][:17]}}...
+                                <span>{% if child['name']|length > 19 %}
+                                        {{child['name'][:18]}}...
                                     {% else %}
                                         {{child['name']}}
                                     {% endif %}</span>
@@ -197,6 +197,15 @@
                                         &#9733;
                                         {% endfor %}
                                     </h4>
+                                </div>
+                                <!-- Icons -->
+                                <div class="col-md-auto">
+                                    <img src="/static/images/dinosaur-shape-of-brachiosaurus.png" alt="Reachy.png" width="30px">
+                                    <img src="/static/images/light-bulb.png" alt="Thought-Provoking.png" width="25px" class="pb-1 mr-1">
+                                    <img src="/static/images/heart.png" alt="Heart-Flutter.png" width="25px" class="pb-1 mr-1">
+                                    <img src="/static/images/landslide.png" alt="Choss.png" width="25px" class="pb-1 mr-1">
+                                    <img src="/static/images/risk-skull.png" alt="Bad-Landing.png" width="25px" class="pb-1 mr-1">
+                                    <img src="/static/images/sweeping.png" alt="Dirty.png" width="25px" class="pb-1 mr-1">
                                 </div>
                             </div>
                             <!-- Height / Pitches + FA -->

@@ -7,6 +7,8 @@
     <title>MyTicks - {% block title %}{% endblock %}</title>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- Personal Styles -->
     <link rel="stylesheet" href="{{url_for('static', filename='/css/styles.css')}}">
 </head>
@@ -47,6 +49,13 @@
     </div>
     <!-- Page Content -->
     {% block content %}{% endblock %}
+    <br><br>
+    <small>Icons made by 
+    <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a>,
+    <a href="https://www.flaticon.com/authors/gregor-cresnar" title="Gregor Cresnar">Gregor Cresnar</a>,
+    <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a>, &
+    <a href="https://www.flaticon.com/authors/those-icons" title="Those Icons">Those Icons</a>
+     from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a></small>
 </body>
 <!-- Scripts -->
 <!-- Ajax/Jquery -->
@@ -58,4 +67,5 @@
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <!-- Personal JS -->
 <script src="{{url_for('static', filename='javascript/dbresponse.js')}}"></script>
+{% block scripts %}{% endblock %}
 </html>

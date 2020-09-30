@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{parent['name']}}
+{% endblock %}
+
+{% block header %}
+    <div class="row ml-4">
+        <div class="col-md">
+            <h1>Add New Boulder</h1>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <!-- Add Entry Form -->
+    <!-- Header (Current Path) -->
+    <div class="row ml-4">
+        <div class="col-md">
+            <!-- Flask for href to link back to parent -->
+            <h4><a href="/area/{{parent['id']}}/{{parent['name']}}">{{parent['name']}}</a></h4>
+        </div>
+    </div>
+    <!-- Steps/Instructions -->
+    <div class="row ml-4 pl-3">
+        <div class="col-md-3">
+            <small style="display: block;" class="my-0 py-0">Step 1 - Basic Details</small>
+            <small style="display: block;" class="my-0 py-0">Step 2 - Description</small>
+            <small style="display: block;" class="my-0 py-0">Step 3 - Tags</small>
+            <small style="display: block;" class="my-0 py-0">Step 4 - Photos</small>
+        </div>
+    </div>
+    <br>
+
+    <div class="row mx-4">
+        <div class="col-lg-6 bg-light">
+                <form id="entry-form" class="needs-validation ml-4" novalidate>
+                    <input name="parent_id" type="text" style="display: none;" value="{{parent['id']}}" required>
+                    <input name="parent_name" type="text" style="display: none;" value="{{parent['name']}}" required>
+                    <input name="parent_path" type="text" style="display: none;" value="{{parent['parent']['path']}}" required>
+                    <input name="change-type" type="text" style="display: none;" value="boulder" required>
+                    
+                    <!-- One "tab" for each step in the form: -->
+                    <!-- Basic Details -->
+                    <div class="form-tab">
+                        <div class="row my-1 py-1">
+                            <h5>Basic Details:</h5>
+                        </div>
+                        <div class="form-row my-1 py-1">
+                            <div class="col req-col"> 
+                                <!-- <label for="name">Name</label> -->
+                                <input name="name" type="text" class="form-control needs-validation" placeholder="Boulder Name" required>
+                                <!-- <small style="color: red; display: inline;">*</small> -->
+                                <div class="invalid-feedback">Please add a name.  If you do not know the name, consider checking other sources.</div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-row my-1 py-1">
+                            <div class="col req-col">
+                                <!-- On entry only whole grades available -->
+                                <select class="custom-select needs-validation" name="grade" type="number" min="-1" max="17" style="width: auto" required>
+                                        <option selected value="">V Grade</option>
+                                        <option value="-1">VB</option>
+                                        <option value="0">V0</option>
+                                        <option value="1">V1</option>
+                                        <option value="2">V2</option>
+                                        <option value="3">V3</option>
+                                        <option value="4">V4</option>
+                                        <option value="5">V5</option>
+                                        <option value="6">V6</option>
+                                        <option value="7">V7</option>
+                                        <option value="8">V8</option>
+                                        <option value="9">V9</option>
+                                        <option value="10">V10</option>
+                                        <option value="11">V11</option>
+                                        <option value="12">V12</option>
+                                        <option value="13">V13</option>
+                                        <option value="14">V14</option>
+                                    </select>
+                            </div>
+                            <div class="col req-col">
+                                <!-- <label for="danger">Danger</label> -->
+                                <select name="danger" type="number" min="0" max="3" class="custom-select needs-validation" style="width: auto" required>
+                                    <option selected value="">Danger</option>
+                                    <option value="0">G</option>
+                                    <option value="1">PG-13</option>
+                                    <option value="2">R</option>
+                                    <option value="3">X</option>
+                                </select>
+                            </div>
+                            <div class="col req-col">
+                                <!-- <label for="height">Height (ft)</label> -->
+                                <input name="height" type="number" min="0" size="4" maxlength="4" class="form-control needs-validation" placeholder="Height (ft)"  style="width: 100%" required>
+                            </div>
+                            <div class="col req-col">
+                                <!-- <label for="quality">Quality</label> -->
+                                <select name="quality" type="number" min="0" max="5" class="custom-select needs-validation" style="width: auto" required>
+                                    <option selected value="">Quality</option>
+                                    <option value="0">&#128163</option>
+                                    <option value="1">&#9733</option>
+                                    <option value="2">&#9733&#9733</option>
+                                    <option value="3">&#9733&#9733&#9733</option>
+                                    <option value="4">&#9733&#9733&#9733&#9733</option>
+                                    <option value="5">&#9733&#9733&#9733&#9733&#9733</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row my-1 py-1">
+                            <div class="col">
+                                <!-- <label for="fa">First Ascenscionist</label> -->
+                                <input name="fa" type="text" class="form-control needs-validation" placeholder="First Ascenscionist">
+                                <small class="form-text text-muted">Unsure? Just put 'Unknown'.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-tab">
+                        <div class="row my-1 py-1">
+                            <h5>Description:</h5>
+                        </div>
+                        <div class="form-row my-1 py-1">
+                            <div class="col"> 
+                                <!-- <label for="description">Description</label> -->
+                                <textarea name="description" class="form-control" placeholder="Boulder Description" style="height: 150px;" required></textarea>
+                                <small class="form-text text-muted">Try describing some obvious features or where this climb is on the wall.</small>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-row my-1 py-1">
+                            <div class="col-md-6">
+                                <!-- <label for="pro">Protection</label> -->
+                                <input name="pro" type="text" class="form-control" placeholder="Protection" required>
+                                <small class="form-text text-muted">How many pads should someone bring?</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-tab">
+                        <div class="row my-1 py-1">
+                            <h5>Tags:</h5>
+                        </div>
+                        <!-- Descriptive Icons -->
+                        <div class="row">
+                            <p class="mr-1"><small>Can this climb be described as any of the following traits?</small></p>
+                            <a href="#iconsModal" data-target="#iconsModal" data-toggle="modal"><small>I'm not sure what these mean.</small></a>
+                        </div>
+                        <div class="form-row my-1 py-1">  
+                            <div class="form-check form-check-inline px-1">
+                                <input class="form-check-input" type="checkbox" name="reachy" id="reachyCheck" value="True">
+                                <label class="form-check-label" for="reachyCheck"><img src="/static/images/reachy.png" alt="Reachy.png" style="width: 50px;"></label>
+                            </div>
+                            <div class="form-check form-check-inline px-1">
+                                <input class="form-check-input" type="checkbox" name="technical" id="technicalCheck" value="True">
+                                <label class="form-check-label" for="technicalCheck"><img src="/static/images/technical.png" alt="Technical.png" style="width: 35px;"></label>
+                            </div>
+                            <div class="form-check form-check-inline px-1">
+                                <input class="form-check-input" type="checkbox" name="highball" id="highballCheck" value="True">
+                                <label class="form-check-label" for="highballCheck"><img src="/static/images/highball.png" alt="Highball.png" style="width: 35px;"></label>
+                            </div>
+                            <div class="form-check form-check-inline px-1">
+                                <input class="form-check-input" type="checkbox" name="chossy" id="chossyCheck" value="True">
+                                <label class="form-check-label" for="chossyCheck"><img src="/static/images/chossy.png" alt="Chossy.png" style="width: 35px;"></label>
+                            </div>
+                            <div class="form-check form-check-inline px-1">
+                                <input class="form-check-input" type="checkbox" name="bad_landing" id="blCheck" value="True">
+                                <label class="form-check-label" for="blCheck"><img src="/static/images/bad-landing.png" alt="Bad-Landing.png" style="width: 35px;"></label>
+                            </div>
+                            <div class="form-check form-check-inline px-1">
+                                <input class="form-check-input" type="checkbox" name="dirty" id="dirtyCheck" value="True">
+                                <label class="form-check-label" for="dirtyCheck"><img src="/static/images/dirty.png" alt="Dirty.png" style="width: 35px;"></label>
+                            </div>
+                        </div>
+                        <!-- Tags -->
+                    </div>
+                    
+                    <div class="form-tab">Contact Info:
+                        <p><input placeholder="E-mail..." oninput="this.className = ''"></p>
+                        <p><input placeholder="Phone..." oninput="this.className = ''"></p>
+                    </div>
+                    
+                    <div class="form-tab">Birthday:
+                        <p><input placeholder="dd" oninput="this.className = ''"></p>
+                        <p><input placeholder="mm" oninput="this.className = ''"></p>
+                        <p><input placeholder="yyyy" oninput="this.className = ''"></p>
+                    </div>
+                    
+                    <div class="form-tab">Login Info:
+                        <p><input placeholder="Username..." oninput="this.className = ''"></p>
+                        <p><input placeholder="Password..." oninput="this.className = ''"></p>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-2 offset-8">
+                            <button class="btn btn-outline-secondary" type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-secondary" type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
+                        </div>
+                    </div>
+
+                    
+                    <!-- Circles which indicates the steps of the form: -->
+                    <div style="text-align:center;margin-top:40px;">
+                        <span class="step"></span>
+                        <span class="step"></span>
+                        <span class="step"></span>
+                        <span class="step"></span>
+                    </div>
+                    
+                </form>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="iconsModal" tabindex="-1" role="dialog" aria-labelledby="iconsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="iconsModalLabel">Descriptive Icons</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <p>The following icons represent common important qualities of climbs.
+                                    We use them to provide essential information at a glance.</p>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/reachy.png" alt="Reachy.png" style="width: 35px;" class="pr-1">
+                            <p style="display: inline;"><strong>Reachy:</strong> This tall dinosaur means a climb may feel reachy and extended for some climbers.
+                                Inherently all climbs will feel reachy to some, however this icon is meant to be used specifically for climbs 
+                                which may be significantly more difficult for some because of the distance between necessary holds.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/technical.png" alt="Technical.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Technical:</strong> A light-bulb represents climbs which are technical, tricky, thought-provoking,
+                                or beta-intensive.  These climbs may require out-of-the-box thinking or significant refinement to tick off.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/highball.png" alt="Highball.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Highball:</strong> The classic heart-flutter represents boulders which are highballs and range from 
+                                tall to borderline free-solos.  Note, this distinction will vary from region to region (i.e. Bishop, CA only tends to grant this distinction
+                                to boulders over 25ft whereas in Horse Pens 40, AL highballs may be as short as 15-18ft.)  The heart-flutter may be used in conjunction 
+                                with danger ratings, highballs only describe the height of a climb, not the committment or other dangers.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/chossy.png" alt="Chossy.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Chossy:</strong> Chossy climbs are ones known to have loose or suspect rock throughout.  A single
+                                loose or suspect hold is generally not enough to earn this distinction, but is good to notes in the description or comments.
+                                This distinction is for climbs where the climber may be at greater risk due to the quality of the rock.  This icon may be used
+                                in conjunction with danger ratings, often 'X' ratings.  Exceptions to this distinction include alpine environments where is should
+                                be assumed there is a large presence of loose rock.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/bad-landing.png" alt="Bad-Landing.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Bad Landing:</strong> This distinction is for climbs with dangerous landings, and can be used for either
+                            boulders or roped climbs.  Examples of bad landings include those with uneven terrain, protruding rocks, large holes, unprotectable landings,
+                            and large plants.  This distinction may be used in conjunction with danger ratings but only represents the added danger of the landing,
+                            not any other portion of the climb.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/dirty.png" alt="Dirty.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Dirty:</strong> The sweeping broom icon describes climbs which are likely dirty and require significant
+                                cleaning.  This icon is not a live status but should be used only for climbs which are frequently dirty, often from a lack
+                                of traffic or other factors.  Some areas and crags are subject to seasonal debris and grime, but this distinction should be reserved for
+                                climbs which do not receive routine cleaning.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}
+{% block scripts %}
+<script>
+var currentTab = 2; // Current tab is set to be the first tab (0)
+showTab(currentTab); // Display the current tab
+
+function showTab(n) {
+  // This function will display the specified tab of the form ...
+  var x = document.getElementsByClassName("form-tab");
+  x[n].style.display = "block";
+  // ... and fix the Previous/Next buttons:
+  if (n == 0) {
+    document.getElementById("prevBtn").style.display = "none";
+  } else {
+    document.getElementById("prevBtn").style.display = "inline";
+  }
+  if (n == (x.length - 1)) {
+    document.getElementById("nextBtn").innerHTML = "Submit";
+  } else {
+    document.getElementById("nextBtn").innerHTML = "Next";
+  }
+  // ... and run a function that displays the correct step indicator:
+  fixStepIndicator(n)
+}
+
+function nextPrev(n) {
+  // This function will figure out which tab to display
+  var x = document.getElementsByClassName("form-tab");
+  // Exit the function if any field in the current tab is invalid:
+  if (n == 1 && !validateCurrentTab()) return false;
+  // Hide the current tab:
+  x[currentTab].style.display = "none";
+  // Increase or decrease the current tab by 1:
+  currentTab = currentTab + n;
+  // if you have reached the end of the form... :
+  if (currentTab >= x.length) {
+    //...the form gets submitted:
+    document.getElementById("entry-form").submit();
+    return false;
+  }
+  // Otherwise, display the correct tab:
+  showTab(currentTab);
+}
+
+function validateCurrentTab() {
+  // This function deals with validation of the form fields
+  var x, y, i, valid = true;
+  x = document.getElementsByClassName("form-tab");
+  y = x[currentTab].getElementsByClassName("needs-validation");
+  // A loop that checks every input field in the current tab:    
+  for (i = 0; i < y.length; i++) {
+    // If a field is empty...
+    if (y[i].checkValidity() === false) {
+      // add an "invalid" class to the field:
+      y[i].classList.add("is-invalid");
+      // and set the current valid status to false:
+      valid = false;
+    } else {
+        y[i].classList.remove("is-invalid");
+        y[i].classList.add("is-valid");
+    }
+  }
+  // If the valid status is true, mark the step as finished and valid:
+  if (valid) {
+    document.getElementsByClassName("step")[currentTab].className += " finish";
+  }
+  return valid; // return the valid status
+}
+
+function fixStepIndicator(n) {
+  // This function removes the "active" class of all steps...
+  var i, x = document.getElementsByClassName("step");
+  for (i = 0; i < x.length; i++) {
+    x[i].className = x[i].className.replace(" active", "");
+  }
+  //... and adds the "active" class to the current step:
+  x[n].className += " active";
+}
+</script>
+{% endblock %}
