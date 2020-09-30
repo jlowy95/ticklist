@@ -63,6 +63,7 @@
 ## Navigation
 - Databases
   - MyTicksClimbs
+    
     Hosts areas and climbs with their attributes
     - areas
       - id
@@ -127,4 +128,10 @@
     - danger
       - id
       - movie
+    - tags
+      - tagID
+      - tagTitle
+    - tagClimb
+      - climbID
+      - tagID
   - MyTicksUsers
