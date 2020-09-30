@@ -63,6 +63,68 @@
 ## Navigation
 - Databases
   - MyTicksClimbs
-    
     Hosts areas and climbs with their attributes
+    - areas
+      - id
+      - name
+      - parent_id
+      - parent_name
+      - area_type
+        - 0: No distinction
+        - 1: Sub-areas
+        - 2: Climbs
+      - path
+      - description
+      - directions
+      - elevation
+      - lat
+      - lng
+      - date_inserted
+    - boulders
+      - id
+      - name
+      - parent_id
+      - parent_name
+      - position
+      - grade (integer scale)
+      - quality (integer scale)
+      - danger
+        - 0: G
+        - 1: PG-13
+        - 2: R
+        - 3: X
+      - height
+      - fa
+      - description
+      - pro
+      - climb_type ('boulder')
+      - date_inserted
+    - routes
+      - id
+      - name
+      - parent_id
+      - parent_name
+      - position
+      - grade (integer scale)
+      - pitches
+      - quality (integer scale)
+      - danger
+        - 0: G
+        - 1: PG-13
+        - 2: R
+        - 3: X
+      - height
+      - committment
+      - fa
+      - description
+      - pro
+      - climb_type ('route')
+      - route_type
+        - 0: 'sport'
+        - 1: 'trad'
+        - 2: 'dws'
+      - date_inserted
+    - danger
+      - id
+      - movie
   - MyTicksUsers
