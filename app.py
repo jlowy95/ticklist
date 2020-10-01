@@ -845,56 +845,6 @@ def area(entry_id, entry_name):
         print(e)
         return render_template('404.html', status_code=errors['404'])
 
-@app.route('/boulder/<entry_id>/<entry_name>')
-def boulder(entry_id, entry_name):
-    print(f'Entry: {entry_id}/{entry_name}')
-    try:
-        entry = db.session.query(BoulderModel)\
-            .filter(BoulderModel.id==entry_id)\
-            .filter(BoulderModel.name==entry_name)\
-            .first()
-        if entry:
-            entry = entry.toJSON()
-        else:
-            return render_template('404.html', status_code=errors['404'])
-        path = getPathNames(entry['parent']['path'])
-        # Get neighboring climbs from parent
-        neighbors = getChildrenInfo(
-            db.session.query(AreaModel)\
-                .filter(AreaModel.id==entry['parent']['id'])\
-                .filter(AreaModel.name==entry['parent']['name'])\
-                .first().toJSON()
-            )
-        return render_template('boulder.html', boulder=entry, path=path, children=neighbors)
-    except Exception as e:
-        print(e)
-        return render_template('404.html', status_code=errors['404'])
-
-@app.route('/route/<entry_id>/<entry_name>')
-def routeClimb(entry_id, entry_name):
-    print(f'Entry: {entry_id}/{entry_name}')
-    try:
-        entry = db.session.query(RouteModel)\
-            .filter(RouteModel.id==entry_id)\
-            .filter(RouteModel.name==entry_name)\
-            .first()
-        if entry:
-            entry = entry.toJSON()
-        else:
-            return render_template('404.html', status_code=errors['404'])
-        path = getPathNames(entry['parent']['path'])
-        # Get neighboring climbs from parent
-        neighbors = getChildrenInfo(
-            db.session.query(AreaModel)\
-                .filter(AreaModel.id==entry['parent']['id'])\
-                .filter(AreaModel.name==entry['parent']['name'])\
-                .first().toJSON()
-            )
-        return render_template('route.html', route=entry, path=path, children=neighbors)
-    except Exception as e:
-        print(e)
-        return render_template('404.html', status_code=errors['404'])
-
 
 # Search query route
 @app.route('/search/<search_terms>')
