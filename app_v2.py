@@ -90,7 +90,7 @@ class AreaModel(db.Model):
             'date_inserted': self.date_inserted
         }
 
-class ClimbsModel(db.model):
+class ClimbModel(db.model):
     __tablename__ = 'climbs'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -152,7 +152,6 @@ class BoulderModel(db.Model):
     def __init__(self, grade):
         self.grade = grade
 
-
 class RouteModel(db.Model):
     __tablename__ = 'routes'
 
@@ -168,7 +167,24 @@ class RouteModel(db.Model):
         self.committment
         self.route_type = route_type
 
+class TagsModel(db.Model):
+    __tablename__ = 'tags'
 
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(20), nullable=False)
+
+    def __init__(self, title):
+        self.title = title
+
+class TagsClimbsModel(db.Model):
+    __tablename__ = 'tagClimb'
+
+    climb_id = db.Column(db.Integer, nullable=False)
+    tag_id = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, climb_id, tag_id):
+        self.climb_id = climb_id
+        self.tag_id = tag_id
 
 
 # Global Functions + Variables
@@ -396,22 +412,20 @@ def countClimbs(area_model):
         return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
     elif area_model.area_type == 2:
         # Climbs, get counts of climb types
-        boulders = db.session.query(func.count(BoulderModel.id))\
-            .filter(BoulderModel.parent_id==area_model.id)\
-            .filter(BoulderModel.parent_name==area_model.name)\
-            .scalar()
-        routes_q = db.session.query(RouteModel.route_type, func.count(RouteModel.id))\
-            .filter(RouteModel.parent_id==area_model.id)\
-            .filter(RouteModel.parent_name==area_model.name)\
-            .group_by(RouteModel.route_type)\
+        tallies = db.session.query(ClimbModel.climb_type, func.count(ClimbModel.id))\
+            .filter(ClimbModel.parent_id==area_model.id)\
+            .filter(ClimbModel.parent_name==area_model.name)\
+            .group_by(ClimbModel.climb_type)\
             .all()
-        for rt in routes_q:
-            if rt[0] == 0:
-                sport = rt[1]
-            elif rt[0] == 1:
-                trad = rt[1]
-            elif rt[0] == 2:
-                dws = rt[1]
+        for typ in tallies:
+            if typ[0] == 'boulder':
+                boulders = typ[1]
+            elif typ[0] == 'sport':
+                sport = typ[1]
+            elif typ[0] == 'trad':
+                trad = typ[1]
+            elif typ[0] == 'dws':
+                dws = typ[1]
         total = boulders+sport+trad+dws
         return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
  
@@ -419,8 +433,10 @@ def countClimbs(area_model):
 # getChildrenInfo: for item in children, retrieve info
 def getChildrenInfo(entry):
     # print("getChildrenInfo")
+    # if area_type 0, no children
     if entry['area_type'] == 0:
         return []
+    # if area_type 1, sub areas, query AreaModel
     elif entry['area_type'] == 1:
         children_info = []
         children = db.session.query(AreaModel)\
@@ -439,7 +455,7 @@ def getChildrenInfo(entry):
                 'route': f"/area/{child.id}/{child.name}",
                 'counts': counts})
         return children_info
-
+    # if area_type 2, climbs, query ClimbModel
     elif entry['area_type'] == 2:
         sorted_info = []
         unsorted_info = []
