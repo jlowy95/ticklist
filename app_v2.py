@@ -1,39 +1,43 @@
-# Author Josh Lowy 
+'''
+MyTicks: A Climbing Journal Webapp
+Made by Josh Lowy
+Copyright 2020 Josh Lowy
 
-# Flask app for MyTicks
-# Connects to local MongoDB and allows for easy maintenance and logging of
-# ticked climbs and tracking of ascents.
+Flask based application connects to local SQL database.
+Designed for easy maintenance and logging of ticked climbs
+and for the tracking of ascents.
+'''
 
+
+# Imported Modules
 from flask import Flask, render_template, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy as sa
 from sqlalchemy import func
 from flask_migrate import Migrate
-# from flask_pymongo import PyMongo
 import mysql.connector
 from bson import ObjectId
 import datetime
 import json
 import pprint
 
+# Initialize Flask app
 app = Flask(__name__)
 
 # Initialize SQLAlchemy connection
 # MySQL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:joshstemppassword@localhost/MyTicksClimbs"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:joshstemppassword@localhost/MyTicksTest"
 
+# Connect SQL database to Flask app
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-# Postrgesql
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://Josh:lowy@localhost/MyTicksClimbs"
-# db = SQLAlchemy(app)
-# migrate = Migrate(app, db)
  
 
 # SQL Models
+# These are translations of the tables in the db
+# Area and Climb have toJSON fn for simplified data retrieval in templates
+
 class AreaModel(db.Model):
     __tablename__ = 'areas'
 
@@ -90,7 +94,8 @@ class AreaModel(db.Model):
             'date_inserted': self.date_inserted
         }
 
-class ClimbModel(db.model):
+
+class ClimbModel(db.Model):
     __tablename__ = 'climbs'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -136,12 +141,12 @@ class ClimbModel(db.model):
                 'height': self.height,
                 'fa': self.fa,
                 'description': self.description,
-                'pro': self.pro,
-                }
+                'pro': self.pro
             },        
             'climb_type': self.climb_type,        
             'date_inserted': self.date_inserted
         }
+
 
 class BoulderModel(db.Model):
     __tablename__ = 'boulders'
@@ -151,6 +156,7 @@ class BoulderModel(db.Model):
 
     def __init__(self, grade):
         self.grade = grade
+
 
 class RouteModel(db.Model):
     __tablename__ = 'routes'
@@ -167,6 +173,7 @@ class RouteModel(db.Model):
         self.committment
         self.route_type = route_type
 
+
 class TagsModel(db.Model):
     __tablename__ = 'tags'
 
@@ -176,11 +183,12 @@ class TagsModel(db.Model):
     def __init__(self, title):
         self.title = title
 
+
 class TagsClimbsModel(db.Model):
     __tablename__ = 'tagClimb'
 
-    climb_id = db.Column(db.Integer, nullable=False)
-    tag_id = db.Column(db.Integer, nullable=False)
+    climb_id = db.Column(db.Integer, db.ForeignKey(ClimbModel.id), primary_key=True)
+    tag_id = db.Column(db.Integer, db.ForeignKey(TagsModel.id), primary_key=True)
 
     def __init__(self, climb_id, tag_id):
         self.climb_id = climb_id
@@ -189,6 +197,7 @@ class TagsClimbsModel(db.Model):
 
 # Global Functions + Variables
 
+# errors: dictionary containing different error messages to be displayed when page issues occur
 errors = {
     '403': {
         'title':'403 - Forbidden',
@@ -202,6 +211,7 @@ errors = {
     }
 }
 
+# dangerInt2Movie: dictionary to translate the stored Danger integer from db to common text value
 dangerInt2Movie = {
     0:'',
     1:'PG-13',
@@ -209,6 +219,8 @@ dangerInt2Movie = {
     3:'X'
 }
 
+# route_types: dictionary to translate route_type value from db to common text value.  
+# The two stored values for each are used interchangeably in different template locations.
 route_types = {
     None: {'short':'','long':''},
     0: {'short':'S','long':'Sport'},
@@ -216,6 +228,7 @@ route_types = {
     2: {'short':'DWS','long':'Deep Water Solo'}
 }
 
+# boulderInt2Grade: translates concensus boulder difficulty values to common V/Font grades
 def boulderInt2Grade(floatDifficulty):
     if floatDifficulty < -0.66:
         return {'usa':'VB', 'euro':'3'}
@@ -281,7 +294,7 @@ def boulderInt2Grade(floatDifficulty):
         return {'usa':'V14', 'euro':'8B+'}
     else:
         return {'usa':'V14+', 'euro':'8B+'}
-
+# routeInt2Grade: translates concensus route difficulty values to common YDS/French grades
 def routeInt2Grade(floatDifficulty):
     if floatDifficulty < -0.66:
         return {'usa':'Easy 5th', 'euro':'1'}
@@ -381,7 +394,7 @@ def routeInt2Grade(floatDifficulty):
         return {'usa':'5.14+', 'euro':'8+'}
     
 
-# getPathNames: For item in entry path, retrieve name
+# getPathNames: Retrieves name and path/route for eachitem in the selected entry's parent path
 def getPathNames(path):
     path_raw = [step.split('/') for step in path.split('$')]
     path_clean = []
@@ -389,7 +402,7 @@ def getPathNames(path):
         path_clean.append({'name': step[1], 'route':f"area/{step[0]}/{step[1]}"})
     return path_clean
 
-# countClimbs: recursive function for querying and counting number of climbs by type
+# countClimbs: recursive function for querying and counting number of children climbs by type
 def countClimbs(area_model):
     boulders, sport, trad, dws, total = 0,0,0,0,0
     # Check area_type to determine search
@@ -430,7 +443,7 @@ def countClimbs(area_model):
         return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
  
 
-# getChildrenInfo: for item in children, retrieve info
+# getChildrenInfo: For populating info on area children, retrieves entry's childrens' data
 def getChildrenInfo(entry):
     # print("getChildrenInfo")
     # if area_type 0, no children
@@ -459,58 +472,39 @@ def getChildrenInfo(entry):
     elif entry['area_type'] == 2:
         sorted_info = []
         unsorted_info = []
-        # Check boulders
-        boulders = db.session.query(BoulderModel.position.label('position'),\
-            BoulderModel.climb_type.label('climb_type'),\
-            BoulderModel.id.label('id'),\
-            BoulderModel.name.label('name'),\
-            BoulderModel.grade.label('grade'),\
-            BoulderModel.quality.label('quality'),\
-            BoulderModel.danger.label('danger'),\
-            BoulderModel.height.label('height'),\
-            sa.null().label('pitches'),\
-            sa.null().label('committment'),\
-            BoulderModel.fa.label('fa'),\
-            BoulderModel.description.label('description'),\
-            BoulderModel.pro.label('pro'),\
-            BoulderModel.elevation.label('elevation'),\
-            BoulderModel.lat.label('lat'),\
-            BoulderModel.lng.label('lng'),\
-            sa.null().label('route_type'))\
-            .filter(BoulderModel.parent_id==entry['id']).filter(BoulderModel.parent_name==entry['name'])
-        # Check routes
-        routes = db.session.query(RouteModel.position.label('position'),\
-            RouteModel.climb_type.label('climb_type'),\
-            RouteModel.id.label('id'),\
-            RouteModel.name.label('name'),\
-            RouteModel.grade.label('grade'),\
-            RouteModel.quality.label('quality'),\
-            RouteModel.danger.label('danger'),\
-            RouteModel.height.label('height'),\
+
+        climbs = db.session.query(ClimbModel.position.label('position'),\
+            ClimbModel.climb_type.label('climb_type'),\
+            ClimbModel.id.label('id'),\
+            ClimbModel.name.label('name'),\
+            func.coalesce(BoulderModel.grade, RouteModel.grade).label('grade'),\
+            ClimbModel.quality.label('quality'),\
+            ClimbModel.danger.label('danger'),\
+            ClimbModel.height.label('height'),\
             RouteModel.pitches.label('pitches'),\
             RouteModel.committment.label('committment'),\
-            RouteModel.fa.label('fa'),\
-            RouteModel.description.label('description'),\
-            RouteModel.pro.label('pro'),\
-            RouteModel.elevation.label('elevation'),\
-            RouteModel.lat.label('lat'),\
-            RouteModel.lng.label('lng'),\
+            ClimbModel.fa.label('fa'),\
+            ClimbModel.description.label('description'),\
+            ClimbModel.pro.label('pro'),\
             RouteModel.route_type.label('route_type'))\
-            .filter(RouteModel.parent_id==entry['id']).filter(RouteModel.parent_name==entry['name'])
-        # Union boulders + routes and sort
-        q = boulders.union(routes)
-        children = q.order_by('position')
+            .outerjoin(RouteModel, RouteModel.id == ClimbModel.id)\
+            .outerjoin(BoulderModel, BoulderModel.id == ClimbModel.id)\
+            .filter(ClimbModel.parent_id==entry['id']).filter(ClimbModel.parent_name==entry['name'])\
+            .order_by('position')
 
-        gradeByClimb_type = {'boulder': boulderInt2Grade, 'route': routeInt2Grade}
+        gradeByClimb_type = {'boulder': boulderInt2Grade,
+             'sport': routeInt2Grade,
+             'trad': routeInt2Grade,
+             'dws': routeInt2Grade}
         # Append info to corresponding lists
-        for child in children:
-            # (position, climb_type, id, name, grade, quality, danger, height pitches, committment, fa, desc, pro, elev, lat, lng, route_type)
+        for child in climbs:
+            # (position, climb_type, id, name, grade, quality, danger, height, pitches, committment, fa, desc, pro, route_type)
             child_entry = {
                 'id': child[2],
                 'name': child[3],
                 'properties': {
                     'grade': gradeByClimb_type[child[1]](child[4]),
-                    'route_type': route_types[child[16]],
+                    'route_type': route_types[child[13]],
                     'quality': child[5],
                     'danger': dangerInt2Movie[child[6]],
                     'height': child[7],
@@ -519,17 +513,11 @@ def getChildrenInfo(entry):
                     'fa': child[10],
                     'description': child[11],
                     'pro': child[12],
-                    'elevation': child[13],
-                    'coords': {
-                        'lat': child[14],
-                        'lng': child[15]
-                    }
                 },
                 'climb_type': child[1],
                 'route': f"{child[1]}/{child[2]}/{child[3]}"
             }
             if child[0] == 0:
-                print(f"Unsorted - {child[2]}")
                 unsorted_info.append(child_entry)
             else:
                 sorted_info.append(child_entry)
