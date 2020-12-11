@@ -610,17 +610,27 @@ def validationErrorProtocol(error_code, data):
 
 
 # addTags: inserts new tags to tags and tagClimb tables
-def addTags(new_entry):
+def addTags(form_fields, new_id):
     # Isolate tag fields
-    tags = {new_entry[field] for field in new_entry.keys() if "tag" in field}
+    tags = {field:form_fields[field] for field in form_fields.keys() if "tag" in field}
     
     # Add new tags to tags
+    # New tags in form field 'tags_other' as comma-separated list
+    if tags['tags_other']:
+        new_tags = tags['tags_other'].split(',')
+        # Process tags, attempt to void false duplicates
 
     # Add relationships to tagClimb
-    # Guidebook tags as follows:
-    # 0-dirty, 1-reachy, 2-technical, 3-highball, 4-chossy, 5-bad_landing
+    # Guidebook tags and ids as follows:
     guidebook_tags = {'tag_dirty':0,'tag_reachy':1,'tag_technical':2,'tag_highball':3,'tag_chossy':4,'tag_bad_landing':5}
-    
+    gtags_models = []
+    for gkey in guidebook_tags.keys():
+        if gkey in tags.keys():
+            gtags_models.append(TagsClimbsModel(
+                climb_id=new_id,
+                tag_id=guidebook_tags[gkey]
+            ))
+    db.session.bulk_save_objects(gtags_models)
 
 
 # addArea: inserts new area entry and updates parent area
@@ -698,6 +708,9 @@ def addBoulder(new_boulder):
         )
 
         db.session.add(new_entry_secondary)
+
+        # Add tags to tag tables
+        addTags(new_boulder,new_entry.id)
 
         # Update parent area_type if necessary (2 for Boulders/Routes)
         parent = db.session.query(AreaModel)\
