@@ -6,7 +6,7 @@
 
 {% block header %}
     <div class="row mx-1 my-2">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <!-- Flask Area Path -->
             <div class="row justify-content-start no-gutters">
                 {% for link in path %}
@@ -24,31 +24,6 @@
                     <h5><a style="color: #26abff" href="/area/{{area['id']}}/{{area['name']}}">{{area['name']}}</a></h6>
                 </div>
             </div>
-        </div>
-        <!-- Entry Management Tools -->
-        <div class="col-md-3">
-            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-                <div class="btn-group btn-group-sm" role="group">
-                    <button id="addEntry" type="button"
-                            class="btn btn-secondary dropdown-toggle"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Add Entry
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="addEntryDrop">
-                        {% if area['area_type'] == 0 or area['area_type'] == 1 %}
-                        <a class="dropdown-item" href="/add-entry/area/{{area['id']}}/{{area['name']}}">Area</a>
-                        {% endif %}
-                        {% if area['area_type'] == 0 or area['area_type'] == 2 %}
-                        <a class="dropdown-item" href="/add-entry/boulder/{{area['id']}}/{{area['name']}}">Boulder</a>
-                        <a class="dropdown-item" href="/add-entry/route/{{area['id']}}/{{area['name']}}">Route</a>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="btn-group btn-group-sm" role="group" aria-label="First group">
-                    <a class="btn btn-secondary" href="/edit-entry/area/{{area['id']}}/{{area['name']}}" role="button">Edit Entry</a>
-                    <button type="button" class="btn btn-secondary">Delete Entry</button>
-                </div>
-            </div>        
         </div>
     </div>
 {% endblock %}
@@ -85,8 +60,8 @@
                         <p class="text-center my-1 pt-2 border-top"><strong>Unsorted Climbs</strong></p>
 
                             {% for child in children['unsorted'] %}
-                            <a class="nav-link mb-1 py-1 pl-2 ml-2" id="v-pills-{{child['climb_type']}}-{{child['id']}}-tab" data-toggle="pill" href="#v-pills-{{child['climb_type']}}-{{child['id']}}" role="tab" aria-controls="v-pills-{{child['climb_type']}}-{{child['id']}}" aria-selected="false">
-                                <span class="text-right" style="color:black">{% for i in range(child['properties']['quality'])  %}
+                            <a class="nav-link mb-1 py-1 pl-2 ml-2" id="v-pills-{{child['climb_type']}}-{{child['id']}}-tab1" data-toggle="pill" href="#v-pills-{{child['climb_type']}}-{{child['id']}}" role="tab" aria-controls="v-pills-{{child['climb_type']}}-{{child['id']}}" aria-selected="false">
+                                <span class="text-right" style="color:black;">{% for i in range(child['properties']['quality'])  %}
                                     <span style="margin-right: -5px">&#11089;</span>
                                     {% endfor %}&nbsp;&nbsp;</span>
                                 <span>{% if child['name']|length > 19 %}
@@ -107,15 +82,36 @@
             <div class="tab-content" id="v-pills-tabContent">
                 <!-- Area Details Tab -->
                 <div class="tab-pane fade rounded bg-white show active" id="v-pills-ad" role="tabpanel" aria-labelledby="v-pills-area-details">
-                    <!-- Area Title -->
+                    <!-- Area Title & Entry Management -->
                     <div class="row mb-2">
-                        <div class="col-md">
+                        <!-- Title -->
+                        <div class="col-md-11">
                             <h1>{{area['name']}}</h1>
+                        </div>
+                        <!-- Entry Management -->
+                        <div class="col-md-1">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-white dropdown-toggle"
+                                        type="button" id="areaDropdownMenu" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                        <img src="/static/images/settings.svg" alt="Settings.svg" width="30px">
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="areaDropdownMenu">
+                                    <a class="dropdown-item" href="/edit-entry/area/{{area['id']}}/{{area['name']}}" role="button">Edit Area</a>
+                                    {% if area['area_type'] == 0 or area['area_type'] == 1 %}
+                                    <a class="dropdown-item" href="/add-entry/area/{{area['id']}}/{{area['name']}}">Add Area</a>
+                                    {% endif %}
+                                    {% if area['area_type'] == 0 or area['area_type'] == 2 %}
+                                    <a class="dropdown-item" href="/add-entry/boulder/{{area['id']}}/{{area['name']}}">Add Boulder</a>
+                                    <a class="dropdown-item" href="/add-entry/route/{{area['id']}}/{{area['name']}}">Add Route</a>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <!-- Location Details + Images -->
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <div class="row">
                                 <div class="col-md">
                                     <p class="my-0"><strong>Elevation </strong>{{area['properties']['elevation']}} ft</p>
@@ -134,20 +130,20 @@
                             </div>
                         </div>
                         <!-- Area Images Carousel -->
-                        <div class="col-md-6">
+                        <div class="col-md-7">
                             <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
                                 <div class="carousel-inner" role="listbox">
                                     <div class="carousel-item active">
-                                        <img class="d-block w-100" src="https://images.squarespace-cdn.com/content/v1/59f3e94acf81e02892f7b094/1575078472182-EYT4MC11WX6HPB0EA123/ke17ZwdGBToddI8pDm48kLkXF2pIyv_F2eUT9F60jBl7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0iyqMbMesKd95J-X4EagrgU9L3Sa3U8cogeb0tjXbfawd0urKshkc5MgdBeJmALQKw/Ana-SWAPS-3.jpg?format=2500w" alt="Ana-SWAPS-3" style="height: 300px;">
+                                        <img class="d-block w-100" src="https://images.squarespace-cdn.com/content/v1/59f3e94acf81e02892f7b094/1575078472182-EYT4MC11WX6HPB0EA123/ke17ZwdGBToddI8pDm48kLkXF2pIyv_F2eUT9F60jBl7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0iyqMbMesKd95J-X4EagrgU9L3Sa3U8cogeb0tjXbfawd0urKshkc5MgdBeJmALQKw/Ana-SWAPS-3.jpg?format=2500w" alt="Ana-SWAPS-3" style="height: 400px;">
                                     </div>
                                     <div class="carousel-item">
-                                        <img class="d-block w-100" src="https://images.squarespace-cdn.com/content/v1/59f3e94acf81e02892f7b094/1575079268972-8VGTWMS7HH7S0IEC0S6W/ke17ZwdGBToddI8pDm48kLkXF2pIyv_F2eUT9F60jBl7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0iyqMbMesKd95J-X4EagrgU9L3Sa3U8cogeb0tjXbfawd0urKshkc5MgdBeJmALQKw/VuOnJellyfishWall.jpg?format=2500w" alt="VuOnJellyfishWall" data-holder-rendered="true" style="height: 300px;">
+                                        <img class="d-block w-100" src="https://images.squarespace-cdn.com/content/v1/59f3e94acf81e02892f7b094/1575079268972-8VGTWMS7HH7S0IEC0S6W/ke17ZwdGBToddI8pDm48kLkXF2pIyv_F2eUT9F60jBl7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0iyqMbMesKd95J-X4EagrgU9L3Sa3U8cogeb0tjXbfawd0urKshkc5MgdBeJmALQKw/VuOnJellyfishWall.jpg?format=2500w" alt="VuOnJellyfishWall" data-holder-rendered="true" style="height: 400px;">
                                     </div>
                                     <div class="carousel-item">
-                                        <img class="d-block w-100" src="https://images.squarespace-cdn.com/content/v1/59f3e94acf81e02892f7b094/1575078638649-2IHSI24Y0GIX0WPYHHAM/ke17ZwdGBToddI8pDm48kLkXF2pIyv_F2eUT9F60jBl7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0iyqMbMesKd95J-X4EagrgU9L3Sa3U8cogeb0tjXbfawd0urKshkc5MgdBeJmALQKw/BishRR-12-18LR-7.jpg?format=2500w" alt="NateOnBloodKin" data-holder-rendered="true" style="height: 300px;">
+                                        <img class="d-block w-100" src="https://images.squarespace-cdn.com/content/v1/59f3e94acf81e02892f7b094/1575078638649-2IHSI24Y0GIX0WPYHHAM/ke17ZwdGBToddI8pDm48kLkXF2pIyv_F2eUT9F60jBl7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0iyqMbMesKd95J-X4EagrgU9L3Sa3U8cogeb0tjXbfawd0urKshkc5MgdBeJmALQKw/BishRR-12-18LR-7.jpg?format=2500w" alt="NateOnBloodKin" data-holder-rendered="true" style="height: 400px;">
                                     </div>
                                     <div class="carousel-item">
-                                        <img class="d-block w-100" src="https://images.squarespace-cdn.com/content/v1/59f3e94acf81e02892f7b094/1575078883656-JOQ5TIMPB897RWX6ACGI/ke17ZwdGBToddI8pDm48kLkXF2pIyv_F2eUT9F60jBl7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0iyqMbMesKd95J-X4EagrgU9L3Sa3U8cogeb0tjXbfawd0urKshkc5MgdBeJmALQKw/JLOWOnBaptism-2.jpg?format=2500w" alt="JLOWOnBaptism-2" data-holder-rendered="true" style="height: 300px;">
+                                        <img class="d-block w-100" src="https://images.squarespace-cdn.com/content/v1/59f3e94acf81e02892f7b094/1575078883656-JOQ5TIMPB897RWX6ACGI/ke17ZwdGBToddI8pDm48kLkXF2pIyv_F2eUT9F60jBl7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0iyqMbMesKd95J-X4EagrgU9L3Sa3U8cogeb0tjXbfawd0urKshkc5MgdBeJmALQKw/JLOWOnBaptism-2.jpg?format=2500w" alt="JLOWOnBaptism-2" data-holder-rendered="true" style="height: 400px;">
                                     </div>
                                 </div>
                                 <!-- Carousel controls -->
@@ -175,11 +171,24 @@
                 {% for child in children['sorted']+children['unsorted'] %}
                 <div class="tab-pane fade rounded bg-white px-2" id="v-pills-{{child['climb_type']}}-{{child['id']}}" role="tabpanel" aria-labelledby="v-pills-{{child['climb_type']}}-{{child['id']}}-tab">
                     <!-- Title Info + Images -->
-                    <!-- Climb Title -->
+                    <!-- Climb Title & Entry Management-->
                     <div class="row">
-                        <div class="col-md">
+                        <div class="col-md-11">
                             <h1>{{child['name']}}</h1>
                         </div>
+                        <!-- Entry Management -->
+                        <div class="col-md-1">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-white dropdown-toggle"
+                                            type="button" id="dropdownMenu-{{child['id']}}" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <img src="/static/images/settings.svg" alt="Settings.svg" width="30px">
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu-{{child['id']}}">
+                                        <a class="dropdown-item" href="/edit-entry/climb/{{child['id']}}/{{child['name']}}" role="button">Edit Climb</a>
+                                    </div>
+                                </div>
+                            </div>
                     </div>
                     <!-- Detail Info + Images -->
                     <div class="row">
@@ -189,7 +198,7 @@
                             <div class="row">
                                 <!-- Grade/Danger -->
                                 <div class="col-md-auto">
-                                    <h3>{{child['properties']['grade']['usa']}} <small><small>{{child['properties']['danger']}}</small></small></h3>
+                                    <h3>&nbsp;{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small></h3>
                                 </div>
                                 <!-- Quality -->
                                 <div class="col-md-auto">
@@ -200,12 +209,12 @@
                                 </div>
                                 <!-- Icons -->
                                 <div class="col-md-auto">
-                                    <img src="/static/images/dinosaur-shape-of-brachiosaurus.png" alt="Reachy.png" width="30px">
-                                    <img src="/static/images/light-bulb.png" alt="Thought-Provoking.png" width="25px" class="pb-1 mr-1">
-                                    <img src="/static/images/heart.png" alt="Heart-Flutter.png" width="25px" class="pb-1 mr-1">
-                                    <img src="/static/images/landslide.png" alt="Choss.png" width="25px" class="pb-1 mr-1">
-                                    <img src="/static/images/risk-skull.png" alt="Bad-Landing.png" width="25px" class="pb-1 mr-1">
-                                    <img src="/static/images/sweeping.png" alt="Dirty.png" width="25px" class="pb-1 mr-1">
+                                    <img src="/static/images/reachy.png" alt="Reachy.png" width="30px">
+                                    <img src="/static/images/technical.png" alt="Thought-Provoking.png" width="25px" class="pb-1 mr-1">
+                                    <img src="/static/images/highball.png" alt="Heart-Flutter.png" width="25px" class="pb-1 mr-1">
+                                    <img src="/static/images/chossy.png" alt="Choss.png" width="25px" class="pb-1 mr-1">
+                                    <img src="/static/images/bad-landing.png" alt="Bad-Landing.png" width="25px" class="pb-1 mr-1">
+                                    <img src="/static/images/dirty.png" alt="Dirty.png" width="25px" class="pb-1 mr-1">
                                 </div>
                             </div>
                             <!-- Height / Pitches + FA -->
@@ -219,20 +228,7 @@
                             </div>
                             <br>
                             <!-- Location Details -->
-                            <div class="row">
-                                <div class="col-md">
-                                    <div class="row">
-                                        <div class="col-md">
-                                            <small><strong>Elevation&nbsp;</strong>  {{child['properties']['elevation']}} ft</small>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md">
-                                            <p><small><strong>GPS&nbsp;</strong>  {{child['properties']['coords']['lat']}}, {{child['properties']['coords']['lng']}}</small></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            
                             <!-- Description -->
                             <div class="row">
                                 <div class="col-md">
@@ -273,9 +269,6 @@
                     <!-- Climb Details + Comments -->
                     <div class="row">
                         <div class="col-md-12">
-                            <h6>Getting There</h6>
-                            <p>flask for directions</p>
-                            <br>
                             <h6>Protection</h6>
                             <p>{{child['properties']['pro']}}</p>
                         </div>

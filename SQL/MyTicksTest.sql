@@ -73,8 +73,8 @@ INSERT INTO climbs(name,parent_id,parent_name,climb_type,position,quality,danger
 	VALUES
 		('Boulder One', 3, 'Wyoming', 'boulder', 1, 3, 0, 12, 'Some rando', 'Its aight', 'Towel'),
         ('Boulder Two', 3, 'Wyoming', 'boulder', 0, 1, 2, 32, Null, Null, 'pads'),
-        ('Route One', 3, 'Wyoming', 'route', 0, 4, 0, 89, 'Josh Lowy', 'The best', '3 Draws'),
-        ('Route Two', 3, 'Wyoming', 'route', 2, 3, 2, 120, 'Unknown', Null, Null)
+        ('Route One', 3, 'Wyoming', 'sport', 0, 4, 0, 89, 'Josh Lowy', 'The best', '3 Draws'),
+        ('Route Two', 3, 'Wyoming', 'trad', 2, 3, 2, 120, 'Unknown', Null, Null)
 	;
 
 
@@ -84,12 +84,27 @@ CREATE TABLE tags (
   PRIMARY KEY (id)
 );
 
+INSERT INTO tags(title)
+	VALUES
+		('dirty'),
+        ('reachy'),
+        ('technical'),
+        ('highball'),
+        ('chossy'),
+        ('bad landing')
+	;
+
 CREATE TABLE tagClimb (
   `climb_id` INT NOT NULL,
   `tag_id` INT NOT NULL,
   FOREIGN KEY (climb_id) REFERENCES climbs(id),
   FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
+
+INSERT INTO tagClimb
+	VALUES
+		(1,1),(1,5),(3,3)
+	;
 
 CREATE TABLE boulders (
   `id` INT NOT NULL,
@@ -158,7 +173,9 @@ INSERT INTO boulder_grades
 		(12.34, 12.66, 'V12-13', '8A+'),
 		(12.66, 13.34, 'V13', '8B'),
 		(13.34, 13.66, 'V13-14', '8B'),
-		(13.66, 14.34, 'V14', '8B+')
+		(13.66, 14.34, 'V14', '8B+'),
+        (14.34, 14.66, 'V14-15', '8C'),
+        (14.66, 15.34, 'V15', '8C')
     ;
 
 CREATE TABLE route_grades (
@@ -213,15 +230,30 @@ INSERT INTO route_grades
 		(21.66, 22.34, '5.14a', '8b+')   
     ;
 
-SELECT * FROM areas;
+SELECT * FROM tags;
 
-SELECT c.id,c.name,c.position,c.quality,d.movie AS 'danger',c.height,c.fa,c.description,c.pro,COALESCE(bg.usa,rg.usa) AS 'grade',r.route_type,r.pitches
+SELECT c.id,c.name,c.position,c.quality,d.movie AS 'danger',c.height,c.fa,c.description,c.pro,COALESCE(bg.usa,rg.usa) AS 'grade',r.route_type,r.pitches, t.title
 	FROM climbs as c
 	LEFT JOIN boulders as b ON b.id=c.id
     LEFT JOIN routes as r ON r.id=c.id
     JOIN danger as d ON d.id=c.danger
     LEFT JOIN boulder_grades as bg ON b.grade BETWEEN bg.lowVal AND bg.highVal
 	LEFT JOIN route_grades as rg ON r.grade BETWEEN rg.lowVal AND rg.highVal
+    LEFT JOIN tagClimb as tc ON tc.climb_id=c.id
+    LEFT JOIN tags as t ON t.id = tc.tag_id
 	WHERE c.parent_id = 3 AND c.parent_name = 'Wyoming'
     ORDER BY c.position
+;
+
+SELECT t.title
+	FROM tags AS t
+    JOIN tagClimb as tc ON tc.tag_id=t.id
+    JOIN climbs as c ON c.id=tc.climb_id
+    WHERE c.id=1
+;
+
+SELECT c.climb_type, COUNT(c.id)
+	FROM climbs as c
+    WHERE c.parent_id = 3 AND c.parent_name = 'Wyoming'
+    GROUP BY c.climb_type
 ;

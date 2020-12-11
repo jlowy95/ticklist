@@ -14,6 +14,7 @@ CREATE TABLE `areas` (
     `parent_name` VARCHAR(35) NOT NULL,
     `path` VARCHAR(150),
     `description` VARCHAR(500),
+    `directions` VARCHAR(500),
     `elevation` INT,
     `lat` DOUBLE(9,6),
     `lng` DOUBLE(9,6),
@@ -61,7 +62,7 @@ INSERT INTO route_grades
 -- Danger Reference Table
 CREATE TABLE `danger` (
 	`int_id` INT NOT NULL,
-    `danger` VARCHAR(5),
+    `movie` VARCHAR(5),
     PRIMARY KEY (int_id)
 );
 INSERT INTO danger
@@ -84,14 +85,10 @@ CREATE TABLE `boulders` (
     `fa` VARCHAR(50),
     `description` VARCHAR(500),
     `pro` VARCHAR(100),
-    `elevation` INT,
-    `lat` DOUBLE(9,6),
-    `lng` DOUBLE(9,6),
     `climb_type` VARCHAR(10) NOT NULL DEFAULT 'boulder',
     `date_inserted` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id,name),
     FOREIGN KEY (parent_id,parent_name) REFERENCES areas(id,name),
-    FOREIGN KEY (grade) REFERENCES route_grades(int_id),
     FOREIGN KEY (danger) REFERENCES danger(int_id)
 );
 
@@ -112,16 +109,24 @@ CREATE TABLE `routes` (
     `fa` VARCHAR(50),
     `description` VARCHAR(500),
     `pro` VARCHAR(100),
-    `elevation` INT,
-    `lat` DOUBLE(9,6),
-    `lng` DOUBLE(9,6),
     `climb_type` VARCHAR(10) NOT NULL DEFAULT 'route',
     `route_type` INT NOT NULL,
     `date_inserted` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id,name),
     FOREIGN KEY (parent_id,parent_name) REFERENCES areas(id,name),
-    FOREIGN KEY (grade) REFERENCES route_grades(int_id),
     FOREIGN KEY (danger) REFERENCES danger(int_id)
+);
+
+CREATE TABLE `tags` (
+	`id` INT NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(20) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE `tagClimb` (
+	`climb_id` INT NOT NULL,
+    `tag_id` INT NOT NULL,
+    FOREIGN KEY (climb_id) REFERENCES 
 );
 
 

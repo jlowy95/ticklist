@@ -151,10 +151,11 @@ class ClimbModel(db.Model):
 class BoulderModel(db.Model):
     __tablename__ = 'boulders'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, db.ForeignKey('climbs.id'),primary_key=True, nullable=False)
     grade = db.Column(db.Float, nullable=False)
 
-    def __init__(self, grade):
+    def __init__(self, id, grade):
+        self.id = id
         self.grade = grade
 
 
@@ -539,7 +540,7 @@ def convertFormDatatypes(new_loc):
 # validateAddition: re-checks all fields are filled and valid,
 # then checks database for new entry details of parent and name
 # Returns a tuple corresponding to the following:
-# (validated boolean, error code if error, additional info for error handling)
+# ("validated" boolean (True=accepted), error code if error, additional info for error handling)
 def validateAddition(loc_type, new_loc):
     print('Validating...')
     # Check for all fields filled
@@ -568,13 +569,19 @@ def validateAddition(loc_type, new_loc):
             return (False, 1, (loc_type, new_loc))
 
     # Check for duplicate entry
-    type2model = {'area': AreaModel,'boulder': BoulderModel, 'route': RouteModel}
-    model = type2model[loc_type]
+    if loc_type == 'area':
+        model = AreaModel
+    else:
+        model = ClimbModel
+    # Old db code
+    # type2model = {'area': AreaModel,'boulder': BoulderModel, 'route': RouteModel}
+    # model = type2model[loc_type]
     validated =  db.session.query(model)\
         .filter(model.parent_id == new_loc['parent_id'])\
         .filter(model.parent_name==new_loc['parent_name'])\
         .filter(model.name==new_loc['name'])\
         .first()
+    # If validated (if an entry already exists) return duplicta entry error, otherwise proceed
     if validated:
         return (False, 2, (loc_type, validated))
     else:
@@ -600,6 +607,20 @@ def validationErrorProtocol(error_code, data):
         else:
             return {'redirect': f"/area/{str(data[1].parent_id)}/{str(data[1].parent_name)}#v-pills-{data[0]}-{data[1].id}",
                 'error': 2}
+
+
+# addTags: inserts new tags to tags and tagClimb tables
+def addTags(new_entry):
+    # Isolate tag fields
+    tags = {new_entry[field] for field in new_entry.keys() if "tag" in field}
+    
+    # Add new tags to tags
+
+    # Add relationships to tagClimb
+    # Guidebook tags as follows:
+    # 0-dirty, 1-reachy, 2-technical, 3-highball, 4-chossy, 5-bad_landing
+    guidebook_tags = {'tag_dirty':0,'tag_reachy':1,'tag_technical':2,'tag_highball':3,'tag_chossy':4,'tag_bad_landing':5}
+    
 
 
 # addArea: inserts new area entry and updates parent area
@@ -650,23 +671,33 @@ def addBoulder(new_boulder):
     if validated[0]:
         new_boulder = validated[1]
         # Initialize new entry
-        new_entry = BoulderModel(
+        new_entry = ClimbModel(
             name=new_boulder['name'],
             parent_id=new_boulder['parent_id'],
             parent_name=new_boulder['parent_name'],
-            path=new_boulder['parent_path']+f"${new_boulder['parent_id']}/{new_boulder['parent_name']}",
+            # path=new_boulder['parent_path']+f"${new_boulder['parent_id']}/{new_boulder['parent_name']}",
+            climb_type='boulder',
             position=0,
-            grade=new_boulder['grade'],
+            # grade=new_boulder['grade'],
             quality=new_boulder['quality'],
             danger=new_boulder['danger'],
             height=new_boulder['height'],
             fa=new_boulder['fa'],
             description=new_boulder['description'],
-            pro=new_boulder['pro'],
-            elevation=None,
-            lat=None,
-            lng=None
+            pro=new_boulder['pro']
         )
+
+        db.session.add(new_entry)
+        # Flush ClimbModel addition to db for ID key
+        db.session.flush()
+
+        # Add grade to 'boulders' table
+        new_entry_secondary = BoulderModel(
+            id=new_entry.id,
+            grade=new_boulder['grade']
+        )
+
+        db.session.add(new_entry_secondary)
 
         # Update parent area_type if necessary (2 for Boulders/Routes)
         parent = db.session.query(AreaModel)\
@@ -679,12 +710,12 @@ def addBoulder(new_boulder):
             return render_template('404.html', status_code=errors['403'])
 
         # Commit
-        db.session.add(new_entry)
+        
         db.session.commit()
 
         # Return and redirect
-        print(f'Redirecting to boulder/{new_entry.id}/{new_entry.name}')
-        return {'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}/#v-pills-boulder-{new_entry.id}',
+        print(f'Redirecting to area/{str(new_entry.parent_id)}/{new_entry.parent_name}')
+        return {'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-boulder-{new_entry.id}',
             'success': 'New entry added successfully!'}
     else:
         # Else, error - handle the error and return
@@ -812,7 +843,7 @@ def addEntry(entry_type, parent_id, parent_name):
     if entry_type == 'area':
         return render_template('addArea.html', parent=parent)
     elif entry_type == 'boulder':
-        return render_template('addBoulder2.html', parent=parent)
+        return render_template('addBoulder.html', parent=parent)
     elif entry_type == 'route':
         return render_template('addRoute.html', parent=parent)
     else:

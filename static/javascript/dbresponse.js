@@ -23,12 +23,18 @@ function handlePOSTError(errorCode) {
 
 window.onload = function() {
     console.log('Running OnLoad');
+    // Check session storage
     var error = sessionStorage.getItem("error");
     if (error) {
         console.log('Error Detected');
         sessionStorage.removeItem("error");
         handlePOSTError(sessionStorage.getItem("errorCode"));
         sessionStorage.removeItem("errorCode");
+    }
+    // Check intra-page href and redirect
+    var url = document.location.toString();
+    if (url.match('#')) {
+        $('a[href="#' + url.split('#')[1] + '"]').tab('show');
     }
 };
 
@@ -45,6 +51,9 @@ function validateForms() {
     } else {
         // Else form is valid, submit to back-end
         console.log('Valid form submission.');
+        
+        // Add duplicate name validation pre-check
+        
         submit_data();
     }
     form.classList.add('was-validated');
@@ -92,5 +101,5 @@ function submit_data() {
     call_API(get_inputs());
 }
 
-var area_form_submit = d3.select('#area-form-submit');
-area_form_submit.on('click', validateForms);
+var entry_form_submit = d3.select('#entry-form-submit');
+entry_form_submit.on('click', validateForms);

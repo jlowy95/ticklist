@@ -35,6 +35,7 @@
     <div class="row mx-4">
         <div class="col-lg-6 bg-light">
                 <form id="entry-form" class="needs-validation ml-4" novalidate>
+                    <!-- Hidden values for parent/native information transfer -->
                     <input name="parent_id" type="text" style="display: none;" value="{{parent['id']}}" required>
                     <input name="parent_name" type="text" style="display: none;" value="{{parent['name']}}" required>
                     <input name="parent_path" type="text" style="display: none;" value="{{parent['parent']['path']}}" required>
@@ -259,9 +260,9 @@
                         <div class="col">
                             <img src="/static/images/chossy.png" alt="Chossy.png" style="width: 25px;" class="pr-1">
                             <p style="display: inline;"><strong>Chossy:</strong> Chossy climbs are ones known to have loose or suspect rock throughout.  A single
-                                loose or suspect hold is generally not enough to earn this distinction, but is good to notes in the description or comments.
+                                loose or suspect hold is generally not enough to earn this distinction, but is good to note in the description or comments.
                                 This distinction is for climbs where the climber may be at greater risk due to the quality of the rock.  This icon may be used
-                                in conjunction with danger ratings, often 'X' ratings.  Exceptions to this distinction include alpine environments where is should
+                                in conjunction with danger ratings, often 'X' ratings.  Exceptions to this distinction include alpine environments where it should
                                 be assumed there is a large presence of loose rock.</p>
                         </div>
                     </div>
@@ -294,7 +295,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-var currentTab = 2; // Current tab is set to be the first tab (0)
+var currentTab = 0; // Current tab is set to be the first tab (0)
 showTab(currentTab); // Display the current tab
 
 function showTab(n) {

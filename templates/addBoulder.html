@@ -109,6 +109,41 @@
                 <div class="invalid-feedback">How many pads should someone bring?</div>
             </div>
         </div>
+        <br>
+        <div class="form-group-row">
+            <div class="col-md-6">
+                <h5>Tags</h5>
+                <!-- Descriptive Icons -->
+                <div class="row">
+                    <p class="mr-1"><small>Can this climb be described as any of the following traits?</small></p>
+                    <a href="#iconsModal" data-target="#iconsModal" data-toggle="modal"><small>I'm not sure what these mean.</small></a>
+                </div>
+                <div class="form-row my-1 py-1">  
+                    <div class="form-check form-check-inline px-1">
+                        <input class="form-check-input" type="checkbox" name="tag_reachy" id="reachyCheck" value="True">
+                        <label class="form-check-label" for="reachyCheck"><img src="/static/images/reachy.png" alt="Reachy.png" style="width: 50px;"></label>
+                    </div>
+                    <div class="form-check form-check-inline px-1">
+                        <input class="form-check-input" type="checkbox" name="tag_technical" id="technicalCheck" value="True">
+                        <label class="form-check-label" for="technicalCheck"><img src="/static/images/technical.png" alt="Technical.png" style="width: 35px;"></label>
+                    </div>
+                    <div class="form-check form-check-inline px-1">
+                        <input class="form-check-input" type="checkbox" name="tag_highball" id="highballCheck" value="True">
+                        <label class="form-check-label" for="highballCheck"><img src="/static/images/highball.png" alt="Highball.png" style="width: 35px;"></label>
+                    </div>
+                    <div class="form-check form-check-inline px-1">
+                        <input class="form-check-input" type="checkbox" name="tag_chossy" id="chossyCheck" value="True">
+                        <label class="form-check-label" for="chossyCheck"><img src="/static/images/chossy.png" alt="Chossy.png" style="width: 35px;"></label>
+                    </div>
+                    <div class="form-check form-check-inline px-1">
+                        <input class="form-check-input" type="checkbox" name="tag_bad_landing" id="blCheck" value="True">
+                        <label class="form-check-label" for="blCheck"><img src="/static/images/bad-landing.png" alt="Bad-Landing.png" style="width: 35px;"></label>
+                    </div>
+                    <div class="form-check form-check-inline px-1">
+                        <input class="form-check-input" type="checkbox" name="tag_dirty" id="dirtyCheck" value="True">
+                        <label class="form-check-label" for="dirtyCheck"><img src="/static/images/dirty.png" alt="Dirty.png" style="width: 35px;"></label>
+                    </div>
+                </div>
         <!-- Google Maps API for location -->
         <!-- <div class="form-group-row">
             <div class="col-md-6">
@@ -119,8 +154,86 @@
         <br>
         <div class="form-group row mt-2">
             <div class="col-md-12">
-                <button id="area-form-submit" type="button" class="btn btn-dark">Submit</button>
+                <button id="entry-form-submit" type="button" class="btn btn-dark">Submit</button>
             </div>
             </div>
     </form>
+
+    <!-- Modal -->
+    <div class="modal" id="iconsModal" tabindex="-1" role="dialog" aria-labelledby="iconsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="iconsModalLabel">Descriptive Icons</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <p>The following icons represent common important qualities of climbs.
+                                    We use them to provide essential information at a glance.</p>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/reachy.png" alt="Reachy.png" style="width: 35px;" class="pr-1">
+                            <p style="display: inline;"><strong>Reachy:</strong> This tall dinosaur means a climb may feel reachy and extended for some climbers.
+                                Inherently all climbs will feel reachy to some, however this icon is meant to be used specifically for climbs 
+                                which may be significantly more difficult for some because of the distance between necessary holds.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/technical.png" alt="Technical.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Technical:</strong> A light-bulb represents climbs which are technical, tricky, thought-provoking,
+                                or beta-intensive.  These climbs may require out-of-the-box thinking or significant refinement to tick off.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/highball.png" alt="Highball.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Highball:</strong> The classic heart-flutter represents boulders which are highballs and range from 
+                                tall to borderline free-solos.  Note, this distinction will vary from region to region (i.e. Bishop, CA only tends to grant this distinction
+                                to boulders over 25ft whereas in Horse Pens 40, AL highballs may be as short as 15-18ft.)  The heart-flutter may be used in conjunction 
+                                with danger ratings, highballs only describe the height of a climb, not the committment or other dangers.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/chossy.png" alt="Chossy.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Chossy:</strong> Chossy climbs are ones known to have loose or suspect rock throughout.  A single
+                                loose or suspect hold is generally not enough to earn this distinction, but is good to note in the description or comments.
+                                This distinction is for climbs where the climber may be at greater risk due to the quality of the rock.  This icon may be used
+                                in conjunction with danger ratings, often 'X' ratings.  Exceptions to this distinction include alpine environments where it should
+                                be assumed there is a large presence of loose rock.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/bad-landing.png" alt="Bad-Landing.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Bad Landing:</strong> This distinction is for climbs with dangerous landings, and can be used for either
+                            boulders or roped climbs.  Examples of bad landings include those with uneven terrain, protruding rocks, large holes, unprotectable landings,
+                            and large plants.  This distinction may be used in conjunction with danger ratings but only represents the added danger of the landing,
+                            not any other portion of the climb.</p>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col">
+                            <img src="/static/images/dirty.png" alt="Dirty.png" style="width: 25px;" class="pr-1">
+                            <p style="display: inline;"><strong>Dirty:</strong> The sweeping broom icon describes climbs which are likely dirty and require significant
+                                cleaning.  This icon is not a live status but should be used only for climbs which are frequently dirty, often from a lack
+                                of traffic or other factors.  Some areas and crags are subject to seasonal debris and grime, but this distinction should be reserved for
+                                climbs which do not receive routine cleaning.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
