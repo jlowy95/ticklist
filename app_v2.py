@@ -229,6 +229,27 @@ route_types = {
     2: {'short':'DWS','long':'Deep Water Solo'}
 }
 
+# likeCommonTags: dictionary of common tags for climbs 
+# with their values being a list of common mispellings/abbreviations/variants
+likeCommonTags = {
+    "dirty": ["dirt"],
+    "reachy": ["reach"],
+    "technical": ["tech", "tricky"],
+    "highball": ["tall", "high", "high ball"],
+    "chossy": ["choss", "flakey", "loose"],
+    "bad landing": ["danger", "landing"],
+    "warmup": ["warm-up"],
+    "pinchy": ["pinch", "pinches", "pinchey", "pinchs"],
+    "crimpy": ["crimp", "crimps", "crimpey", "crimpes"],
+    "compstyle": ["compy", "competition", "competition style"],
+    "sandbagged": ["bagged", "sandbag"],
+    "huecos": ["heucos", "heuco", "hueco", "hueco-y"],
+    "pockety": ["pocket", "pockets", "pocketey"],
+    "dyno": ["dyanmic", "dynos", "dyno-y"],
+    "eliminate": ["elim"],
+    "manufactured": ["chipped", "manufacture"]
+}
+
 # boulderInt2Grade: translates concensus boulder difficulty values to common V/Font grades
 def boulderInt2Grade(floatDifficulty):
     if floatDifficulty < -0.66:
@@ -609,18 +630,54 @@ def validationErrorProtocol(error_code, data):
                 'error': 2}
 
 
-# addTags: inserts new tags to tags and tagClimb tables
+# addTags: inserts new tags to tags(TagsModel) and tagClimb(TagClimbsModel) tables
 def addTags(form_fields, new_id):
     # Isolate tag fields
     tags = {field:form_fields[field] for field in form_fields.keys() if "tag" in field}
     
-    # Add new tags to tags
+    # Process possible new tags
     # New tags in form field 'tags_other' as comma-separated list
+    # Tags to be stored/converted to lowercasefor consistency
     if tags['tags_other']:
-        new_tags = tags['tags_other'].split(',')
+        other_tags = []
+        new_tags = [tag.lower().strip() for tag in tags['tags_other'].split(',')]
         # Process tags, attempt to void false duplicates
+        for tag in new_tags:
+            exists =  db.session.query(TagsModel)\
+                .filter(TagsModel.title == tag)\
+                .first()
+            # If exists, add relationship b/w climb and tag to TagClimbs
+            if exists:
+                other_tags.append(TagsClimbsModel(
+                    climb_id=new_id,
+                    tag_id=exists.id
+                ))
+            # Else, possible new tag, double check against likeCommonTags
+            else:
+                for key in likeCommonTags.keys():
+                    if tag in likeCommonTags[key]:
+                        # Duplicate tag, use normal value (query for id)
+                        other_tags.append(TagsClimbsModel(
+                            climb_id=new_id,
+                            tag_id=db.session.query(TagsModel)\
+                                .filter(TagsModel.title == key)\
+                                .first().id
+                        ))
+                        continue
+                # Not duplicate, NEW tag, add to TagsModel, flush for id, add relationship
+                confirm_new_tag = TagsModel(
+                    title=tag
+                )
+                db.session.add(confirm_new_tag)
+                db.session.flush()
+                other_tags.append(TagsClimbsModel(
+                    climb_id=new_id,
+                    tag_id=confirm_new_tag.id
+                ))
+        # All tags_other processed, bulk save
+        db.session.bulk_save_objects(other_tags)
 
-    # Add relationships to tagClimb
+    # Process guidebook tags
     # Guidebook tags and ids as follows:
     guidebook_tags = {'tag_dirty':0,'tag_reachy':1,'tag_technical':2,'tag_highball':3,'tag_chossy':4,'tag_bad_landing':5}
     gtags_models = []
@@ -631,6 +688,8 @@ def addTags(form_fields, new_id):
                 tag_id=guidebook_tags[gkey]
             ))
     db.session.bulk_save_objects(gtags_models)
+    # No commit, full commit will be made after boulder is flushed
+
 
 
 # addArea: inserts new area entry and updates parent area
@@ -672,6 +731,7 @@ def addArea(new_area):
         # Else, error - handle the error and return
         print(f"Error Code: {validated[1]}")
         return validationErrorProtocol(validated[1], validated[2])
+
 
 
 # addBoulder: inserts new boulder entry and updates parent area
@@ -723,7 +783,6 @@ def addBoulder(new_boulder):
             return render_template('404.html', status_code=errors['403'])
 
         # Commit
-        
         db.session.commit()
 
         # Return and redirect
@@ -734,6 +793,7 @@ def addBoulder(new_boulder):
         # Else, error - handle the error and return
         print(f"Error Code: {validated[1]}")
         return validationErrorProtocol(validated[1], validated[2])
+
 
 
 # addRoute: inserts new boulder entry and updates parent area
