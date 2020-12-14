@@ -30,7 +30,7 @@
 
 {% block content %}
     <div class="row mx-2 pl-1">
-        <!-- Children -->
+        <!-- Left Side Nav w/ Area Details and Children -->
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md bg-light py-2 pr-0 pl-1">
@@ -77,7 +77,8 @@
                     </div>
                 </div>
             </div>
-        </div>            
+        </div>      
+        <!-- Content Pills -->
         <div class="col-md-9">
             <div class="tab-content" id="v-pills-tabContent">
                 <!-- Area Details Tab -->
@@ -167,7 +168,7 @@
                         </div>
                     </div>
                 </div>
-                
+                <!-- Child Tabs -->
                 {% for child in children['sorted']+children['unsorted'] %}
                 <div class="tab-pane fade rounded bg-white px-2" id="v-pills-{{child['climb_type']}}-{{child['id']}}" role="tabpanel" aria-labelledby="v-pills-{{child['climb_type']}}-{{child['id']}}-tab">
                     <!-- Title Info + Images -->
@@ -207,14 +208,29 @@
                                         {% endfor %}
                                     </h4>
                                 </div>
-                                <!-- Icons -->
+                                <!-- Guidebook Icons -->
                                 <div class="col-md-auto">
-                                    <img src="/static/images/reachy.png" alt="Reachy.png" width="30px">
-                                    <img src="/static/images/technical.png" alt="Thought-Provoking.png" width="25px" class="pb-1 mr-1">
-                                    <img src="/static/images/highball.png" alt="Heart-Flutter.png" width="25px" class="pb-1 mr-1">
-                                    <img src="/static/images/chossy.png" alt="Choss.png" width="25px" class="pb-1 mr-1">
-                                    <img src="/static/images/bad-landing.png" alt="Bad-Landing.png" width="25px" class="pb-1 mr-1">
-                                    <img src="/static/images/dirty.png" alt="Dirty.png" width="25px" class="pb-1 mr-1">
+                                    {% if child['tags'] %}
+                                        {% if 'reachy' in child['tags'] %}
+                                        <img src="/static/images/reachy.png" alt="Reachy.png" width="30px">
+                                        {% endif %}
+                                        {% if 'technical' in child['tags'] %}
+                                        <img src="/static/images/technical.png" alt="Thought-Provoking.png" width="25px" class="pb-1 mr-1">
+                                        {% endif %}
+                                        {% if 'highball' in child['tags'] %}
+                                        <img src="/static/images/highball.png" alt="Heart-Flutter.png" width="25px" class="pb-1 mr-1">
+                                        {% endif %}
+                                        {% if 'chossy' in child['tags'] %}
+                                        <img src="/static/images/chossy.png" alt="Choss.png" width="25px" class="pb-1 mr-1">
+                                        {% endif %}
+                                        {% if 'bad landing' in child['tags'] %}
+                                        <img src="/static/images/bad-landing.png" alt="Bad-Landing.png" width="25px" class="pb-1 mr-1">
+                                        {% endif %}
+                                        {% if 'dirty' in child['tags'] %}
+                                        <img src="/static/images/dirty.png" alt="Dirty.png" width="25px" class="pb-1 mr-1">
+                                        {% endif %}
+                                        <a href="#iconsModal" data-target="#iconsModal" data-toggle="modal"><strong><sup>?</sup></strong></a>
+                                    {% endif %}
                                 </div>
                             </div>
                             <!-- Height / Pitches + FA -->
@@ -226,9 +242,18 @@
                                     <small>FA: {{child['properties']['fa']}}</small>
                                 </div>
                             </div>
+                            <!-- Tags -->
+                            {% if child['tags'] %}
+                            <div class="row">
+                                <div class="col-md-auto">
+                                    <span>Tags: </span>
+                                    {% for tag in child['tags'] %}
+                                    <span>{{tag}}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
                             <br>
-                            <!-- Location Details -->
-                            
                             <!-- Description -->
                             <div class="row">
                                 <div class="col-md">
@@ -282,4 +307,82 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal" id="iconsModal" tabindex="-1" role="dialog" aria-labelledby="iconsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="iconsModalLabel">Descriptive Icons</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col">
+                                <p>The following icons represent common important qualities of climbs.
+                                        We use them to provide essential information at a glance.</p>
+                                <hr>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <img src="/static/images/reachy.png" alt="Reachy.png" style="width: 35px;" class="pr-1">
+                                <p style="display: inline;"><strong>Reachy:</strong> This tall dinosaur means a climb may feel reachy and extended for some climbers.
+                                    Inherently all climbs will feel reachy to some, however this icon is meant to be used specifically for climbs 
+                                    which may be significantly more difficult for some because of the distance between necessary holds.</p>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <img src="/static/images/technical.png" alt="Technical.png" style="width: 25px;" class="pr-1">
+                                <p style="display: inline;"><strong>Technical:</strong> A light-bulb represents climbs which are technical, tricky, thought-provoking,
+                                    or beta-intensive.  These climbs may require out-of-the-box thinking or significant refinement to tick off.</p>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <img src="/static/images/highball.png" alt="Highball.png" style="width: 25px;" class="pr-1">
+                                <p style="display: inline;"><strong>Highball:</strong> The classic heart-flutter represents boulders which are highballs and range from 
+                                    tall to borderline free-solos.  Note, this distinction will vary from region to region (i.e. Bishop, CA only tends to grant this distinction
+                                    to boulders over 25ft whereas in Horse Pens 40, AL highballs may be as short as 15-18ft.)  The heart-flutter may be used in conjunction 
+                                    with danger ratings, highballs only describe the height of a climb, not the committment or other dangers.</p>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <img src="/static/images/chossy.png" alt="Chossy.png" style="width: 25px;" class="pr-1">
+                                <p style="display: inline;"><strong>Chossy:</strong> Chossy climbs are ones known to have loose or suspect rock throughout.  A single
+                                    loose or suspect hold is generally not enough to earn this distinction, but is good to note in the description or comments.
+                                    This distinction is for climbs where the climber may be at greater risk due to the quality of the rock.  This icon may be used
+                                    in conjunction with danger ratings, often 'X' ratings.  Exceptions to this distinction include alpine environments where it should
+                                    be assumed there is a large presence of loose rock.</p>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <img src="/static/images/bad-landing.png" alt="Bad-Landing.png" style="width: 25px;" class="pr-1">
+                                <p style="display: inline;"><strong>Bad Landing:</strong> This distinction is for climbs with dangerous landings, and can be used for either
+                                boulders or roped climbs.  Examples of bad landings include those with uneven terrain, protruding rocks, large holes, unprotectable landings,
+                                and large plants.  This distinction may be used in conjunction with danger ratings but only represents the added danger of the landing,
+                                not any other portion of the climb.</p>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <img src="/static/images/dirty.png" alt="Dirty.png" style="width: 25px;" class="pr-1">
+                                <p style="display: inline;"><strong>Dirty:</strong> The sweeping broom icon describes climbs which are likely dirty and require significant
+                                    cleaning.  This icon is not a live status but should be used only for climbs which are frequently dirty, often from a lack
+                                    of traffic or other factors.  Some areas and crags are subject to seasonal debris and grime, but this distinction should be reserved for
+                                    climbs which do not receive routine cleaning.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Got it!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 {% endblock %}

@@ -537,7 +537,11 @@ def getChildrenInfo(entry):
                     'pro': child[12],
                 },
                 'climb_type': child[1],
-                'route': f"{child[1]}/{child[2]}/{child[3]}"
+                'route': f"{child[1]}/{child[2]}/{child[3]}",
+                'tags': [str(tag)[2:-3] for tag in db.session.query(TagsModel.title)\
+                    .join(TagsClimbsModel, TagsClimbsModel.tag_id == TagsModel.id)\
+                    .join(ClimbModel, ClimbModel.id == TagsClimbsModel.climb_id)\
+                    .filter(ClimbModel.id == child[2])]
             }
             if child[0] == 0:
                 unsorted_info.append(child_entry)
@@ -656,7 +660,7 @@ def addTags(form_fields, new_id):
             else:
                 for key in likeCommonTags.keys():
                     if tag in likeCommonTags[key]:
-                        # Duplicate tag, use normal value (query for id)
+                        # Existing tag, use existing value (query for id)
                         other_tags.append(TagsClimbsModel(
                             climb_id=new_id,
                             tag_id=db.session.query(TagsModel)\
