@@ -162,13 +162,14 @@ class BoulderModel(db.Model):
 class RouteModel(db.Model):
     __tablename__ = 'routes'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, db.ForeignKey('climbs.id'),primary_key=True, nullable=False)
     grade = db.Column(db.Float, nullable=False)
     pitches = db.Column(db.Integer, nullable=False)
     committment = db.Column(db.String(3))
     route_type = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, grade, pitches, committment, route_type):
+    def __init__(self, id, grade, pitches, committment, route_type):
+        self.id = id
         self.grade = grade
         self.pitches = pitches
         self.committment
@@ -188,8 +189,8 @@ class TagsModel(db.Model):
 class TagsClimbsModel(db.Model):
     __tablename__ = 'tagClimb'
 
-    climb_id = db.Column(db.Integer, db.ForeignKey(ClimbModel.id), primary_key=True)
-    tag_id = db.Column(db.Integer, db.ForeignKey(TagsModel.id), primary_key=True)
+    climb_id = db.Column(db.Integer, db.ForeignKey('climbs.id'), primary_key=True, nullable=False)
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'), primary_key=True, nullable=False)
 
     def __init__(self, climb_id, tag_id):
         self.climb_id = climb_id
@@ -515,9 +516,7 @@ def getChildrenInfo(entry):
             .order_by('position')
 
         gradeByClimb_type = {'boulder': boulderInt2Grade,
-             'sport': routeInt2Grade,
-             'trad': routeInt2Grade,
-             'dws': routeInt2Grade}
+             'route': routeInt2Grade}
         # Append info to corresponding lists
         for child in climbs:
             # (position, climb_type, id, name, grade, quality, danger, height, pitches, committment, fa, desc, pro, route_type)
@@ -584,7 +583,8 @@ def validateAddition(loc_type, new_loc):
             return (False, 1, (loc_type, new_loc))
     
     if loc_type == 'route':
-        if new_loc['grade'] > 40 or new_loc['grade'] < -1:
+        new_loc = convertFormDatatypes(new_loc)
+        if new_loc['grade'] > 22 or new_loc['grade'] < -1:
             return (False, 1, (loc_type, new_loc))
         if int(new_loc['danger']) != new_loc['danger'] or new_loc['danger'] > 3 or new_loc['danger'] < 0:
             return (False, 1, (loc_type, new_loc))
@@ -658,6 +658,7 @@ def addTags(form_fields, new_id):
                 ))
             # Else, possible new tag, double check against likeCommonTags
             else:
+                notCommon = True
                 for key in likeCommonTags.keys():
                     if tag in likeCommonTags[key]:
                         # Existing tag, use existing value (query for id)
@@ -667,23 +668,25 @@ def addTags(form_fields, new_id):
                                 .filter(TagsModel.title == key)\
                                 .first().id
                         ))
-                        continue
+                        notCommon = False
+                        break
                 # Not duplicate, NEW tag, add to TagsModel, flush for id, add relationship
-                confirm_new_tag = TagsModel(
-                    title=tag
-                )
-                db.session.add(confirm_new_tag)
-                db.session.flush()
-                other_tags.append(TagsClimbsModel(
-                    climb_id=new_id,
-                    tag_id=confirm_new_tag.id
-                ))
+                if notCommon:
+                    confirm_new_tag = TagsModel(
+                        title=tag
+                    )
+                    db.session.add(confirm_new_tag)
+                    db.session.flush()
+                    other_tags.append(TagsClimbsModel(
+                        climb_id=new_id,
+                        tag_id=confirm_new_tag.id
+                    ))
         # All tags_other processed, bulk save
         db.session.bulk_save_objects(other_tags)
 
     # Process guidebook tags
     # Guidebook tags and ids as follows:
-    guidebook_tags = {'tag_dirty':0,'tag_reachy':1,'tag_technical':2,'tag_highball':3,'tag_chossy':4,'tag_bad_landing':5}
+    guidebook_tags = {'tag_dirty':1,'tag_reachy':2,'tag_technical':3,'tag_highball':4,'tag_chossy':5,'tag_bad_landing':6}
     gtags_models = []
     for gkey in guidebook_tags.keys():
         if gkey in tags.keys():
@@ -749,10 +752,8 @@ def addBoulder(new_boulder):
             name=new_boulder['name'],
             parent_id=new_boulder['parent_id'],
             parent_name=new_boulder['parent_name'],
-            # path=new_boulder['parent_path']+f"${new_boulder['parent_id']}/{new_boulder['parent_name']}",
             climb_type='boulder',
             position=0,
-            # grade=new_boulder['grade'],
             quality=new_boulder['quality'],
             danger=new_boulder['danger'],
             height=new_boulder['height'],
@@ -805,43 +806,56 @@ def addRoute(new_route):
     # Validate if new entry
     validated = validateAddition('route', new_route)
     if validated[0]:
-        # Find parent for path extension
-        parent = routes_col.find_one({'_id': ObjectId(f'{new_route["parentID"]}')})
+        new_route = validated[1]
         # Initialize new entry
-        new_entry = routes_col.insert_one({
-            'name': new_route['name'],
-            'parentID': new_route['parentID'],
-            'path': '',
-            'children': [],
-            'properties': {
-                'grade': yos2Int(new_route['grade']), # Write yos2Int!!!
-                'quality': -2,
-                'danger': new_route['danger'],
-                'height': new_route['height'],
-                'pitches': new_route['pitches'],
-                'committment': new_route['committment'],
-                'fa': new_route['fa'],
-                'description': new_route['description'],
-                'protection': new_route['protection'],
-                'images': [],
-                'elevation': '',
-                'coords': {
-                    'lat': '',
-                    'lng': ''
-                }
-            }
-        })
-        # Update new entry path
-        routes_col.update_one({'_id': new_entry.inserted_id}, 
-            {'$set': {
-                'path': parent['path']+'$route/'+str(new_entry.inserted_id)
-                }})
-        # Update parent children
-        updateChildren(parent, new_entry)
+        new_entry = ClimbModel(
+            name=new_route['name'],
+            parent_id=new_route['parent_id'],
+            parent_name=new_route['parent_name'],
+            climb_type='route',
+            position=0,
+            quality=new_route['quality'],
+            danger=new_route['danger'],
+            height=new_route['height'],
+            fa=new_route['fa'],
+            description=new_route['description'],
+            pro=new_route['pro']
+        )
+
+        db.session.add(new_entry)
+        # Flush ClimbModel addition to db for ID key
+        db.session.flush()
+
+        # Add other info to 'routes' table
+        new_entry_secondary = RouteModel(
+            id=new_entry.id,
+            grade=new_route['grade'],
+            pitches=new_route['pitches'],
+            committment=new_route['committment'],
+            route_type=new_route['route_type']
+        )
+
+        db.session.add(new_entry_secondary)
+
+        # Add tags to tag tables
+        addTags(new_route,new_entry.id)
+
+        # Update parent area_type if necessary (2 for Boulders/Routes)
+        parent = db.session.query(AreaModel)\
+            .filter(AreaModel.id==new_route['parent_id'])\
+            .filter(AreaModel.name==new_route['parent_name'])\
+            .first()
+        if parent.area_type == 0:
+            parent.area_type = 2
+        elif parent.area_type == 1:
+            return render_template('404.html', status_code=errors['403'])
+
+        # Commit
+        db.session.commit()
 
         # Return and redirect
-        print(f'Redirecting to route/{new_entry.inserted_id}')
-        return {'redirect': f'/route/{str(new_entry.inserted_id)}',
+        print(f'Redirecting to area/{str(new_entry.parent_id)}/{new_entry.parent_name}')
+        return {'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-route-{new_entry.id}',
             'success': 'New entry added successfully!'}
     else:
         # Else, error - handle the error and return
@@ -920,9 +934,9 @@ def addEntry(entry_type, parent_id, parent_name):
     if entry_type == 'area':
         return render_template('addArea.html', parent=parent)
     elif entry_type == 'boulder':
-        return render_template('addBoulder.html', parent=parent)
+        return render_template('addBoulder2.html', parent=parent)
     elif entry_type == 'route':
-        return render_template('addRoute.html', parent=parent)
+        return render_template('addRoute2.html', parent=parent)
     else:
         print('Error: invalid entry_type')
         redirect(url_for('area', entry_id=parent_id, entry_name=parent_name))
@@ -932,12 +946,12 @@ def addEntry(entry_type, parent_id, parent_name):
 @app.route('/submit-changes', methods=['POST'])
 def submitChanges():
     inputted_data = simplifyArray(request.get_json())
-    # print(inputted_data)
+    print(inputted_data)
     # Switch for correct actions
     change_options = {
         'area': addArea, # add new area functions plus returns redirect to new area
         'boulder': addBoulder,
-        'route': '',
+        'route': addRoute,
         'edit': ''
     }
     

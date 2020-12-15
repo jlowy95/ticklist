@@ -42,22 +42,21 @@ window.onload = function() {
 // Validate Form
 // Disable form submissions if there are invalid fields
 function validateForms() {
+    var valid = true;
     // Get the forms we want to add validation styles to
     var forms = document.getElementsByClassName('needs-validation');
     // Loop over them and prevent submission
     var validation = Array.prototype.filter.call(forms, function(form) {
     if (form.checkValidity() === false) {
+        // Unfilled/invalid field found, flip boolean to prevent form submission
+        valid = false;
         console.log('Invalid form submission.');
-    } else {
-        // Else form is valid, submit to back-end
-        console.log('Valid form submission.');
-        
-        // Add duplicate name validation pre-check
-        
-        submit_data();
     }
     form.classList.add('was-validated');
-    }, false);   
+    }, false);
+    
+    // After loop, if form is still valid, submit
+    if (valid) submit_data(); 
 }
 
 // Collect inputted data

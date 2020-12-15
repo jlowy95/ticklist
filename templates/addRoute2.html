@@ -7,7 +7,7 @@
 {% block header %}
     <div class="row ml-4">
         <div class="col-md">
-            <h1>Add New Boulder</h1>
+            <h1>Add New Route</h1>
         </div>
     </div>
 {% endblock %}
@@ -39,7 +39,7 @@
                     <input name="parent_id" type="text" style="display: none;" value="{{parent['id']}}" required>
                     <input name="parent_name" type="text" style="display: none;" value="{{parent['name']}}" required>
                     <input name="parent_path" type="text" style="display: none;" value="{{parent['parent']['path']}}" required>
-                    <input name="change-type" type="text" style="display: none;" value="boulder" required>
+                    <input name="change-type" type="text" style="display: none;" value="route" required>
                     
                     <!-- One "tab" for each step in the form: -->
                     <!-- Basic Details Tab -->
@@ -50,7 +50,7 @@
                         <div class="form-row my-1 py-1">
                             <div class="col req-col"> 
                                 <!-- <label for="name">Name</label> -->
-                                <input name="name" type="text" class="form-control needs-validation" placeholder="Boulder Name" required>
+                                <input name="name" type="text" class="form-control needs-validation" placeholder="Route Name" required>
                                 <!-- <small style="color: red; display: inline;">*</small> -->
                                 <div class="invalid-feedback">Please add a name.  If you do not know the name, consider checking other sources.</div>
                             </div>
@@ -59,24 +59,32 @@
                         <div class="form-row my-1 py-1">
                             <div class="col req-col">
                                 <!-- On entry only whole grades available -->
-                                <select class="custom-select needs-validation" name="grade" type="number" min="-1" max="17" style="width: auto" required>
-                                        <option selected value="">V Grade</option>
-                                        <option value="-1">VB</option>
-                                        <option value="0">V0</option>
-                                        <option value="1">V1</option>
-                                        <option value="2">V2</option>
-                                        <option value="3">V3</option>
-                                        <option value="4">V4</option>
-                                        <option value="5">V5</option>
-                                        <option value="6">V6</option>
-                                        <option value="7">V7</option>
-                                        <option value="8">V8</option>
-                                        <option value="9">V9</option>
-                                        <option value="10">V10</option>
-                                        <option value="11">V11</option>
-                                        <option value="12">V12</option>
-                                        <option value="13">V13</option>
-                                        <option value="14">V14</option>
+                                <select class="custom-select needs-validation" name="grade" type="number" min="-1" max="22" style="width: auto" required>
+                                        <option selected value="">YDS Grade</option>
+                                        <option value="-1">Easy 5th</option>
+                                        <option value="0">5.4</option>
+                                        <option value="1">5.5</option>
+                                        <option value="2">5.6</option>
+                                        <option value="3">5.7</option>
+                                        <option value="4">5.8</option>
+                                        <option value="5">5.9</option>
+                                        <option value="6">5.10a</option>
+                                        <option value="7">5.10b</option>
+                                        <option value="8">5.10c</option>
+                                        <option value="9">5.10d</option>
+                                        <option value="10">5.11a</option>
+                                        <option value="11">5.11b</option>
+                                        <option value="12">5.11c</option>
+                                        <option value="13">5.11d</option>
+                                        <option value="14">5.12a</option>
+                                        <option value="15">5.12b</option>
+                                        <option value="16">5.12c</option>
+                                        <option value="17">5.12d</option>
+                                        <option value="18">5.13a</option>
+                                        <option value="19">5.13b</option>
+                                        <option value="20">5.13c</option>
+                                        <option value="21">5.13d</option>
+                                        <option value="22">5.14a</option>
                                     </select>
                             </div>
                             <div class="col req-col">
@@ -108,9 +116,37 @@
                         </div>
                         <br>
                         <div class="row my-1 py-1">
+                            <div class="col req-col">
+                                <!-- <label for="pitches">Pitches</label> -->
+                                <input name="pitches" type="number" min="0" size="2" maxlength="2" class="form-control needs-validation" placeholder="Pitches"  style="width: 100%" required>
+                            </div>
+                            <div class="col req-col">
+                                <!-- <label for="committment">Committment</label> -->
+                                <select name="committment" type="text" min="0" max="7" class="custom-select needs-validation" style="width: auto" required>
+                                    <option selected value="">Committment</option>
+                                    <option value="I">I</option>
+                                    <option value="II">II</option>
+                                    <option value="III">III</option>
+                                    <option value="IV">IV</option>
+                                    <option value="V">V</option>
+                                    <option value="VI">VI</option>
+                                </select>
+                            </div>
+                            <div class="col req-col">
+                                <!-- <label for="route_type">Route Type</label> -->
+                                <select name="route_type" type="number" min="0" max="3" class="custom-select needs-validation" style="width: auto" required>
+                                    <option selected value="">Route Type</option>
+                                    <option value="0">Sport</option>
+                                    <option value="1">Trad</option>
+                                    <option value="2">Deep Water Solo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row my-1 py-1">
                             <div class="col">
                                 <!-- <label for="fa">First Ascenscionist</label> -->
-                                <input name="fa" type="text" class="form-control needs-validation" placeholder="First Ascenscionist">
+                                <input name="fa" type="text" class="form-control needs-validation" placeholder="First Ascenscionist" required>
                                 <small class="form-text text-muted">Unsure? Just put 'Unknown'.</small>
                             </div>
                         </div>
@@ -124,7 +160,7 @@
                         <div class="form-row my-1 py-1">
                             <div class="col"> 
                                 <!-- <label for="description">Description</label> -->
-                                <textarea name="description" class="form-control needs-validation" placeholder="Boulder Description" style="height: 150px;" required></textarea>
+                                <textarea name="description" class="form-control needs-validation" placeholder="Route Description" style="height: 150px;" required></textarea>
                                 <small class="form-text text-muted">Try describing some obvious features or where this climb is on the wall.</small>
                             </div>
                         </div>
@@ -133,7 +169,7 @@
                             <div class="col-md-6">
                                 <!-- <label for="pro">Protection</label> -->
                                 <input name="pro" type="text" class="form-control needs-validation" placeholder="Protection" required>
-                                <small class="form-text text-muted">How many pads should someone bring?</small>
+                                <small class="form-text text-muted">How many draws/what kind of rack should someone bring?</small>
                             </div>
                         </div>
                     </div>
