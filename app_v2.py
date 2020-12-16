@@ -224,10 +224,10 @@ dangerInt2Movie = {
 # route_types: dictionary to translate route_type value from db to common text value.  
 # The two stored values for each are used interchangeably in different template locations.
 route_types = {
-    None: {'short':'','long':''},
-    0: {'short':'S','long':'Sport'},
-    1: {'short':'T','long':'Trad'},
-    2: {'short':'DWS','long':'Deep Water Solo'}
+    0: {'short':'','long':''},
+    1: {'short':'S','long':'Sport'},
+    2: {'short':'T','long':'Trad'},
+    3: {'short':'DWS','long':'Deep Water Solo'}
 }
 
 # likeCommonTags: dictionary of common tags for climbs 
@@ -448,21 +448,24 @@ def countClimbs(area_model):
         return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
     elif area_model.area_type == 2:
         # Climbs, get counts of climb types
-        tallies = db.session.query(ClimbModel.climb_type, func.count(ClimbModel.id))\
+        tallies = db.session.query(func.ifnull(RouteModel.route_type, 0), func.count(func.ifnull(RouteModel.route_type, 0)))\
+            .select_from(ClimbModel)\
+            .outerjoin(RouteModel, ClimbModel.id == RouteModel.id)\
             .filter(ClimbModel.parent_id==area_model.id)\
             .filter(ClimbModel.parent_name==area_model.name)\
-            .group_by(ClimbModel.climb_type)\
+            .group_by(RouteModel.route_type)\
             .all()
         for typ in tallies:
-            if typ[0] == 'boulder':
+            if typ[0] == 0:
                 boulders = typ[1]
-            elif typ[0] == 'sport':
+            elif typ[0] == 1:
                 sport = typ[1]
-            elif typ[0] == 'trad':
+            elif typ[0] == 2:
                 trad = typ[1]
-            elif typ[0] == 'dws':
+            elif typ[0] == 3:
                 dws = typ[1]
         total = boulders+sport+trad+dws
+        print(f"'boulders':{boulders},'sport':{sport},'trad':{trad},'dws':{dws},'total':{total}")
         return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
  
 
@@ -509,7 +512,7 @@ def getChildrenInfo(entry):
             ClimbModel.fa.label('fa'),\
             ClimbModel.description.label('description'),\
             ClimbModel.pro.label('pro'),\
-            RouteModel.route_type.label('route_type'))\
+            func.ifnull(RouteModel.route_type, 0).label('route_type'))\
             .outerjoin(RouteModel, RouteModel.id == ClimbModel.id)\
             .outerjoin(BoulderModel, BoulderModel.id == ClimbModel.id)\
             .filter(ClimbModel.parent_id==entry['id']).filter(ClimbModel.parent_name==entry['name'])\
