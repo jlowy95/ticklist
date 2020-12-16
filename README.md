@@ -7,7 +7,7 @@
   - Research forum/comment nesting
   - Research userbase storage
 2. Add validation
-  - Both client and server side to changes/additions (Areas+Boulders+Routes DONE)
+  - Both client and server side to changes/additions (Areas+Boulders+Routes IN PROGRESS)
   - Add validation for difficulty/numeric values (Areas+Boulders+Routes DONE)
   - Finalize 'required' form fields and corresponding validation/implementation needed
 3. Design/implement mass upload feature

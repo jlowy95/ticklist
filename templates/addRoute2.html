@@ -50,7 +50,7 @@
                         <div class="form-row my-1 py-1">
                             <div class="col req-col"> 
                                 <!-- <label for="name">Name</label> -->
-                                <input name="name" type="text" class="form-control needs-validation" placeholder="Route Name" required>
+                                <input name="name" type="text" maxlength="35" class="form-control needs-validation" placeholder="Route Name" required>
                                 <!-- <small style="color: red; display: inline;">*</small> -->
                                 <div class="invalid-feedback">Please add a name.  If you do not know the name, consider checking other sources.</div>
                             </div>
@@ -146,7 +146,7 @@
                         <div class="row my-1 py-1">
                             <div class="col">
                                 <!-- <label for="fa">First Ascenscionist</label> -->
-                                <input name="fa" type="text" class="form-control needs-validation" placeholder="First Ascenscionist" required>
+                                <input name="fa" type="text" maxlength="50" class="form-control needs-validation" placeholder="First Ascenscionist" required>
                                 <small class="form-text text-muted">Unsure? Just put 'Unknown'.</small>
                             </div>
                         </div>
@@ -160,7 +160,7 @@
                         <div class="form-row my-1 py-1">
                             <div class="col"> 
                                 <!-- <label for="description">Description</label> -->
-                                <textarea name="description" class="form-control needs-validation" placeholder="Route Description" style="height: 150px;" required></textarea>
+                                <textarea name="description" maxlength="500" class="form-control needs-validation" placeholder="Route Description" style="height: 150px;" required></textarea>
                                 <small class="form-text text-muted">Try describing some obvious features or where this climb is on the wall.</small>
                             </div>
                         </div>
@@ -168,7 +168,7 @@
                         <div class="form-row my-1 py-1">
                             <div class="col-md-6">
                                 <!-- <label for="pro">Protection</label> -->
-                                <input name="pro" type="text" class="form-control needs-validation" placeholder="Protection" required>
+                                <input name="pro" type="text" maxlength="100" class="form-control needs-validation" placeholder="Protection" required>
                                 <small class="form-text text-muted">How many draws/what kind of rack should someone bring?</small>
                             </div>
                         </div>

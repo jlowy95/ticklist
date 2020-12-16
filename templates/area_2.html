@@ -34,13 +34,15 @@
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md bg-light py-2 pr-0 pl-1">
-                    <!-- Flask for each child and for header -->
+                    <!-- Flask for creating each child and for header -->
                     <div class="nav flex-column nav-pills nav-pills-custom" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                         <a class="nav-link mb-1 p-2 pl-2 ml-2 active" id="v-pills-area-details" data-toggle="pill" href="#v-pills-ad" role="tab" aria-controls="v-pills-ad" aria-selected="true">
                             <span class="font-weight-bold small text-uppercase">Area Details</span></a>
-
+                        
+                            <!-- Sorted Climbs -->
                         <p class="text-center mb-2 pt-2 border-top"><strong>Climbs in {{area['name']}}</strong></p>
                         
+                        <!-- Flask for creating a pill tab for each climb -->
                         {% for child in children['sorted'] %}
                         <a class="nav-link mb-1 py-1 pl-2 ml-2" id="v-pills-{{child['climb_type']}}-{{child['id']}}-tab" data-toggle="pill" href="#v-pills-{{child['climb_type']}}-{{child['id']}}" role="tab" aria-controls="v-pills-{{child['climb_type']}}-{{child['id']}}" aria-selected="false">
                             <span class="text-right pr-2" style="color:black">{% for i in range(child['properties']['quality'])  %}
@@ -55,7 +57,8 @@
                             <span class="pl-2"><small>{{child['properties']['route_type']['short']}}</small></span>
                         </a>
                         {% endfor %}
-                        
+
+                        <!-- Unsorted Climbs and same corresponding Flask -->
                         {% if children['unsorted'] != [] %}
                         <p class="text-center my-1 pt-2 border-top"><strong>Unsorted Climbs</strong></p>
 
@@ -70,6 +73,7 @@
                                         {{child['name']}}
                                     {% endif %}</span>
                                 <span style="color: black">&nbsp;&nbsp;{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small></span>
+                                <span class="pl-2"><small>{{child['properties']['route_type']['short']}}</small></span>
                             </a>
                             {% endfor %}
                         {% endif %}
@@ -191,6 +195,7 @@
                                 </div>
                             </div>
                     </div>
+
                     <!-- Detail Info + Images -->
                     <div class="row">
                         <!-- Detail Info -->
@@ -233,6 +238,33 @@
                                     {% endif %}
                                 </div>
                             </div>
+
+                            <!-- Route Details -->
+                            {% if child['climb_type'] == 'route' %}
+                            <!-- Secondary Details: Type, Pitches, Committment -->
+                            <div class="row">
+                                <div class="col-md-auto">
+                                    <small>Details: {{child['properties']['route_type']['long']}},
+                                        {{child['properties']['pitches']}} {% if child['properties']['pitches'] == 1 %}Pitch{% else %}Pitches{% endif %}, 
+                                        Grade {% set committment = child['properties']['committment'] %}
+                                        {% if committment == None or committment == 1 %}
+                                        I
+                                        {% elif committment == 2 %}
+                                        II
+                                        {% elif committment == 3 %}
+                                        III
+                                        {% elif committment == 4 %}
+                                        IV
+                                        {% elif committment == 5 %}
+                                        V
+                                        {% else %}
+                                        VI
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endif %}
+
                             <!-- Height / Pitches + FA -->
                             <div class="row">
                                 <div class="col-md-4">
@@ -242,17 +274,6 @@
                                     <small>FA: {{child['properties']['fa']}}</small>
                                 </div>
                             </div>
-                            <!-- Tags -->
-                            {% if child['tags'] %}
-                            <div class="row">
-                                <div class="col-md-auto">
-                                    <span>Tags: </span>
-                                    {% for tag in child['tags'] %}
-                                    <span>{{tag}}</span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endif %}
                             <br>
                             <!-- Description -->
                             <div class="row">
@@ -261,6 +282,17 @@
                                     <p>{{child['properties']['description']}}</p>
                                 </div>
                             </div>
+                            <!-- Tags -->
+                            {% if child['tags'] %}
+                            <div class="row">
+                                <div class="col-md-auto">
+                                    <small>Tags: </small>
+                                    {% for tag in child['tags'] %}
+                                    <small>{{tag}}</small>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                         <!-- Image Carousel -->
                         <div class="col-md-7">
@@ -291,16 +323,13 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Climb Details + Comments -->
+                    <!-- Protection + Comments -->
                     <div class="row">
                         <div class="col-md-12">
                             <h6>Protection</h6>
                             <p>{{child['properties']['pro']}}</p>
                         </div>
                     </div>
-                <!-- if child['climb_type'] == 'boulder' -->
-                <!-- elif child['climb_type'] == 'route' -->
-                <!-- endif -->
                 </div>
                 {% endfor %}
 
