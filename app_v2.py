@@ -102,7 +102,7 @@ class ClimbModel(db.Model):
     name = db.Column(db.String(35), nullable=False, primary_key=True)
     parent_id = db.Column(db.Integer, nullable=False)
     parent_name = db.Column(db.String(35), nullable=False)
-    climb_type = db.Column(db.String(10), nullable=False)
+    climb_type = db.Column(db.String(10), nullable=False) # for distinction between boulders and routes
     position = db.Column(db.Integer)
     quality = db.Column(db.Integer, nullable=False)
     danger = db.Column(db.Integer, nullable=False)
