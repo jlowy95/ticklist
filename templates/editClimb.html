@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{entry['name']}}
+{% endblock %}
+
+{% block header %}
+    <div class="row ml-4">
+        <div class="col-md-12">
+            <h1>Edit Area</h1>
+        </div>
+    </div>
+    <!-- Path to Entry -->
+    <div class="row mx-1 my-0 ml-4">
+        <div class="col-md-12">
+            <!-- Flask Area Path -->
+            <div class="row justify-content-start no-gutters">
+                {% for link in path %}
+                <!-- {% if link['name'] == entry['name'] %}
+                <div class="col-sm-auto">
+                    <h5><a href="/{{link['route']}}">{{link['name']}}</a></h5>
+                </div>
+                {% else %} -->
+                <div class="col-sm-auto">
+                    <h6><a style="color: #26abff" href="/{{link['route']}}">{{link['name']}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;</h6>
+                </div>
+                <!-- {% endif %} -->
+                {% endfor %}
+                <div class="col-sm-auto">
+                    <h6><a style="color: #26abff" href="/area/{{entry['parent']['id']}}/{{entry['parent']['name']}}">{{entry['parent']['name']}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;</h6>
+                </div>
+                <div class="col-sm-auto">
+                    <h6><a style="color: #26abff" href="/area/{{entry['parent']['id']}}/{{entry['parent']['name']}}#v-pills-{{entry['climb_type']}}-{{entry['id']}}">{{entry['name']}}</a></h6>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <!-- Edit Entry Form -->
+    <!-- Header (Current Path) -->
+    <div class="row ml-4">
+        <div class="col-md-12">
+            <!-- Flask for href to link back to area -->
+            <h4><a style="color: black;" href="/area/{{entry['id']}}/{{entry['name']}}">{{entry['name']}}</a></h4>
+        </div>
+    </div>
+    <br>
+    <div class="row ml-4">
+        <small class="ml-4">These fields are prefilled with the current details. <br>
+             ANY changes to them will be saved, but blank fields will not be saved. <br>
+             If you are attempting to change the name of this area, please contact a site administrator.</small>
+    </div>
+    <br>
+    <form id='entry-form' class="needs-validation ml-4" novalidate>
+        <input name="id" type="text" style="display: none;" value="{{entry['id']}}" required>
+        <input name="name" type="text" style="display: none;" value="{{entry['name']}}" required>
+        <input name="change-type" type="text" style="display: none;" value="edit" required>
+        
+        <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="description">Description</label>
+                <textarea name="description" maxlength="500" class="form-control">{{entry['properties']['description']}}</textarea>
+            </div>
+        </div>
+        <br>
+        <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="directions">Directions</label>
+                <textarea name="directions" maxlength="500" class="form-control">{{entry['properties']['directions']}}</textarea>
+            </div>
+        </div>
+        <!-- Google Maps API for location -->
+        <!-- <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="areaDescriptionInput">Area Description</label>
+                <input id="areaDescriptionInput" type="text" class="form-control" placeholder="Area Description" style="height: 150px;">
+            </div>
+        </div> -->
+        <br>
+        <div class="form-group row mt-2">
+            <div class="col-md-12">
+                <button id="entry-form-submit" type="button" class="btn btn-dark">Submit</button>
+            </div>
+            </div>
+    </form>
+{% endblock %}

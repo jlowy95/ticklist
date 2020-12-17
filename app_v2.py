@@ -961,9 +961,60 @@ def submitChanges():
     return change_options[inputted_data['change-type']](inputted_data)
 
 # editEntry (allows edits to the current entry)
-@app.route('/edit-entry/<entry_type>/<entry_id>')
-def editEntry(entry_type, entry_id):
-    print('placeholder')
+@app.route('/edit-entry/<entry_type>/<entry_id>/<entry_name>')
+def editEntry(entry_type, entry_id, entry_name):
+    # Attempt to locate entry
+    if entry_type == 'area':
+        entry = db.session.query(AreaModel)\
+            .filter(AreaModel.id == entry_id)\
+            .filter(AreaModel.name == entry_name)\
+            .first()
+    elif entry_type == 'climb':
+        entry = db.session.query(ClimbModel)\
+            .filter(ClimbModel.id == entry_id)\
+            .filter(ClimbModel.name == entry_name)\
+            .first()
+    else:
+        # Invalid entry type, 404
+        print('Error: invalid entry_type')
+        return render_template('404.html', status_code=errors['404'])
+
+    # Verify that an entry was found or 404    
+    if entry:
+        entry = entry.toJSON()
+    else:
+        return render_template('404.html', status_code=errors['404'])
+
+    # Use toJSON to create object to populate template then redirect
+    if entry_type == 'area':
+        path = getPathNames(entry['parent']['path'])
+        return render_template('editArea.html', entry=entry, path=path)
+    elif entry_type == 'climb':
+        path = getPathNames(db.session.query(AreaModel.path)\
+            .filter(AreaModel.id == entry['parent']['id'])\
+            .filter(AreaModel.name == entry['parent']['name'])\
+            .first()[0])
+        print(path)
+        if entry['climb_type'] == 'boulder':
+            secondary = db.session.query(BoulderModel)\
+                .filter(BoulderModel.id == entry['id'])\
+                .first()
+            entry['properties']['grade'] = secondary.grade
+            return render_template('editClimb.html', entry=entry)
+        elif entry['climb_type'] == 'route':
+            secondary = db.session.query(RouteModel)\
+                .filter(RouteModel.id == entry['id'])\
+                .first()
+            entry['properties']['route_type'] = secondary.route_type
+            entry['properties']['grade'] = secondary.grade
+            entry['properties']['pitches'] = secondary.pitches
+            entry['properties']['committment'] = secondary.committment
+            return render_template('editClimb.html', entry=entry, path=path)
+        else:
+            # Invalid climb_type, redirect to error
+            print('Error: invalid climb_type')
+            return render_template('404.html', status_code=errors['404'])
+        
 
 
 
