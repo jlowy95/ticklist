@@ -7,7 +7,7 @@
 {% block header %}
     <div class="row ml-4">
         <div class="col-md-12">
-            <h1>Edit Area</h1>
+            <h1>Edit Climb</h1>
         </div>
     </div>
     <!-- Path to Entry -->
@@ -49,15 +49,163 @@
     <br>
     <div class="row ml-4">
         <small class="ml-4">These fields are prefilled with the current details. <br>
-             ANY changes to them will be saved, but blank fields will not be saved. <br>
-             If you are attempting to change the name of this area, please contact a site administrator.</small>
+             ANY changes to them will be saved, but blank fields will not be saved.</small>
     </div>
     <br>
     <form id='entry-form' class="needs-validation ml-4" novalidate>
         <input name="id" type="text" style="display: none;" value="{{entry['id']}}" required>
-        <input name="name" type="text" style="display: none;" value="{{entry['name']}}" required>
         <input name="change-type" type="text" style="display: none;" value="edit" required>
-        
+        <!-- Name -->
+        <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="name">Name</label>
+                <input name="name" type="text" class="form-control" value="{{entry['name']}}" required>
+            </div>
+        </div>
+        <br>
+        <!-- Basic Details -->
+        <div class="form-row">
+            <div class="col-md-1 ml-3 mr-0">
+                {% if entry['climb_type'] == 'boulder' %}
+                <select class="custom-select" name="grade" type="number" min="-1" max="17" style="width: auto">
+                    <option selected value="{{entry['properties']['grade'][0]}}">{{entry['properties']['grade'][1]['usa']}}</option>
+                    <option value="-1">VB</option>
+                    <option value="0">V0</option>
+                    <option value="1">V1</option>
+                    <option value="2">V2</option>
+                    <option value="3">V3</option>
+                    <option value="4">V4</option>
+                    <option value="5">V5</option>
+                    <option value="6">V6</option>
+                    <option value="7">V7</option>
+                    <option value="8">V8</option>
+                    <option value="9">V9</option>
+                    <option value="10">V10</option>
+                    <option value="11">V11</option>
+                    <option value="12">V12</option>
+                    <option value="13">V13</option>
+                    <option value="14">V14</option>
+                    </select>
+                {% elif entry['climb_type'] == 'route' %}
+                <select class="custom-select needs-validation" name="grade" type="number" min="-1" max="22" style="width: auto">
+                    <option selected value="{{entry['properties']['grade'][0]}}">{{entry['properties']['grade'][1]['usa']}}</option>
+                    <option value="-1">Easy 5th</option>
+                    <option value="0">5.4</option>
+                    <option value="1">5.5</option>
+                    <option value="2">5.6</option>
+                    <option value="3">5.7</option>
+                    <option value="4">5.8</option>
+                    <option value="5">5.9</option>
+                    <option value="6">5.10a</option>
+                    <option value="7">5.10b</option>
+                    <option value="8">5.10c</option>
+                    <option value="9">5.10d</option>
+                    <option value="10">5.11a</option>
+                    <option value="11">5.11b</option>
+                    <option value="12">5.11c</option>
+                    <option value="13">5.11d</option>
+                    <option value="14">5.12a</option>
+                    <option value="15">5.12b</option>
+                    <option value="16">5.12c</option>
+                    <option value="17">5.12d</option>
+                    <option value="18">5.13a</option>
+                    <option value="19">5.13b</option>
+                    <option value="20">5.13c</option>
+                    <option value="21">5.13d</option>
+                    <option value="22">5.14a</option>
+                </select>
+                {% endif %}
+            </div>
+            <div class="col-md-1 mr-0">
+                <!-- <label for="danger">Danger</label> -->
+                <select name="danger" type="number" min="0" max="3" class="custom-select" style="width: auto">
+                    <option selected value="{{entry['properties']['danger'][0]}}">{{entry['properties']['danger'][1]}}</option>
+                    <option value="0">G</option>
+                    <option value="1">PG-13</option>
+                    <option value="2">R</option>
+                    <option value="3">X</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <!-- <label for="height">Height (ft)</label> -->
+                <input name="height" type="number" min="0" size="4" maxlength="4" class="form-control" placeholder="Height (ft)" value="{{entry['properties']['height']}}" style="width: auto">
+            </div>
+            <div class="col-md-1">
+                <!-- <label for="quality">Quality</label> -->
+                <select name="quality" type="number" min="0" max="5" class="custom-select" style="width: auto">
+                    <option selected value="{{entry['properties']['quality']}}">
+                        {% if entry['properties']['quality'] == 0 %}
+                        &#128163
+                        {% else %}
+                            {% for i in range(entry['properties']['quality'])  %}
+                            &#9733;
+                            {% endfor %}
+                        {% endif %}
+                        </option>
+                    <option value="0">&#128163</option>
+                    <option value="1">&#9733</option>
+                    <option value="2">&#9733&#9733</option>
+                    <option value="3">&#9733&#9733&#9733</option>
+                    <option value="4">&#9733&#9733&#9733&#9733</option>
+                    <option value="5">&#9733&#9733&#9733&#9733&#9733</option>
+                </select>
+            </div>
+        </div>
+        <br>
+
+        {% if entry['climb_type'] == 'route' %}
+        <div class="form-row">
+            <!-- Pitches -->
+            <div class="col-md-1 ml-3 mr-0">
+                <input name="pitches" type="number" min="0" size="2" maxlength="2" class="form-control" placeholder="Pitches"  style="width: 100%" value="{{entry['properties']['pitches']}}">
+            </div>
+            <!-- Committment -->
+            <div class="col-md-1 ml-3 mr-0">
+                <select name="committment" type="text" min="0" max="7" class="custom-select" style="width: auto">
+                        <option selected value="{{entry['properties']['committment']}}">
+                            {% set committment = entry['properties']['committment'] %}
+                            {% if committment == None or committment == 1 %}
+                            I
+                            {% elif committment == 2 %}
+                            II
+                            {% elif committment == 3 %}
+                            III
+                            {% elif committment == 4 %}
+                            IV
+                            {% elif committment == 5 %}
+                            V
+                            {% else %}
+                            VI
+                            {% endif %}
+                        </option>
+                        <option value="I">I</option>
+                        <option value="II">II</option>
+                        <option value="III">III</option>
+                        <option value="IV">IV</option>
+                        <option value="V">V</option>
+                        <option value="VI">VI</option>
+                    </select>
+                </div>
+            <!-- Route Type -->
+            <div class="col-md-1 ml-3 mr-0">
+                <select name="route_type" type="number" min="0" max="3" class="custom-select needs-validation" style="width: auto" required>
+                    <option selected value="{{entry['properties']['route_type'][0]}}">{{entry['properties']['route_type'][1]['long']}}</option>
+                    <option value="1">Sport</option>
+                    <option value="2">Trad</option>
+                    <option value="3">Deep Water Solo</option>
+                </select>
+            </div>
+        </div>
+        <br>
+        {% endif %}
+
+        <div class="form-group-row">
+            <div class="col-md-6">
+                <label for="fa">First Ascenscionist</label>
+                <input name="fa" type="text" class="form-control" value="{{entry['properties']['fa']}}" >
+            </div>
+        </div>
+        <br>
         <div class="form-group-row">
             <div class="col-md-6">
                 <label for="description">Description</label>
@@ -67,8 +215,8 @@
         <br>
         <div class="form-group-row">
             <div class="col-md-6">
-                <label for="directions">Directions</label>
-                <textarea name="directions" maxlength="500" class="form-control">{{entry['properties']['directions']}}</textarea>
+                <label for="pro">Protection</label>
+                <textarea name="pro" maxlength="100" class="form-control">{{entry['properties']['pro']}}</textarea>
             </div>
         </div>
         <!-- Google Maps API for location -->

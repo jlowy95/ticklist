@@ -994,19 +994,21 @@ def editEntry(entry_type, entry_id, entry_name):
             .filter(AreaModel.id == entry['parent']['id'])\
             .filter(AreaModel.name == entry['parent']['name'])\
             .first()[0])
-        print(path)
+        # Danger is already converted, switch it to tuple (int, movie)
+        reverseDanger = {'':(0,'G'),'PG-13':(1,'PG-13'),'R':(2,'R'),'X':(3,'X')}
+        entry['properties']['danger'] = reverseDanger[entry['properties']['danger']]
         if entry['climb_type'] == 'boulder':
             secondary = db.session.query(BoulderModel)\
                 .filter(BoulderModel.id == entry['id'])\
                 .first()
-            entry['properties']['grade'] = secondary.grade
+            entry['properties']['grade'] = (secondary.grade, boulderInt2Grade(secondary.grade))
             return render_template('editClimb.html', entry=entry)
         elif entry['climb_type'] == 'route':
             secondary = db.session.query(RouteModel)\
                 .filter(RouteModel.id == entry['id'])\
                 .first()
-            entry['properties']['route_type'] = secondary.route_type
-            entry['properties']['grade'] = secondary.grade
+            entry['properties']['route_type'] = (secondary.route_type, route_types[secondary.route_type])
+            entry['properties']['grade'] = (secondary.grade, routeInt2Grade(secondary.grade))
             entry['properties']['pitches'] = secondary.pitches
             entry['properties']['committment'] = secondary.committment
             return render_template('editClimb.html', entry=entry, path=path)
