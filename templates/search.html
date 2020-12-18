@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Search
+{% endblock %}
+
+{% block header %}
+    <div class="row ml-4">
+        <div class="col-md-12">
+            <h1>MyTicks Search</h1>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+<br>
+<!-- Search Results -->
+<div>
+    <!-- Title/ Search Terms -->
+    <div class="row ml-4">
+        <div class="col-md-8 offset-1">
+            <h5>Results for '{{search_terms}}'</h5>
+        </div>
+    </div>
+    <br>
+    <!-- Results -->
+    <div class="row ml-4">
+        <!-- Areas -->
+        <div class="col-md-4 offset-1">
+            <h6>Areas</h6>
+            {% for r in results['areas'] %}
+            <div class="row">
+                <div class="col-md">
+                    <a href="/area/{{r.id}}/{{r.name}}">{{r.name}}</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Climbs -->
+        <div class="col-md-4">
+                <h6>Climbs</h6>
+                {% for r in results['climbs'] %}
+                <div class="row">
+                    <div class="col-md">
+                        <a href="/area/{{r.parent.id}}/{{r.parent.name}}#v-pills-{{r.climb_type}}-{{r.id}}">{{r.name}}</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+    </div>
+</div>
+{% endblock %}

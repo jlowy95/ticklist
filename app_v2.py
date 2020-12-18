@@ -885,7 +885,7 @@ def allLocations():
 # Loads the corresponding page type to the entry requested
 @app.route('/area/<entry_id>/<entry_name>')
 def area(entry_id, entry_name):
-    print(f'Entry: {entry_id}/{entry_name}')
+    # print(f'Entry: {entry_id}/{entry_name}')
     try:
         # Retrieve Entry
         entry = db.session.query(AreaModel)\
@@ -911,9 +911,22 @@ def area(entry_id, entry_name):
 
 
 # Search query route
-@app.route('/search/<search_terms>')
-def search(search_terms):
-    print(search_terms)
+@app.route('/search')
+def search():
+    search_terms = request.args.get('search_terms')
+
+    likeFormat = "%{}%".format(search_terms)
+    # Query Areas and Climbs for search_terms (in likeFormat)
+    queryArea = db.session.query(AreaModel)\
+        .filter(AreaModel.name.like(likeFormat)).all()
+    queryClimb = db.session.query(ClimbModel)\
+        .filter(ClimbModel.name.like(likeFormat)).all()
+    # Use toJSON method to parse query results and store
+    results = {
+        'areas':[r.toJSON() for r in queryArea],
+        'climbs': [r.toJSON() for r in queryClimb]
+    }
+    return render_template('search.html', search_terms=search_terms, results=results)
 
 
 # Entry Management
