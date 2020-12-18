@@ -16,6 +16,9 @@ Search
 <br>
 <!-- Search Results -->
 <div>
+    <!-- Check for results, present them if True -->
+    {% if results['areas'] or results['climbs'] %}
+    
     <!-- Title/ Search Terms -->
     <div class="row ml-4">
         <div class="col-md-8 offset-1">
@@ -25,6 +28,7 @@ Search
     <br>
     <!-- Results -->
     <div class="row ml-4">
+        {% if results['areas'] %}
         <!-- Areas -->
         <div class="col-md-4 offset-1">
             <h6>Areas</h6>
@@ -36,17 +40,29 @@ Search
             </div>
             {% endfor %}
         </div>
+        {% endif %}
+        {% if results['climbs'] %}
         <!-- Climbs -->
         <div class="col-md-4">
-                <h6>Climbs</h6>
-                {% for r in results['climbs'] %}
-                <div class="row">
-                    <div class="col-md">
-                        <a href="/area/{{r.parent.id}}/{{r.parent.name}}#v-pills-{{r.climb_type}}-{{r.id}}">{{r.name}}</a>
-                    </div>
+            <h6>Climbs</h6>
+            {% for r in results['climbs'] %}
+            <div class="row">
+                <div class="col-md">
+                    <a href="/area/{{r.parent.id}}/{{r.parent.name}}#v-pills-{{r.climb_type}}-{{r.id}}">{{r.name}}</a>
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
+    {% else %}
+    <!-- Else print "no results found" -->
+    <br>
+    <div class="row ml-4">
+        <div class="col-md offset-3">
+            <h3>Sorry, we couldn't find any results matching '{{search_terms}}'.</h3>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

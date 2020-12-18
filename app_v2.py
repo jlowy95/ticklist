@@ -915,7 +915,9 @@ def area(entry_id, entry_name):
 def search():
     search_terms = request.args.get('search_terms')
 
+    # Format search terms for sqlalchemy
     likeFormat = "%{}%".format(search_terms)
+
     # Query Areas and Climbs for search_terms (in likeFormat)
     queryArea = db.session.query(AreaModel)\
         .filter(AreaModel.name.like(likeFormat)).all()
