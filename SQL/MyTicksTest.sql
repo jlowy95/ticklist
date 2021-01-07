@@ -46,7 +46,7 @@ CREATE TABLE route_types (
 
 INSERT INTO route_types
 	VALUES
-		(0, 'sport'), (1, 'trad'), (2, 'dws')
+		(0, 'boulder'), (1, 'sport'), (2, 'trad'), (3, 'dws')
 	;
 
 CREATE TABLE `climbs` (
@@ -73,8 +73,8 @@ INSERT INTO climbs(name,parent_id,parent_name,climb_type,position,quality,danger
 	VALUES
 		('Boulder One', 3, 'Wyoming', 'boulder', 1, 3, 0, 12, 'Some rando', 'Its aight', 'Towel'),
         ('Boulder Two', 3, 'Wyoming', 'boulder', 0, 1, 2, 32, Null, Null, 'pads'),
-        ('Route One', 3, 'Wyoming', 'sport', 0, 4, 0, 89, 'Josh Lowy', 'The best', '3 Draws'),
-        ('Route Two', 3, 'Wyoming', 'trad', 2, 3, 2, 120, 'Unknown', Null, Null)
+        ('Route One', 3, 'Wyoming', 'route', 0, 4, 0, 89, 'Josh Lowy', 'The best', '3 Draws'),
+        ('Route Two', 3, 'Wyoming', 'route', 2, 3, 2, 120, 'Unknown', Null, Null)
 	;
 
 
@@ -91,7 +91,17 @@ INSERT INTO tags(title)
         ('technical'),
         ('highball'),
         ('chossy'),
-        ('bad landing')
+        ('bad landing'),
+        ('warmup'),
+        ('pinchy'),
+        ('crimpy'),
+        ('compstyle'),
+        ('sandbagged'),
+        ('huecos'),
+        ('pockety'),
+        ('dyno'),
+        ('eliminate'),
+        ('manufactured')
 	;
 
 CREATE TABLE tagClimb (
@@ -130,8 +140,8 @@ CREATE TABLE routes (
 
 INSERT INTO routes
 	VALUES
-		(3, 1, 18.7, 4, Null),
-        (4, 2, 6.33, 6, 1)
+		(3, 2, 18.7, 4, Null),
+        (4, 3, 6.33, 6, 1)
 	;
 
 CREATE TABLE boulder_grades (
@@ -230,9 +240,8 @@ INSERT INTO route_grades
 		(21.66, 22.34, '5.14a', '8b+')   
     ;
 
-SELECT * FROM tags;
 
-SELECT c.id,c.name,c.position,c.quality,d.movie AS 'danger',c.height,c.fa,c.description,c.pro,COALESCE(bg.usa,rg.usa) AS 'grade',r.route_type,r.pitches, t.title
+SELECT c.id,c.name,c.climb_type,c.position,c.quality,d.movie AS 'danger',c.height,c.fa,c.description,c.pro,COALESCE(bg.usa,rg.usa) AS 'grade',rt.route_type,r.pitches, t.title
 	FROM climbs as c
 	LEFT JOIN boulders as b ON b.id=c.id
     LEFT JOIN routes as r ON r.id=c.id
@@ -241,6 +250,7 @@ SELECT c.id,c.name,c.position,c.quality,d.movie AS 'danger',c.height,c.fa,c.desc
 	LEFT JOIN route_grades as rg ON r.grade BETWEEN rg.lowVal AND rg.highVal
     LEFT JOIN tagClimb as tc ON tc.climb_id=c.id
     LEFT JOIN tags as t ON t.id = tc.tag_id
+    LEFT JOIN route_types as rt ON rt.id = r.route_type
 	WHERE c.parent_id = 3 AND c.parent_name = 'Wyoming'
     ORDER BY c.position
 ;
@@ -249,11 +259,16 @@ SELECT t.title
 	FROM tags AS t
     JOIN tagClimb as tc ON tc.tag_id=t.id
     JOIN climbs as c ON c.id=tc.climb_id
-    WHERE c.id=1
+    WHERE c.id = 13
 ;
 
-SELECT c.climb_type, COUNT(c.id)
-	FROM climbs as c
+SELECT c.climb_type, r.route_type
+	FROM climbs AS c
+    LEFT JOIN routes as r ON r.id = c.id
     WHERE c.parent_id = 3 AND c.parent_name = 'Wyoming'
-    GROUP BY c.climb_type
+;
+
+SELECT * 
+	FROM areas as a
+    WHERE a.name LIKE '%wy%'
 ;

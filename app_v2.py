@@ -420,9 +420,10 @@ def routeInt2Grade(floatDifficulty):
 # getPathNames: Retrieves name and path/route for eachitem in the selected entry's parent path
 def getPathNames(path):
     path_raw = [step.split('/') for step in path.split('$')]
-    path_clean = []
-    for step in path_raw:
+    path_clean = [{'name': 'All Locations', 'route':f"1/All-Locations"}]
+    for step in path_raw[1:]:
         path_clean.append({'name': step[1], 'route':f"area/{step[0]}/{step[1]}"})
+    # print(path_clean)
     return path_clean
 
 # countClimbs: recursive function for querying and counting number of children climbs by type
@@ -439,6 +440,9 @@ def countClimbs(area_model):
             .filter(AreaModel.parent_name==area_model.name)\
             .all()
         for child in children:
+            # Recursion check
+            if child == area_model:
+                continue
             counts = countClimbs(child)
             boulders += counts['boulders']
             sport += counts['sport']
@@ -465,7 +469,7 @@ def countClimbs(area_model):
             elif typ[0] == 3:
                 dws = typ[1]
         total = boulders+sport+trad+dws
-        print(f"'boulders':{boulders},'sport':{sport},'trad':{trad},'dws':{dws},'total':{total}")
+        # print(f"'boulders':{boulders},'sport':{sport},'trad':{trad},'dws':{dws},'total':{total}")
         return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
  
 
@@ -484,6 +488,9 @@ def getChildrenInfo(entry):
             .all()
         if type(children)==list:
             for child in children:
+                # Recursion Check
+                if child.toJSON() == entry:
+                    continue
                 counts = countClimbs(child)
                 children_info.append({'name': child.name,
                     'route': f"/area/{child.id}/{child.name}",
@@ -878,7 +885,15 @@ def index():
 @app.route('/1/All-Locations')
 def allLocations():
     # Template to be filled when database is properly initialized
-    return render_template('allLocations.html')
+    al = db.session.query(AreaModel)\
+        .filter(AreaModel.id==1)\
+        .filter(AreaModel.name=='All Locations')\
+        .first()
+    al = al.toJSON()
+
+    children = getChildrenInfo(al)
+
+    return render_template('allLocations.html', children=children)
 
 
 # API Routes
