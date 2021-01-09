@@ -30,16 +30,43 @@ All Locations
     <!-- Locations w/ Counts -->
     <div class="row">
         <div class="col-md-10 offset-1">
-            {% for child in children %}
+            <!-- Line for each child -->
+            {% for i in range(children|length) %}
             <div class="row">
                 <div class="col-md">
-                        <a href="{{child['route']}}">
-                            <span class="text-right pr-2">{{child['name']}}</span>           
-                            <span class="text-right pr-2">({{child['counts']['total']}})</span>
-                        </a>
+                    <a href="{{children[i]['route']}}">
+                        <span class="text-right pr-2">{{children[i]['name']}}</span>           
+                        <span class="text-right pr-2">({{children[i]['counts']['total']}})</span>
+                    </a>
+                    <!-- Bullet for each grandchild -->
+                    <ul>
+                        {% for child in grandchildren[i] %}
+                        <li>
+                            <a href="{{child['route']}}">
+                                <span class="text-right pr-2">{{child['name']}}</span>           
+                                <span class="text-right pr-2">({{child['counts']['total']}})</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
             {% endfor %}
+        </div>
+    </div>
+    <br>
+    <hr>
+    <br>
+    <!-- Mass Import Tool -->
+    <div class="row">
+        <div class="col-md-8 offset-2">
+            <h4>Mass Import Tool</h4>
+            <br>
+            <form action="">
+                <label for="mifile">Select a file: </label>
+                <input type="file" id="mifile" name="mifile"><br><br>
+                <input type="submit">
+            </form>
         </div>
     </div>
 {% endblock %}

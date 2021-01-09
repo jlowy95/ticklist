@@ -1,5 +1,6 @@
 import csv
 import string
+import pandas as pd
 
 '''
 Mass Input Reader
@@ -48,3 +49,75 @@ If left blank, it will be assumed as 'G' / 0
 'FA', 'Description', 'Pro' are optional but appreciated.
 Similarly, area details for any/all new areas can be added after input.
 '''
+
+# Assign path to mass_input file (to be changed to uploaded file)
+path = 'mass_input_template2.csv'
+
+# Open and read the .csv file
+with open(path, newline='', encoding='utf-8-sig') as csvfile:
+    csvreader = csv.reader(csvfile, delimiter=',')
+    current_row = next(csvreader)
+    #  Check for headers
+    for col in current_row: 
+        if 'Area' in col:
+            print('Header detected.')
+            break
+        else:
+            print('Header not found, resetting reader.')
+
+    for row in csvreader:
+        print(row)
+        # Indices 0-5 are parent areas, 5 - Climb, 6 - Climb_Type, 7 - Grade,
+        # 8 - Route_type, 9 - Height, 10 - Quality, 11 - Danger,
+        # 12 - FA, 13 - Description, 14 - Protection
+
+        # Check areas for existing entries/parents,
+        #  creating new areas as needed within the newly provided parents
+        connection = False
+        for area in row[0:5]:
+            if area == '':
+                continue
+            else:
+                if not connection:
+                    parent_check = findParents(area)
+                    if parent_check[0] == 1:
+                        # If no connection is yet established, mark the connection as this area
+                        connection = parent_check[1]
+                if connection:
+                    parent_check = findParents(area)
+                    if parent_check[0] == 1:
+                        # A connection is already established, but a child lower in the tree still matches, 
+                        # Replace the connection
+                        connection = parent_check[1]
+                    elif parent_check[0] == 0:
+                        # New area found beneath connection, add as new area, area_type defaults 0
+
+
+                        '''MAP TREE AS DICTIONARY FOR LATER REFERENCE'''
+
+
+
+# findParents: Queries the AreaModel for names matching that provided.
+# Returns a tuple - (Found Case (0-2), Match (As db.object))
+# Found Case: 0-False, 1-True, 2-Multiple found user parsing needed
+def findParents(area_name):
+    # Query for matching (like) area name
+    likeFormat = "%{}%".format(area_name)
+    matches = db.session.query(AreaModel)\
+        .filter(AreaModel.name.like(likeFormat)).all()
+
+    if matches:
+        # If multiple matches, present results to user.
+        if len(matches) > 1:
+            for match in matches:
+                print(match)
+
+        else: # Else, a single match has been found
+            return (1, matches)
+    else:
+        return (0)
+
+    
+
+# raw_import = pd.read_csv(path)
+# print(raw_import.head())

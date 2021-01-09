@@ -892,8 +892,16 @@ def allLocations():
     al = al.toJSON()
 
     children = getChildrenInfo(al)
+    grandchildren = []
+    for child in children:
+        id_name = child['route'][6:].split('/')
+        # print(id_name)
+        grandchildren.append(getChildrenInfo(db.session.query(AreaModel)\
+            .filter(AreaModel.id==id_name[0])\
+            .filter(AreaModel.name==id_name[1])\
+            .first().toJSON()))
 
-    return render_template('allLocations.html', children=children)
+    return render_template('allLocations.html', children=children, grandchildren=grandchildren)
 
 
 # API Routes
