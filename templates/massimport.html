@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Mass Import
+{% endblock %}
+
+{% block header %}
+    <div class="row ml-4">
+        <div class="col-md-11">
+            <h1>Mass Import Tool</h1>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <br>
+    <!-- Mass Import Tool -->
+    <div class="row">
+        <div class="col-md-8 offset-2">
+            <h4>Mass Import Tool</h4>
+            <br>
+            <form action="">
+                <label for="mifile">Select a file: </label>
+                <input type="file" id="mifile" name="mifile"><br><br>
+            </form>
+            <button id="continue" style="display: none">Continue?</button>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <!-- CSV Reader -->
+    <script src="{{url_for('static', filename='javascript/massimport.js')}}"></script>
+{% endblock %}

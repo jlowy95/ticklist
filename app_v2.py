@@ -20,6 +20,7 @@ from bson import ObjectId
 import datetime
 import json
 import pprint
+from werkzeug.utils import secure_filename
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -33,6 +34,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:joshstemppassword@localhos
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
  
+# Define file upload guidelines
+UPLOAD_FOLDER = '/uploads'
+ALLOWED_EXTENSIONS = {'csv'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # SQL Models
 # These are translations of the tables in the db
@@ -250,6 +255,11 @@ likeCommonTags = {
     "eliminate": ["elim"],
     "manufactured": ["chipped", "manufacture"]
 }
+
+# allowed_file: Returns bool if file extension is in ALLOWED_EXTENSIONS
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # boulderInt2Grade: translates concensus boulder difficulty values to common V/Font grades
 def boulderInt2Grade(floatDifficulty):
@@ -1056,6 +1066,12 @@ def editEntry(entry_type, entry_id, entry_name):
             return render_template('404.html', status_code=errors['404'])
         
 
+# Mass Import Tool
+@app.route('/mass-import', methods=['GET', 'POST'])
+def massImport():
+    data = request.files
+    print(data)
+    return render_template('massimport.html')
 
 
 if __name__ == '__main__':
