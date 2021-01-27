@@ -1067,11 +1067,14 @@ def editEntry(entry_type, entry_id, entry_name):
         
 
 # Mass Import Tool
-@app.route('/mass-import', methods=['GET', 'POST'])
+# massImport - returns the mass import tool page
+@app.route('/mass-import')
 def massImport():
-    data = request.files
-    print(data)
     return render_template('massimport.html')
+
+@app.route('/check-entry', methods=['GET', 'POST'])
+def checkEntry():
+    return None
 
 
 if __name__ == '__main__':
