@@ -580,7 +580,20 @@ def convertFormDatatypes(new_loc):
             new_loc[i] = int(new_loc[i])
     return new_loc
 
-        
+# checkDupe: Checks ClimbModel and AreaModel for an already existing climb under said area.
+def checkDupe(area, climb):
+    query = db.session.query(ClimbModel)\
+        .filter(ClimbModel.name == climb)\
+        .filter(AreaModel.name == area)\
+        .join(AreaModel, AreaModel.id == ClimbModel.parent_id)\
+        .first()
+    # If match, return true, else false
+    if query:
+        return True
+    else:
+        return False
+
+
 # validateAddition: re-checks all fields are filled and valid,
 # then checks database for new entry details of parent and name
 # Returns a tuple corresponding to the following:
@@ -1074,7 +1087,15 @@ def massImport():
 
 @app.route('/check-entry', methods=['GET', 'POST'])
 def checkEntry():
-    return None
+    args = request.args
+    if request.method == 'GET':
+        if args['type'] == 'dupe':
+            dupe = checkDupe(args['area'], args['climb'])
+            if dupe:
+                return {'dupeCheck': True}
+            else:
+                return {'dupeCheck': False}
+    return {0: 'hmmm'}
 
 
 if __name__ == '__main__':
