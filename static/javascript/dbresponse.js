@@ -100,5 +100,5 @@ function submit_data() {
     call_API(get_inputs());
 }
 
-var entry_form_submit = d3.select('#entry-form-submit');
+var entry_form_submit = $('#entry-form-submit');
 entry_form_submit.on('click', validateForms);

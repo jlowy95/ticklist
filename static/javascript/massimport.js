@@ -2,14 +2,14 @@
 // data validation, then push to server for submission.
 
 // Define "submit" button
-var continueButton = d3.select('#continue');
+var continueButton = $('#continue');
 continueButton.on('click', processFile);
 
 // Client file upload
 var mifile;
 
 // Listener for file choice
-document.getElementById('mifile').addEventListener('change', storeFile, false);
+$('#mifile').on('change', storeFile);
 
 // storeFile: Listens for file upload then reads/stores data into global var 'mifile'.
 // Continue button for further processing is then displayed.
@@ -25,28 +25,28 @@ function storeFile (evt) {
     };
     reader.readAsText(file);
     // Display continue button
-    continueButton.style('display', 'block');
+    continueButton.css('display', 'block');
 }
 
 // processFile: Opens user correction/validation tools and runs csv parsing tools for server imports
 function processFile () {
-    console.log(mifile);
+    // console.log(mifile);
     // Hide form and continue button, display instructions and processing
-    d3.select('#fileform').style('display','none');
-    continueButton.style('display', 'none');
-    d3.select('#processing').style('display', 'block');
+    $('#fileform').css('display','none');
+    continueButton.css('display', 'none');
+    $('#processing').css('display', 'block');
     // more processing functions
     start();
 }
 
 // User input controls for processing
-d3.select('#yesButton').on('click', buttonsHandler);
-d3.select('#noButton').on('click', buttonsHandler);
-d3.select('#skipButton').on('click', buttonsHandler);
+$('#yesButton').on('click', buttonsHandler);
+$('#noButton').on('click', buttonsHandler);
+$('#skipButton').on('click', buttonsHandler);
 
 // Switch handler for user processing inputs
 function buttonsHandler() {
-    var src = d3.event['srcElement']['id'].slice(0,-6);
+    var src = event.srcElement.id.slice(0,-6);
     // console.log(src);
     switch(src) {
         case ('yes'):
@@ -62,13 +62,37 @@ function buttonsHandler() {
     }
 }
 
+//----------------------------------------------------------------
 // Iterating functions for csv processing and user input
 var currentIndex = 0;
 
-function nextRow() {
+function nextRow() { //Iterate row by row of imported csv file
     if (currentIndex < mifile.length) {
-        currentRow = mifile[currentIndex];
-        d3.select('#currentRow').text(currentRow);
+        currentRow = mifile[currentIndex].split(',');
+        // Separate entry details
+        var areas = currentRow.slice(0,6);
+        areas = areas.filter(item => item !== '');
+        console.log(areas);
+        var name = currentRow.slice(6,7);
+        var details = currentRow.slice(7);
+        // Clear contents of previous entry
+        $('#areas').empty();
+        $('#climb').empty();
+        $('#details').empty();
+        // Populate contents of current entry
+        for (var i = 0; i<areas.length; i++) {
+            $('#areas').append($('<span></span>').text(areas[i]));
+            if (i<areas.length-1 && areas[i+1]!='') {
+                $('#areas').append(' > ');
+            }
+        }
+        $('#climb').append($('<span></span>').text(name));
+        for (var i = 0; i<details.length; i++) {
+            $('#details').append($('<span></span>').text(details[i]));
+            if (i<details.length-1) {
+                $('#details').append(', ');
+            }
+        }
     } else {
         alert('Temp Done!');
     }
