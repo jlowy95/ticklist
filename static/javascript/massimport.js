@@ -97,6 +97,8 @@ function nextRow() { //Iterate row by row of imported csv file
                 $('#details').append(', ');
             }
         }
+        // add current row to table
+        addTRow(entry);
     } else {
         alert('Temp Done!');
     }
@@ -111,6 +113,8 @@ function iterateRow() {
     currentIndex++;
     nextRow();
 }
+
+// --------------------------------------------------------------
 
 function checkEntry(entry) {
     fetch('/check-entry', {
@@ -141,7 +145,7 @@ async function getEntry(entry) {
 
 // dupeCheck: Sends a GET request to check if a duplicate climb under final listed area exists
 function dupeCheck(entry) {
-    fetch(`/check-entry?type=dupe&area=${entry.areas[-1]}&climb=${entry.name}`, {
+    fetch(`/check-entry?type=dupe&area=${entry.areas[entry.areas.length-1]}&climb=${entry.name}`, {
         method: 'GET'
     })
     .then (response => response.json())
@@ -149,6 +153,20 @@ function dupeCheck(entry) {
         console.log(data);
     })
     .catch(error => console.log(error));
+}
+
+// addTRow
+function addTRow(entry) {
+    // Isolate data we want for the table (in order)
+    var table_data = [(currentIndex+1),entry.areas[0],entry.areas[entry.areas.length-1],entry.name,entry.details.climb_type,entry.details.grade];
+    // Create tr object
+    var tblRow = $('<tr>');
+    // Append td's to tr
+    $.each(table_data, function(i,v) {
+        tblRow.append('<td>' + v + '</td>');
+    });
+    // Append our completed tr to the tbody
+    $('tbody').append(tblRow);
 }
 
 // separateDetails: Takes the row/entry and creates an object for distinction of details/areas/name
@@ -159,17 +177,17 @@ function separateDetails(row) {
     parents = parents.filter(item => item !== '');
     // Object Assignment
     entry.areas = parents;
-    entry.name = row.slice(6,7);
-    entry.details.climb_type = row.slice(7,8);
-    entry.details.grade = row.slice(8,9);
-    entry.details.pitches = row.slice(9,10);
-    entry.details.committment = row.slice(10,11);
-    entry.details.route_type = row.slice(11,12);
-    entry.details.height = row.slice(12,13);
-    entry.details.quality = row.slice(13,14);
-    entry.details.danger = row.slice(14,15);
-    entry.details.fa = row.slice(15,16);
-    entry.details.description = row.slice(16,17);
-    entry.details.pro = row.slice(17);
+    entry.name = row[6];
+    entry.details.climb_type = row[7];
+    entry.details.grade = row[8];
+    entry.details.pitches = row[9];
+    entry.details.committment = row[10];
+    entry.details.route_type = row[11];
+    entry.details.height = row[12];
+    entry.details.quality = row[13];
+    entry.details.danger = row[14];
+    entry.details.fa = row[15];
+    entry.details.description = row[16];
+    entry.details.pro = row[17];
     return entry;
 }
