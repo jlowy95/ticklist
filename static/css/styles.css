@@ -60,3 +60,11 @@
 .step.finish {
     background-color: #4CAF50;
 }
+
+.square {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 1px solid rgba(0, 0, 0, .2);
+}

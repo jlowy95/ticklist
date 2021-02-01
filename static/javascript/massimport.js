@@ -77,7 +77,7 @@ function nextRow() { //Iterate row by row of imported csv file
         // var check = checkEntry(entry);
         // console.log(`check:${check}`);
         // getEntry(entry);
-        dupeCheck(entry);
+        
 
         // Clear contents of previous entry
         $('#areas').empty();
@@ -99,6 +99,7 @@ function nextRow() { //Iterate row by row of imported csv file
         }
         // add current row to table
         addTRow(entry);
+        dupeCheck(entry);
     } else {
         alert('Temp Done!');
     }
@@ -150,6 +151,9 @@ function dupeCheck(entry) {
     })
     .then (response => response.json())
     .then (function(data) {
+        if (data.dupeCheck) {
+            $(`#tr-${currentIndex+1} td:last span`).css('background', 'blue');
+        }
         console.log(data);
     })
     .catch(error => console.log(error));
@@ -160,11 +164,12 @@ function addTRow(entry) {
     // Isolate data we want for the table (in order)
     var table_data = [(currentIndex+1),entry.areas[0],entry.areas[entry.areas.length-1],entry.name,entry.details.climb_type,entry.details.grade];
     // Create tr object
-    var tblRow = $('<tr>');
+    var tblRow = $(`<tr id="tr-${currentIndex+1}">`);
     // Append td's to tr
     $.each(table_data, function(i,v) {
         tblRow.append('<td>' + v + '</td>');
     });
+    tblRow.append('<td class="text-center"><span class="square"></span></td>');
     // Append our completed tr to the tbody
     $('tbody').append(tblRow);
 }

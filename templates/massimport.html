@@ -36,7 +36,7 @@ Mass Import
         </div>
         <hr>
         <div id="dataRow" class="row">
-            <div class="col-md-8 offset-2">
+            <div class="col-md-10 offset-2">
                 <h5>Current Entry:</h5>
                 <div class="row">
                     <div class="col-12 offset-1">
@@ -58,36 +58,45 @@ Mass Import
                 </div>
                 <br>
                 <div id="buttonsRow" class="row">
-                    <div class="col-md-8 offset-2">
+                    <div class="col-md-10 offset-2">
                         <button id="yesButton">Yes</button>
                         <button id="noButton">No</button>
                         <button id="skipButton">Skip</button>
                     </div>
                 </div>
                 <br>
+                <!-- Table -->
                 <div class="row">
                     <div class="col-12">
+                        <!-- Status Keys -->
+                        <div class="row">
+                            <div class="col-3">
+                                <span>Unprocessed: </span>
+                                <span class="square"></span>
+                            </div>
+                            <div class="col-3">
+                                <span>Validated: </span>
+                                <span class="square" style="background:greenyellow"></span>
+                            </div>
+                            <div class="col-3">
+                                <span>Input Needed: </span>
+                                <span class="square" style="background:yellow"></span>
+                            </div>
+                            <div class="col-3">
+                                <span>Duplicate Found: </span>
+                                <span class="square" style="background:blue"></span>
+                            </div>
+                        </div>
+                        <!-- Import Table -->
                         <table class="table table-hover table-sm">
                             <thead class="thead-light">
                                 <th>#</th>
-                                <!-- <th>Area 1</th>
-                                <th>Area 2</th>
-                                <th>Area 3</th>
-                                <th>Area 4</th> -->
                                 <th>Outer Area</th>
                                 <th>Inner Area</th>
                                 <th>Climb</th>
                                 <th>Climb_Type</th>
                                 <th>Grade</th>
-                                <!-- <th>Pitches*</th>
-                                <th>Committment*</th>
-                                <th>Route_Type*</th>
-                                <th>Height</th>
-                                <th>Quality</th>
-                                <th>Danger</th>
-                                <th>FA</th>
-                                <th>Description</th>
-                                <th>Protection</th> -->
+                                <th>Status</th>
                             </thead>
                             <tbody></tbody>
                         </table>
