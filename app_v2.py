@@ -1090,6 +1090,7 @@ def checkEntry():
     args = request.args
     if request.method == 'GET':
         if args['type'] == 'dupe':
+            # !!!!!!! CHECK CASE SENSITIVITY FOR DUPE CHECK AND STORAGE PROTOCOL
             dupe = checkDupe(args['area'], args['climb'])
             if dupe:
                 return {'dupeCheck': True}

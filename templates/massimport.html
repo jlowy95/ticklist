@@ -37,19 +37,32 @@ Mass Import
         <hr>
         <!-- UI -->
         <div>
+            <!-- Progress Bar -->
+            <div class="row">
+                <div class="col-md-8 offset-1">
+                    <div class="progress">
+                        <div id="progressbar-c" class="progress-bar bg-success" role="progressbar"></div>
+                        <div id="progressbar-valid" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"></div>
+                        <div id="progressbar-in" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar"></div>
+                    </div>
+                </div>
+            </div>
+            <br>
             <!-- Current Entry -->
             <div id="dataRow" class="row">
-                <div class="col-md-8 offset-1">
+                <div class="col-1 offset-1">
                     <h5>Current Entry:</h5>
+                </div>
+                <div class="col-10">
                     <div class="row">
-                        <div class="col-11 offset-1">
+                        <div class="col-12">
                             <small id="areas"></small>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-11 offset-1">
-                            <strong>Climb: </strong>
-                            &nbsp;
+                        <div class="col-12">
+                            <!-- <strong>Climb: </strong>
+                            &nbsp; -->
                             <span id="climb"></span>
                             &nbsp;
                             <span id="grade"></span>
@@ -57,12 +70,6 @@ Mass Import
                             <span id="danger"></span>
                             &nbsp;
                             <span id="quality"></span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12 offset-1">
-                            <strong>Details: </strong>
-                            <div id="details"></div>
                         </div>
                     </div>
                 </div>
@@ -79,7 +86,7 @@ Mass Import
             <br>
             <!-- Status Table -->
             <div class="row">
-                <div class="col-10 offset-1">
+                <div class="col-8 offset-1">
                     <!-- Legend -->
                     <div class="row">
                         <div class="col-3">
@@ -100,22 +107,27 @@ Mass Import
                         </div>
                     </div>
                     <!-- Import Table -->
-                    <table class="table table-hover table-sm">
-                        <thead class="thead-light">
-                            <th>#</th>
-                            <th>Outer Area</th>
-                            <th>Inner Area</th>
-                            <th>Climb</th>
-                            <th>Climb_Type</th>
-                            <th>Grade</th>
-                            <th>Status</th>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <div class="pre-scrollable">
+                        <table class="table table-hover table-sm">
+                            <thead class="thead-light">
+                                <th>#</th>
+                                <th>Outer Area</th>
+                                <th>Inner Area</th>
+                                <th>Climb</th>
+                                <th>Climb_Type</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <br>
+    <!-- Summary -->
+    <div id="summary" style="display: none"></div>
 {% endblock %}
 {% block scripts %}
     <!-- CSV Reader -->

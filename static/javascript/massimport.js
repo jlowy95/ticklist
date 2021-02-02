@@ -55,7 +55,9 @@ function processFile () {
     continueButton.css('display', 'none');
     $('#processing').css('display', 'block');
     // more processing functions
-    start();
+    // start();
+    setTimeout(500);
+    justRun();
 }
 
 // User input controls for processing
@@ -84,23 +86,23 @@ function buttonsHandler() {
 //----------------------------------------------------------------
 // Iterating functions for csv processing and user input
 var currentIndex = 0;
+var invalids = [];
+var r2i = [];
+var completed = 0;
 
-function nextRow() { //Iterate row by row of imported csv file
+async function nextRow() { //Iterate row by row of imported csv file
     if (currentIndex < mifile.length) {
         // Separate details
         currentRow = mifile[currentIndex].split(',');
         var entry = separateDetails(currentRow);
         console.log(entry.name);
 
-        // Check Database
-        // var check = checkEntry(entry);
-        // console.log(`check:${check}`);
-        // getEntry(entry);
+        updatePBar();
 
         // Clear contents of previous entry
         $('#areas').empty();
-        $('#climb').empty();
-        $('#details').empty();
+        // $('#climb').empty();
+        // $('#details').empty();
 
         // Populate contents of current entry
         for (let i = 0; i<entry.areas.length; i++) {
@@ -150,16 +152,23 @@ function nextRow() { //Iterate row by row of imported csv file
         //         $('#details').append(', ');
         //     }
         // }
-
+        
         // add current row to table
         addTRow(entry);
-        // Check for duplicate, if dupe, continue
-        dupeCheck(entry);
 
-        gradeCheck(entry);
+        // Validate Data
+        // Check for duplicate, if dupe, continue
+        var duped = await dupeCheck(entry);
+        if (!duped) {
+            validateEntry(entry);
+        }
+        setTimeout(200);
+        return true;
 
     } else {
-        alert('Temp Done!');
+        currentIndex++;
+        updatePBar();
+        console.log('DONE!');
     }
 }
 
@@ -173,38 +182,57 @@ function iterateRow() {
     nextRow();
 }
 
-// --------------------------------------------------------------
-
-function checkEntry(entry) {
-    fetch('/check-entry', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(entry)
-    })
-    .then (response => response.json())
-    .then (function(data) {
-        console.log(data);
-    })
-    .catch(error => console.log(error));
+async function justRun() {
+    currentIndex=0;
+    for (let i=0; i<mifile.length;i++) {
+        const imwaiting = await nextRow();
+        console.log(imwaiting);
+        currentIndex++;
+    }
 }
 
 
-async function getEntry(entry) {
-    for (let i=0; i<entry.areas.length; i++) {
-        await fetch(`/check-entry?area=${entry.areas[i]}`, {
-            method: 'GET'
-        })
-        .then (response => response.json())
-        .then (function(data) {
-            // console.log(data);
-        })
-        .catch(error => console.log(error));
+// ----------------- Validation Functions -----------------------
+
+
+// validateEntry: Collective fn for calling individual validation functions.  If invalid, adds entry to
+// invalids with error code
+function validateEntry(entry) {
+    // * Dupe check run separately
+
+    // Invalid Keys
+    // {
+    //  'valid': t/f
+    //  'entry': entry,
+    //  'error': ### (hundreds-fn/src, ones-code),
+    //  'tblID': currentIndex+1
+    // }
+
+    // 1. Check climb_type/grade
+    // 2. Check quality & danger (required)
+    // 3. Optionally validate other details
+    var vfns = [gradeCheck, qualCheck, dangCheck];
+    var valid = true;
+    for (let i=0;i<vfns.length;i++) {
+        var res = vfns[i](entry);
+        // If invalid response, add entry to invalids and iterateRow
+        if (!res.valid) {
+            $(`#tr-${currentIndex+1} td:last span`).css('background', 'yellow');
+            invalids.push(res);
+            valid = false;
+            break;
+        }
+    }
+    // If still valid, add to r2i array
+    if (valid) {
+        $(`#tr-${currentIndex+1} td:last span`).css('background', 'greenyellow');
+        r2i.push({'entry': entry, 'tblID': currentIndex+1});
     }
 }
 
 // dupeCheck: Sends a GET request to check if a duplicate climb under final listed area exists
-function dupeCheck(entry) {
-    fetch(`/check-entry?type=dupe&area=${entry.areas[entry.areas.length-1]}&climb=${entry.name}`, {
+async function dupeCheck(entry) {
+    await fetch(`/check-entry?type=dupe&area=${entry.areas[entry.areas.length-1]}&climb=${entry.name}`, {
         method: 'GET'
     })
     .then (response => response.json())
@@ -212,13 +240,88 @@ function dupeCheck(entry) {
         // If duplicate was found, update status
         if (data.dupeCheck) {
             $(`#tr-${currentIndex+1} td:last span`).css('background', 'blue');
+            completed++;
             // Continue
-            iterateRow();
+            return true;
+        } else {
+            return false;
         }
-        // console.log(data);
+        
     })
     .catch(error => console.log(error));
 }
+
+// gradeCheck: Performs basic validation on the climb_type and grade details of the current entry
+function gradeCheck(entry) {
+    // All inputs of type string as parsed by FileReader
+    // TEMPORARY: grades will be submitted as whole US grades w/o V or 5.
+    var climb_type = entry.details.climb_type.toLowerCase();
+    var grade = entry.details.grade.toLowerCase();
+    console.log('gradeCheck: ' + grade);
+
+    // Check for valid symbols
+    var valids = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','+','-','/'];
+    for (let i=0;i<grade.length;i++) {
+        // If character isn't valid...
+        if (!(valids.includes(grade[i]))) {
+            console.log('INVALID GRADE - Character: ' + grade[i]);
+            return {'valid': false, 'entry': entry, 'error': 101, 'tblId': currentIndex+1};
+        }
+    }
+
+    // Boulder grades may have +/- at end
+    if (climb_type == 'boulder') {
+        // Check for +/- in grade and only at end
+        if (grade.includes('+') || grade.includes('-')) {
+            if (grade.endswith('+') || grade.endswith('-')) {
+                // +\- OK, remove for further validation
+                grade = grade.slice(0,-1);
+            } else {
+                // +\- in middle, INVALID
+                console.log('INVALID GRADE - Out of place +\-');
+                return {'valid': false, 'entry': entry, 'error': 102, 'tblId': currentIndex+1};
+            }
+        }
+        // FIX FUNCTIONALITY FOR VB
+        // Check for letters (ONLY USD)
+        if (['a','b','c','d'].some(r => grade.includes(r))) {
+            console.log('INVALID GRADE - Letters in boulder');
+            return {'valid': false, 'entry': entry, 'error': 103, 'tblId': currentIndex+1};
+        }
+        
+        // Check that base integer is btw 0-16
+        if (parseInt(grade) >= 0 && parseInt(grade) <= 16) {
+            console.log('Valid grade');
+        } else {
+            console.log('INVALID GRADE - boulderNot0-16');
+            return {'valid': false, 'entry': entry, 'error': 104, 'tblId': currentIndex+1};
+        }
+
+    } else if (climb_type == 'route') {
+        console.log('Route');
+    } else {
+        // Invalid climb_type
+        console.log('INVALID CLIMB_TYPE');
+        return {'valid': false, 'entry': entry, 'error': 201, 'tblId': currentIndex+1};
+    }
+    return {'valid': true};
+}
+
+// qualCheck:
+function qualCheck(entry) {
+    console.log('qualCheck');
+    return {'valid': true};
+}
+
+// dangCheck:
+function dangCheck(entry) {
+    console.log('dangCheck');
+    return {'valid': true};
+}
+
+
+// -------------------------- Other Functions ---------------------------
+
 
 // addTRow
 function addTRow(entry) {
@@ -262,42 +365,39 @@ function separateDetails(row) {
     return entry;
 }
 
-// gradeCheck:
-function gradeCheck(entry) {
-    // All inputs of type string as parsed by FileReader
-    // TEMPORARY: grades will be submitted as whole US grades w/o V or 5.
-    var climb_type = entry.details.climb_type.toLowerCase();
-    var grade = entry.details.grade.toLowerCase();
-    console.log('gradeCheck: ' + grade);
+function checkEntry(entry) {
+    fetch('/check-entry', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(entry)
+    })
+    .then (response => response.json())
+    .then (function(data) {
+        console.log(data);
+    })
+    .catch(error => console.log(error));
+}
 
-    // Check for valid symbols
-    var valids = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','+','-','/'];
-    for (let i=0;i<grade.length;i++) {
-        // If character isn't valid...
-        if (!(valids.includes(grade[i]))) {
-            console.log('INVALID GRADE - Character: ' + grade[i]);
-            // User Correction Needed
-        }
+async function getEntry(entry) {
+    for (let i=0; i<entry.areas.length; i++) {
+        await fetch(`/check-entry?area=${entry.areas[i]}`, {
+            method: 'GET'
+        })
+        .then (response => response.json())
+        .then (function(data) {
+            // console.log(data);
+        })
+        .catch(error => console.log(error));
     }
+}
 
-    // Boulder grades may have +/- at end
-    // if (climb_type == 'boulder') {
-    //     // Check for +/- in grade
-        
-    //     // Remove +/- if attached
-    //     if (grade.endswith('+') || grade.endswith('-')) {
-    //         grade = grade.slice(0,-1);
-    //     // Check that base integer is btw 0-16
-    //     if (parseInt(grade) >= 0 && parseInt(grade) <= 16) {
-    //         console.log('Valid grade');
-    //     } else {
-    //         console.log('INVALID GRADE - boulderNot0-16');
-    //     }
-
-    // } else if (climb_type == 'route') {
-        
-    // } else {
-    //     // Invalid climb_type
-        
-    // }
+// updatePBar: updates/fills the progress bar based on the % of processed entries
+function updatePBar() {
+    var pbar_r2i = r2i.length/mifile.length*100;
+    var pbar_in = invalids.length/mifile.length*100;
+    var pbar_c = completed/mifile.length*100;
+    $('#progressbar-c').css('width',`${pbar_c}%`);
+    $('#progressbar-valid').css('width',`${pbar_r2i}%`);
+    $('#progressbar-in').css('width',`${pbar_in}%`);
+    console.log(`C: ${pbar_c}, Valid: ${pbar_r2i}, IN: ${pbar_in}`);
 }
