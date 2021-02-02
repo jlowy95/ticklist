@@ -16,91 +16,102 @@ Mass Import
     <br>
     <!-- File Upload -->
     <div id="fileform" class="row">
-        <div class="col-md-8 offset-2">
+        <div class="col-md-8 offset-1">
             <h4>File Upload</h4>
             <br>
             <form action="">
                 <label for="mifile">Select a file: </label>
                 <input type="file" id="mifile" name="mifile"><br><br>
             </form>
-            <button id="continue" style="display: none">Continue?</button>
+            <button id="continue" style="display: none" class="btn btn-secondary">Continue?</button>
         </div>
     </div>
     <!-- Processing -->
     <div id="processing" style="display: none">
         <div class="row">
-            <div class="col-md-8 offset-2">
+            <div class="col-md-10 offset-1">
                 <h4>Intructions:</h4>
                 <p>The importer will prompt you asking for confirmation of parent area...</p>
             </div>
         </div>
         <hr>
-        <div id="dataRow" class="row">
-            <div class="col-md-10 offset-2">
-                <h5>Current Entry:</h5>
-                <div class="row">
-                    <div class="col-12 offset-1">
-                        <strong>Areas: </strong>
-                        <div id="areas"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 offset-1">
-                        <strong>Climb: </strong>
-                        <div id="climb"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 offset-1">
-                        <strong>Details: </strong>
-                        <div id="details"></div>
-                    </div>
-                </div>
-                <br>
-                <div id="buttonsRow" class="row">
-                    <div class="col-md-10 offset-2">
-                        <button id="yesButton">Yes</button>
-                        <button id="noButton">No</button>
-                        <button id="skipButton">Skip</button>
-                    </div>
-                </div>
-                <br>
-                <!-- Table -->
-                <div class="row">
-                    <div class="col-12">
-                        <!-- Status Keys -->
-                        <div class="row">
-                            <div class="col-3">
-                                <span>Unprocessed: </span>
-                                <span class="square"></span>
-                            </div>
-                            <div class="col-3">
-                                <span>Validated: </span>
-                                <span class="square" style="background:greenyellow"></span>
-                            </div>
-                            <div class="col-3">
-                                <span>Input Needed: </span>
-                                <span class="square" style="background:yellow"></span>
-                            </div>
-                            <div class="col-3">
-                                <span>Duplicate Found: </span>
-                                <span class="square" style="background:blue"></span>
-                            </div>
+        <!-- UI -->
+        <div>
+            <!-- Current Entry -->
+            <div id="dataRow" class="row">
+                <div class="col-md-8 offset-1">
+                    <h5>Current Entry:</h5>
+                    <div class="row">
+                        <div class="col-11 offset-1">
+                            <small id="areas"></small>
                         </div>
-                        <!-- Import Table -->
-                        <table class="table table-hover table-sm">
-                            <thead class="thead-light">
-                                <th>#</th>
-                                <th>Outer Area</th>
-                                <th>Inner Area</th>
-                                <th>Climb</th>
-                                <th>Climb_Type</th>
-                                <th>Grade</th>
-                                <th>Status</th>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
                     </div>
+                    <div class="row">
+                        <div class="col-11 offset-1">
+                            <strong>Climb: </strong>
+                            &nbsp;
+                            <span id="climb"></span>
+                            &nbsp;
+                            <span id="grade"></span>
+                            &nbsp;
+                            <span id="danger"></span>
+                            &nbsp;
+                            <span id="quality"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 offset-1">
+                            <strong>Details: </strong>
+                            <div id="details"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <!-- Buttons/Navigation -->
+            <div id="buttonsRow" class="row">
+                <div class="col-md-10 offset-2">
+                    <button id="yesButton" class="btn btn-secondary" disabled>Yes</button>
+                    <button id="noButton" class="btn btn-secondary" disabled>No</button>
+                    <button id="skipButton" class="btn btn-secondary">Skip</button>
+                </div>
+            </div>
+            <br>
+            <!-- Status Table -->
+            <div class="row">
+                <div class="col-10 offset-1">
+                    <!-- Legend -->
+                    <div class="row">
+                        <div class="col-3">
+                            <span>Unprocessed: </span>
+                            <span class="square"></span>
+                        </div>
+                        <div class="col-3">
+                            <span>Validated: </span>
+                            <span class="square" style="background:greenyellow"></span>
+                        </div>
+                        <div class="col-3">
+                            <span>Input Needed: </span>
+                            <span class="square" style="background:yellow"></span>
+                        </div>
+                        <div class="col-3">
+                            <span>Duplicate Found: </span>
+                            <span class="square" style="background:blue"></span>
+                        </div>
+                    </div>
+                    <!-- Import Table -->
+                    <table class="table table-hover table-sm">
+                        <thead class="thead-light">
+                            <th>#</th>
+                            <th>Outer Area</th>
+                            <th>Inner Area</th>
+                            <th>Climb</th>
+                            <th>Climb_Type</th>
+                            <th>Grade</th>
+                            <th>Status</th>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
