@@ -95,7 +95,7 @@ async function nextRow() { //Iterate row by row of imported csv file
         // Separate details
         currentRow = mifile[currentIndex].split(',');
         var entry = separateDetails(currentRow);
-        console.log(entry.name);
+        // console.log(entry.name);
 
         updatePBar();
 
@@ -143,16 +143,6 @@ async function nextRow() { //Iterate row by row of imported csv file
             return quality;
         });
         
-        // for (let detail in entry.details.keys) {
-
-        // }
-        // for (let i in entry.details.keys) {
-        //     $('#details').append($('<span></span>').text(entry.details[i]));
-        //     if (i<entry.details.keys.length-1) {
-        //         $('#details').append(', ');
-        //     }
-        // }
-        
         // add current row to table
         addTRow(entry);
 
@@ -162,11 +152,9 @@ async function nextRow() { //Iterate row by row of imported csv file
         if (!duped) {
             validateEntry(entry);
         }
-        setTimeout(200);
         return true;
 
     } else {
-        currentIndex++;
         updatePBar();
         console.log('DONE!');
     }
@@ -184,11 +172,14 @@ function iterateRow() {
 
 async function justRun() {
     currentIndex=0;
-    for (let i=0; i<mifile.length;i++) {
-        const imwaiting = await nextRow();
-        console.log(imwaiting);
-        currentIndex++;
+    while (currentIndex<mifile.length) {
+        let nr = await nextRow();
+        if (nr) {
+            currentIndex++;
+        }
     }
+    stopPBar();
+    alert('Validation Complete! Please attend to the "Input Needed" entries.');
 }
 
 
@@ -232,7 +223,7 @@ function validateEntry(entry) {
 
 // dupeCheck: Sends a GET request to check if a duplicate climb under final listed area exists
 async function dupeCheck(entry) {
-    await fetch(`/check-entry?type=dupe&area=${entry.areas[entry.areas.length-1]}&climb=${entry.name}`, {
+    await fetch(`/check-entry?type=dupe&area=${asciiURL(entry.areas[entry.areas.length-1])}&climb=${asciiURL(entry.name)}`, {
         method: 'GET'
     })
     .then (response => response.json())
@@ -257,14 +248,14 @@ function gradeCheck(entry) {
     // TEMPORARY: grades will be submitted as whole US grades w/o V or 5.
     var climb_type = entry.details.climb_type.toLowerCase();
     var grade = entry.details.grade.toLowerCase();
-    console.log('gradeCheck: ' + grade);
+    // console.log('gradeCheck: ' + grade);
 
     // Check for valid symbols
     var valids = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','+','-','/'];
     for (let i=0;i<grade.length;i++) {
         // If character isn't valid...
         if (!(valids.includes(grade[i]))) {
-            console.log('INVALID GRADE - Character: ' + grade[i]);
+            console.log(entry.name + 'INVALID GRADE - Character: ' + grade[i]);
             return {'valid': false, 'entry': entry, 'error': 101, 'tblId': currentIndex+1};
         }
     }
@@ -278,30 +269,30 @@ function gradeCheck(entry) {
                 grade = grade.slice(0,-1);
             } else {
                 // +\- in middle, INVALID
-                console.log('INVALID GRADE - Out of place +\-');
+                console.log(entry.name + 'INVALID GRADE - Out of place +\-');
                 return {'valid': false, 'entry': entry, 'error': 102, 'tblId': currentIndex+1};
             }
         }
         // FIX FUNCTIONALITY FOR VB
         // Check for letters (ONLY USD)
         if (['a','b','c','d'].some(r => grade.includes(r))) {
-            console.log('INVALID GRADE - Letters in boulder');
+            console.log(entry.name + 'INVALID GRADE - Letters in boulder');
             return {'valid': false, 'entry': entry, 'error': 103, 'tblId': currentIndex+1};
         }
         
         // Check that base integer is btw 0-16
         if (parseInt(grade) >= 0 && parseInt(grade) <= 16) {
-            console.log('Valid grade');
+            // console.log('Valid grade');
         } else {
-            console.log('INVALID GRADE - boulderNot0-16');
+            console.log(entry.name + 'INVALID GRADE - boulderNot0-16');
             return {'valid': false, 'entry': entry, 'error': 104, 'tblId': currentIndex+1};
         }
 
     } else if (climb_type == 'route') {
-        console.log('Route');
+        // console.log('Route');
     } else {
         // Invalid climb_type
-        console.log('INVALID CLIMB_TYPE');
+        console.log(entry.name + 'INVALID CLIMB_TYPE');
         return {'valid': false, 'entry': entry, 'error': 201, 'tblId': currentIndex+1};
     }
     return {'valid': true};
@@ -309,13 +300,13 @@ function gradeCheck(entry) {
 
 // qualCheck:
 function qualCheck(entry) {
-    console.log('qualCheck');
+    // console.log('qualCheck');
     return {'valid': true};
 }
 
 // dangCheck:
 function dangCheck(entry) {
-    console.log('dangCheck');
+    // console.log('dangCheck');
     return {'valid': true};
 }
 
@@ -340,6 +331,9 @@ function addTRow(entry) {
 
 // separateDetails: Takes the row/entry and creates an object for distinction of details/areas/name
 function separateDetails(row) {
+    // Trim excess spaces
+    row = row.map(el => el.trim());
+
     var entry = {'details':{}};
     // Separate entry details
     var parents = row.slice(0,6);
@@ -391,6 +385,14 @@ async function getEntry(entry) {
     }
 }
 
+// asciiURL: Unidentified source is misconverting/reading get requests with "#" characters.  This function 
+// properly converts spaces and '#' symbols to their ascii equivalents for url compatibility.
+function asciiURL(mystring) {
+    mystring = mystring.replace(" ", "%20");
+    mystring = mystring.replace("#", "%23");
+    return mystring;
+}
+
 // updatePBar: updates/fills the progress bar based on the % of processed entries
 function updatePBar() {
     var pbar_r2i = r2i.length/mifile.length*100;
@@ -399,5 +401,10 @@ function updatePBar() {
     $('#progressbar-c').css('width',`${pbar_c}%`);
     $('#progressbar-valid').css('width',`${pbar_r2i}%`);
     $('#progressbar-in').css('width',`${pbar_in}%`);
-    console.log(`C: ${pbar_c}, Valid: ${pbar_r2i}, IN: ${pbar_in}`);
+    // console.log(`C: ${pbar_c}, Valid: ${pbar_r2i}, IN: ${pbar_in}`);
+}
+
+function stopPBar() {
+    $('#progressbar-valid').removeClass('progress-bar-striped');
+    $('#progressbar-valid').removeClass('progress-bar-animated');
 }
