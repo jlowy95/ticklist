@@ -20,15 +20,14 @@
 
 // -------------- CODE ---------------------
 
-// Define "submit" button
-var continueButton = $('#continue');
-continueButton.on('click', processFile);
-
 // Client file upload
 var mifile;
 
 // Listener for file choice
 $('#mifile').on('change', storeFile);
+// Listeners for validation start
+$('#rv-button').on('click', justRun);
+$('#rv-button-2').on('click', justRun);
 
 // storeFile: Listens for file upload then reads/stores data into global var 'mifile'.
 // Continue button for further processing is then displayed.
@@ -43,8 +42,8 @@ function storeFile (evt) {
         mifile = event.target.result.split(/\r\n|\n/).slice(1); 
     };
     reader.readAsText(file);
-    // Display continue button
-    continueButton.css('display', 'block');
+    // Flip page to processing
+    processFile();
 }
 
 // processFile: Opens user correction/validation tools and runs csv parsing tools for server imports
@@ -52,11 +51,9 @@ function processFile () {
     // console.log(mifile);
     // Hide form and continue button, display instructions and processing
     $('#fileform').css('display','none');
-    continueButton.css('display', 'none');
     $('#processing').css('display', 'block');
-    // more processing functions
-    // start();
-    justRun();
+    // Toggle modal to prompt validation start
+    $('#runValidationModal').modal('toggle');
 }
 
 // User input controls for processing
@@ -177,6 +174,10 @@ function iterateRow() {
 }
 
 async function justRun() {
+    // Hide secondary RV button
+    $('#rv-button-2').css('display', 'none');
+    $('#rv-button-2').prop('disabled', true);
+    // Begin iteration
     currentIndex=0;
     while (currentIndex<mifile.length) {
         let nr = await nextRow();
@@ -474,6 +475,8 @@ function asciiURL(mystring) {
     
 }
 
+// --------------------- Progress Bar -------------------------------------
+
 // updatePBar: updates/fills the progress bar based on the % of processed entries
 function updatePBar() {
     var pbar_r2i = r2i.length/mifile.length*100;
@@ -489,3 +492,23 @@ function stopPBar() {
     $('#progressbar-valid').removeClass('progress-bar-striped');
     $('#progressbar-valid').removeClass('progress-bar-animated');
 }
+
+// --------------------- IN Form Functions -----------------------------
+
+// Enable correct grades after climb_type selection
+$('#inform-climb_type').on('change', function() {
+    // Enable grade select
+    $('#inform-grade').prop('disabled', false);
+    // Disable opposite grades
+    if ($('#inform-climb_type').val() == 'boulder') {
+        $('#routegrades').prop('disabled', true);
+        $('#routegrades').css('display', 'none');
+        $('#bouldergrades').prop('disabled', false);
+        $('#bouldergrades').css('display', 'block');
+    } else if ($('#inform-climb_type').val() == 'route') {
+        $('#bouldergrades').prop('disabled', true);
+        $('#bouldergrades').css('display', 'none');
+        $('#routegrades').prop('disabled', false);
+        $('#routegrades').css('display', 'block');
+    }
+});
