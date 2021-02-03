@@ -82,7 +82,7 @@ function buttonsHandler() {
     }
 }
 
-//----------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
 // Iterating functions for csv processing and user input
 var currentIndex = 0;
 var invalids = [];
@@ -94,7 +94,14 @@ async function nextRow() { //Iterate row by row of imported csv file
         // Separate details
         currentRow = mifile[currentIndex].split(',');
         var entry = separateDetails(currentRow);
-        // console.log(entry.name);
+
+        // If no name or areas, skip (add to completed count)
+        // currentIndex is unaltered because mifile has defined length/index
+        if (noname(entry)) {
+            completed++;
+            updatePBar();
+            return true;
+        }
 
         updatePBar();
 
@@ -184,6 +191,18 @@ async function justRun() {
 
 // ----------------- Validation Functions -----------------------
 
+
+// noname: Returns true if entry has a blank name or 0 areas
+function noname(entry) {
+    // Check for lack of name OR no filled areas
+    if (entry.name == '' || entry.areas.every(el => el === '')) {
+        console.log('NONAME ENTRY');
+        console.log(entry);
+        return true;
+    } else {
+        return false;
+    }
+}
 
 // validateEntry: Collective fn for calling individual validation functions.  If invalid, adds entry to
 // invalids with error code
