@@ -397,7 +397,7 @@ function addTRow(entry) {
     var tblRow = $(`<tr id="tr-${currentIndex+1}">`);
     // Append td's to tr
     $.each(table_data, function(i,v) {
-        tblRow.append('<td>' + v + '</td>');
+        tblRow.append('<td><small>' + v + '</small></td>');
     });
     tblRow.append('<td class="text-center"><span class="square"></span></td>');
     // Append our completed tr to the tbody
