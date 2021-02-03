@@ -56,7 +56,6 @@ function processFile () {
     $('#processing').css('display', 'block');
     // more processing functions
     // start();
-    setTimeout(500);
     justRun();
 }
 
@@ -252,44 +251,78 @@ function gradeCheck(entry) {
 
     // Check for valid symbols
     var valids = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','+','-','/'];
+    var letterCount = 0;
     for (let i=0;i<grade.length;i++) {
+        // Count letters to check no more than 1
+        if (['a','b','c','d'].includes(grade[i])) {
+            letterCount++;
+        }
         // If character isn't valid...
         if (!(valids.includes(grade[i]))) {
             console.log(entry.name + 'INVALID GRADE - Character: ' + grade[i]);
             return {'valid': false, 'entry': entry, 'error': 101, 'tblId': currentIndex+1};
         }
     }
+    if (letterCount>1) {
+        console.log(entry.name + 'INVALID GRADE - multipleLetters: ');
+        return {'valid': false, 'entry': entry, 'error': 109, 'tblId': currentIndex+1};
+    }
+
+
+    // Check for +/- in grade and only at end
+    if (grade.includes('+') || grade.includes('-')) {
+        if (grade.endswith('+') || grade.endswith('-')) {
+            // +\- OK, remove for further validation
+            grade = grade.slice(0,-1);
+        } else {
+            // +\- in middle, INVALID
+            console.log(entry.name + 'INVALID GRADE - Out of place +\-');
+            return {'valid': false, 'entry': entry, 'error': 102, 'tblId': currentIndex+1};
+        }
+    }
 
     // Boulder grades may have +/- at end
     if (climb_type == 'boulder') {
-        // Check for +/- in grade and only at end
-        if (grade.includes('+') || grade.includes('-')) {
-            if (grade.endswith('+') || grade.endswith('-')) {
-                // +\- OK, remove for further validation
-                grade = grade.slice(0,-1);
-            } else {
-                // +\- in middle, INVALID
-                console.log(entry.name + 'INVALID GRADE - Out of place +\-');
-                return {'valid': false, 'entry': entry, 'error': 102, 'tblId': currentIndex+1};
-            }
-        }
-        // FIX FUNCTIONALITY FOR VB
-        // Check for letters (ONLY USD)
-        if (['a','b','c','d'].some(r => grade.includes(r))) {
+        // Check for letters (ONLY USD), VB acceptable
+        if (grade === 'b') {
+            return {'valid': true};
+        } else if (['a','b','c','d'].some(r => grade.includes(r))) {
             console.log(entry.name + 'INVALID GRADE - Letters in boulder');
             return {'valid': false, 'entry': entry, 'error': 103, 'tblId': currentIndex+1};
         }
         
         // Check that base integer is btw 0-16
-        if (parseInt(grade) >= 0 && parseInt(grade) <= 16) {
-            // console.log('Valid grade');
-        } else {
+        if (parseInt(grade) < 0 || parseInt(grade) > 16) {
             console.log(entry.name + 'INVALID GRADE - boulderNot0-16');
             return {'valid': false, 'entry': entry, 'error': 104, 'tblId': currentIndex+1};
         }
 
     } else if (climb_type == 'route') {
-        // console.log('Route');
+        // Check int, and check for letter based on int
+        var intGrade = parseInt(grade);
+        if (intGrade < 4 || intGrade > 15) {
+            console.log(entry.name + 'INVALID GRADE - routeNot4-15');
+            return {'valid': false, 'entry': entry, 'error': 105, 'tblId': currentIndex+1};
+        } else if (intGrade < 10) {
+            // Check for letter (letter for 5.9 and below is invalid)
+            if (['a','b','c','d'].some(r => grade.includes(r))) {
+                console.log(entry.name + 'INVALID GRADE - easyRouteLetter');
+                return {'valid': false, 'entry': entry, 'error': 106, 'tblId': currentIndex+1};
+            }
+        } else { // Else 10 <= intGrade <= 15
+            // Check for letter (letter is required now)
+            if (['a','b','c','d'].some(r => grade.includes(r))) {
+                // If letter, letter must be at end (+/- already removed)
+                if (!(['a','b','c','d'].some(r => grade.endsWith(r)))) {
+                    console.log(entry.name + 'INVALID GRADE - RouteMisplacedLetter');
+                    return {'valid': false, 'entry': entry, 'error': 108, 'tblId': currentIndex+1};
+                }
+            } else {
+                console.log(entry.name + 'INVALID GRADE - hardRouteNoLetter');
+                return {'valid': false, 'entry': entry, 'error': 107, 'tblId': currentIndex+1};
+            }
+        }
+
     } else {
         // Invalid climb_type
         console.log(entry.name + 'INVALID CLIMB_TYPE');
@@ -298,15 +331,38 @@ function gradeCheck(entry) {
     return {'valid': true};
 }
 
-// qualCheck:
+// qualCheck: Returns a false JSON object if entry's quality is not 0-5
 function qualCheck(entry) {
-    // console.log('qualCheck');
-    return {'valid': true};
+    if (parseInt(entry.details.quality) <= 0 || parseInt(entry.details.quality) >= 6) {
+        console.log(entry.name + 'INVALID QUALITY');
+        return {'valid': false, 'entry': entry, 'error': 301, 'tblId': currentIndex+1};
+    } else {
+        return {'valid': true};
+    }
 }
 
-// dangCheck:
+// dangCheck: Returns a false JSON object if the entry's danger is not 0-3 or standard movie
 function dangCheck(entry) {
-    // console.log('dangCheck');
+    // Check int or movie
+    var dangInt = parseInt(entry.details.danger);
+    if (!isNaN(dangInt)) {
+        // Check if whole number
+        if (dangInt % 1 === 0) {
+            // Check if 0-3
+            if (dangInt < 0 || dangInt > 3) {
+                console.log(entry.name + 'INVALID dangerInt');
+                return {'valid': false, 'entry': entry, 'error': 401, 'tblId': currentIndex+1};
+            }
+        } else {
+            console.log(entry.name + 'INVALID Danger - not whole int');
+            return {'valid': false, 'entry': entry, 'error': 402, 'tblId': currentIndex+1};
+        }
+    } else { // Else movie
+        if (!(['G','PG','PG13','PG-13','R','X'].includes(entry.details.danger))) {
+            console.log(entry.name + 'INVALID Danger - invalidMovie');
+            return {'valid': false, 'entry': entry, 'error': 403, 'tblId': currentIndex+1};
+        }
+    }
     return {'valid': true};
 }
 
@@ -388,9 +444,15 @@ async function getEntry(entry) {
 // asciiURL: Unidentified source is misconverting/reading get requests with "#" characters.  This function 
 // properly converts spaces and '#' symbols to their ascii equivalents for url compatibility.
 function asciiURL(mystring) {
-    mystring = mystring.replace(" ", "%20");
-    mystring = mystring.replace("#", "%23");
-    return mystring;
+    try {
+        mystring = mystring.replace(" ", "%20");
+        mystring = mystring.replace("#", "%23");
+        return mystring;
+    } catch (error) {
+        console.log(`dupeCheck asciiURL error @ ${currentIndex}`);
+        console.log(error);
+    }
+    
 }
 
 // updatePBar: updates/fills the progress bar based on the % of processed entries
