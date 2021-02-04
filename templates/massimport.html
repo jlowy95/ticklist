@@ -66,27 +66,28 @@ Mass Import
                         <!-- Input Needed Reason/Explanation -->
                         <p id="in-reason">This is what's wrong with this entry.</p>
                         <p>Original Value: <span id="in-og"></span></p>
-                        <form action="" id="form-group--1">
+
+                        <form class="needs-validation" id="form-group--1">
                             <!-- Hidden Values -->
-                            <input type="text" name="inform-entryIndex" id="inform-entryIndex" style="display: none">
+                            <input type="text" name="entryIndex" id="inform-entryIndex" style="display: none" required>
                             <!-- Areas (comma-separated list) -->
                             <div class="form-row">
                                 <div class="col req-col">
                                     <label for="inform-areas"><strong>Areas </strong><small>(comma-separated list)</small></label>
-                                    <textarea name="inform-areas" id="inform-areas" class="form-control"></textarea>
+                                    <textarea name="areas" id="inform-areas" class="form-control" required></textarea>
                                 </div>
                             </div>
                             <!-- Climb -->
                             <div class="form-row">
                                 <div class="col req-col">
                                     <label for="inform-climb">Name</label>
-                                    <input type="text" name="inform-climb" id="inform-climb" class="form-control">
+                                    <input type="text" name="climb" id="inform-climb" class="form-control" required>
                                 </div>
                             </div>
                             <!-- Climb_Type -->
                             <div class="form-row">
                                 <div class="col req-col">
-                                    <select name="inform-climb_type" id="inform-climb_type" type="text" class="custom-select">
+                                    <select name="climb_type" id="inform-climb_type" type="text" class="custom-select" required>
                                         <option value="" disabled>Climb Type</option>
                                         <option value="boulder">Boulder</option>
                                         <option value="route">Route</option>
@@ -96,7 +97,7 @@ Mass Import
                             <div class="form-row">
                                 <div class="col req-col">
                                     <!-- Grade -->
-                                    <select name="inform-grade" id="inform-grade" type="text" class="custom-select">
+                                    <select name="grade" id="inform-grade" type="text" class="custom-select" required>
                                         <option value="" disabled>Grade</option>
                                         <optgroup id="bouldergrades">
                                             <option value="B">VB</option>
@@ -150,19 +151,42 @@ Mass Import
                                         </optgroup>
                                     </select>
                                 </div>
-                                <div class="col req-col">
-                                    <!-- Danger -->
-                                    <select name="inform-danger" id="inform-danger" type="number" min="0" max="3" class="custom-select">
-                                        <option value="" disabled>Danger</option>
-                                        <option value="0">G</option>
-                                        <option value="1">PG-13</option>
-                                        <option value="2">R</option>
-                                        <option value="3">X</option>
+                                <div class="col">
+                                    <!-- Pitches -->
+                                    <input class="form-control route-specific" name="pitches" id="inform-pitches" type="number" min="0" size="2" maxlength="2" placeholder="Pitches">
+                                </div>
+                                <div class="col">
+                                    <!-- Committment -->
+                                    <select class="custom-select route-specific" name="committment" id="inform-committment" type="text" min="0" max="7">
+                                        <option selected value="">Committment</option>
+                                        <option value="I">I</option>
+                                        <option value="II">II</option>
+                                        <option value="III">III</option>
+                                        <option value="IV">IV</option>
+                                        <option value="V">V</option>
+                                        <option value="VI">VI</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <!-- Route_type -->
+                                    <select class="custom-select route-specific" name="route_type" id="inform-route_type" type="number" min="0" max="3">
+                                        <option selected value="">Route Type</option>
+                                        <option value="1">Sport</option>
+                                        <option value="2">Trad</option>
+                                        <option value="3">Deep Water Solo</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <!-- Height -->
+                                    <input name="height" id="inform-height" type="number" min="0" size="4" maxlength="4" class="form-control" placeholder="Height (ft)">
+                                </div>
+                            </div>
+                            <div class="form-row">
                                 <div class="col req-col">
                                     <!-- Quality -->
-                                    <select name="inform-quality" id="inform-quality" type="number" min="0" max="5" class="custom-select">
+                                    <select name="quality" id="inform-quality" type="number" min="0" max="5" class="custom-select" required>
                                         <option value="" disabled>Quality</option>
                                         <option value="0">&#128163</option>
                                         <option value="1">&#9733</option>
@@ -172,10 +196,33 @@ Mass Import
                                         <option value="5">&#9733&#9733&#9733&#9733&#9733</option>
                                     </select>
                                 </div>
+                                <div class="col req-col">
+                                    <!-- Danger -->
+                                    <select name="danger" id="inform-danger" type="number" min="0" max="3" class="custom-select" required>
+                                        <option value="" disabled>Danger</option>
+                                        <option value="0">G</option>
+                                        <option value="1">PG-13</option>
+                                        <option value="2">R</option>
+                                        <option value="3">X</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Other Details -->
+                            <div class="form-row">
+                                <div class="col">
+                                    <!-- FA -->
+                                    <input name="fa" id="inform-fa" type="text" maxlength="50" class="form-control" placeholder="First Ascenscionist">
+                                </div>
                             </div>
                             <div class="form-row">
                                 <div class="col">
-                                    <!-- Other Details -->
+                                    <!-- Description -->
+                                    <textarea name="description" id="inform-description" maxlength="500" class="form-control" placeholder="Description"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <input name="pro" id="inform-pro" type="text" maxlength="100" class="form-control" placeholder="Protection">
                                 </div>
                             </div>
                         </form>
