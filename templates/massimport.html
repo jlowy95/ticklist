@@ -52,14 +52,23 @@ Mass Import
                     </div>
                 </div>
                 <br>
+                <!-- Form Placeholder -->
+                <div id="form-placeholder" class="row">
+                    <div class="col-10 offset-2">
+                        If user input is needed, a form will appear here.
+                    </div>
+                </div>
                 <!-- IN Form -->
-                <div id="in-form" class="row">
+                <div id="in-form" class="row" style="display: none;">
                     <div class="col-10 offset-2">
                         <!-- Form Title -->
-                        <h5>Input Needed:</h5>
+                        <span class="h5">Input Needed (</span><span id="numIN" class="h5"></span><span class="h5">):</span>
                         <!-- Input Needed Reason/Explanation -->
                         <p id="in-reason">This is what's wrong with this entry.</p>
-                        <form action="">
+                        <p>Original Value: <span id="in-og"></span></p>
+                        <form action="" id="form-group--1">
+                            <!-- Hidden Values -->
+                            <input type="text" name="inform-entryIndex" id="inform-entryIndex" style="display: none">
                             <!-- Areas (comma-separated list) -->
                             <div class="form-row">
                                 <div class="col req-col">
@@ -78,7 +87,7 @@ Mass Import
                             <div class="form-row">
                                 <div class="col req-col">
                                     <select name="inform-climb_type" id="inform-climb_type" type="text" class="custom-select">
-                                        <option value="" disabled selected>Climb Type</option>
+                                        <option value="" disabled>Climb Type</option>
                                         <option value="boulder">Boulder</option>
                                         <option value="route">Route</option>
                                     </select>
@@ -87,10 +96,10 @@ Mass Import
                             <div class="form-row">
                                 <div class="col req-col">
                                     <!-- Grade -->
-                                    <select name="inform-grade" id="inform-grade" type="text" class="custom-select" disabled>
-                                        <option value="" disabled selected>Grade</option>
+                                    <select name="inform-grade" id="inform-grade" type="text" class="custom-select">
+                                        <option value="" disabled>Grade</option>
                                         <optgroup id="bouldergrades">
-                                            <option value="-1">VB</option>
+                                            <option value="B">VB</option>
                                             <option value="0">V0</option>
                                             <option value="1">V1</option>
                                             <option value="2">V2</option>
@@ -144,7 +153,7 @@ Mass Import
                                 <div class="col req-col">
                                     <!-- Danger -->
                                     <select name="inform-danger" id="inform-danger" type="number" min="0" max="3" class="custom-select">
-                                        <option value="" disabled selected>Danger</option>
+                                        <option value="" disabled>Danger</option>
                                         <option value="0">G</option>
                                         <option value="1">PG-13</option>
                                         <option value="2">R</option>
@@ -154,7 +163,7 @@ Mass Import
                                 <div class="col req-col">
                                     <!-- Quality -->
                                     <select name="inform-quality" id="inform-quality" type="number" min="0" max="5" class="custom-select">
-                                        <option value="" selected disabled>Quality</option>
+                                        <option value="" disabled>Quality</option>
                                         <option value="0">&#128163</option>
                                         <option value="1">&#9733</option>
                                         <option value="2">&#9733&#9733</option>
@@ -170,15 +179,11 @@ Mass Import
                                 </div>
                             </div>
                         </form>
-                    </div>
-                </div>
-                <br>
-                <!-- Buttons -->
-                <div id="buttonsRow" class="row">
-                    <div class="col-9 offset-3">
-                        <button id="yesButton" class="btn btn-secondary" disabled>Yes</button>
-                        <button id="noButton" class="btn btn-secondary" disabled>No</button>
-                        <button id="skipButton" class="btn btn-secondary">Skip</button>
+                        <br>
+                        <!-- Buttons -->
+                        <div id="buttonsRow" class="text-center">
+                            <button id="subButton" class="btn btn-secondary">Submit <span id="curForm"></span></button>
+                        </div>
                     </div>
                 </div>
             </div>

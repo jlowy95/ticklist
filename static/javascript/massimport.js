@@ -56,29 +56,6 @@ function processFile () {
     $('#runValidationModal').modal('toggle');
 }
 
-// User input controls for processing
-$('#yesButton').on('click', buttonsHandler);
-$('#noButton').on('click', buttonsHandler);
-$('#skipButton').on('click', buttonsHandler);
-
-// Switch handler for user processing inputs
-function buttonsHandler() {
-    var src = event.srcElement.id.slice(0,-6);
-    // console.log(src);
-    switch(src) {
-        case ('yes'):
-            console.log('Yes');
-            break;
-        case('no'): 
-            console.log('No');
-            break;
-        case('skip'):
-            console.log('Skip');
-            iterateRow();
-            break;
-    }
-}
-
 //-----------------------------------------------------------------------------------------
 // Iterating functions for csv processing and user input
 var currentIndex = 0;
@@ -229,6 +206,9 @@ function validateEntry(entry) {
         if (!res.valid) {
             $(`#tr-${currentIndex+1} td:last span`).css('background', 'yellow');
             invalids.push(res);
+            // Trigger IN Form
+            $('#numIN').text(invalids.length);
+            $('#numIN').trigger('change');
             valid = false;
             break;
         }
@@ -320,8 +300,8 @@ function gradeCheck(entry) {
     } else if (climb_type == 'route') {
         // Check int, and check for letter based on int
         var intGrade = parseInt(grade);
-        if (intGrade < 4 || intGrade > 15) {
-            console.log(entry.name + 'INVALID GRADE - routeNot4-15');
+        if (intGrade < 3 || intGrade > 15) {
+            console.log(entry.name + 'INVALID GRADE - routeNot3-15');
             return {'valid': false, 'entry': entry, 'error': 105, 'tblId': currentIndex+1};
         } else if (intGrade < 10) {
             // Check for letter (letter for 5.9 and below is invalid)
@@ -512,3 +492,123 @@ $('#inform-climb_type').on('change', function() {
         $('#routegrades').css('display', 'block');
     }
 });
+
+$('#numIN').on('change', function() {
+    // If first change (invalids.length==1), unhide form, hide placeholder
+    if (invalids.length===1) {
+        $('#in-form').css('display', 'block');
+        $('#form-placeholder').css('display', 'none');
+        fillForm(invalids[0]);
+    }
+});
+
+// errorDecode: Takes the inputted error code and returns an object with the text string reason and the source
+function errorDecode(code) {
+    var res = {};
+    res.src = Math.floor(code/100);
+    switch (code) {
+        case 101:
+            res.reason = "Invalid Grade: A prohibited character was found in the submitted grade.  Only numeric digits, standard routes letter (a-d), and +/- are allowed.";
+            break;
+        case 102:
+            res.reason = "Invalid Grade: Out of place '+/-'.  If a plus or minus sign is used, it must be placed at the end of the grade.  Slash grades are not permitted.";
+            break;
+        case 103:
+            res.reason = "Invalid Grade: Letters in boulder grade.  Only US/Vermin boulders are permitted for the mass importer at this time.  Please correct the grade, convert the it to US/Vermin or correct climb_type.";
+            break;
+        case 104:
+            res.reason = "Invalid Grade: Boulder grade out of range.  Boulder grades may only be (V)B-16.";
+            break;
+        case 105:
+            res.reason = "Invalid Grade: Route grade out of range.  Route grades may only be (5.)3-15.";
+            break;
+        case 106:
+            res.reason = "Invalid Grade: Letter included for easy difficulty.  Only US/YDS grades are permitted for the mass importer at this time.  Please correct the grade, convert it to US/YDS, or correct climb_type.";
+            break;
+        case 107:
+            res.reason = "Invalid Grade: Letter omitted for hard difficulty.  Only US/YDS grades are permitted for the mass importer at this time.  Please correct the grade, convert it to US/YDS, or correct climb_type.";
+            break;
+        case 108:
+            res.reason = "Invalid Grade: Misplaced letter.  Following standard YDS format, if a letter is used in a grade it is placed after the number.  Please select the intended grade.";
+            break;
+        case 201:
+            res.reason = "Invalid Climb_Type: Only 'boulder' or 'route' are accepted climb_types at this time.";
+            break;
+        case 301:
+            res.reason = "Invalid Quality: Quality values may only be 0-5 reflecting absolute shit to life list.";
+            break;
+        case 401:
+            res.reason = "Invalid Danger: Danger integer out of range.  Danger may only be 0-3 for 'G', 'PG-13', 'R', and 'X'.";
+            break;
+        case 402:
+            res.reason = "Invalid Danger: Danger not whole number.  Danger may only be 0-3 for 'G', 'PG-13', 'R', and 'X'.";
+            break;
+        case 403:
+            res.reason = "Invalid Danger: Invalid movie grade.  Danger may only be 'G', 'PG-13'(PG13), 'R', and 'X'.";
+            break;
+    }
+    return res;
+}
+
+// fillForm: Prefills form fields with data from the inputted (invalid) entry
+function fillForm (invalidEntry) {
+    $('#inform-entryIndex').val(invalidEntry.tblId);
+    // Get error source and update error reason
+    var error = errorDecode(invalidEntry.error);
+    $('#in-reason').text(error.reason);
+
+    // Create csl of areas and place into textarea
+    $('#inform-areas').val(buildCSL(invalidEntry.entry.areas));
+
+    $('#inform-climb').val(invalidEntry.entry.name);
+
+    // If error from source, dont attempt to fill form with invalid value, fill in-og with source value
+    // Grade Error
+    if (error.src === 1) {
+        $('#in-og').text(invalidEntry.entry.details.grade);
+        $('#inform-grade').val('');
+    } else {
+        $('#inform-grade option').filter(function() {
+            return $(this).val() == invalidEntry.entry.details.grade;
+        }).attr('selected', true);
+    }
+    // Climb_type Error
+    if (error.src === 2) {
+        $('#in-og').text(invalidEntry.entry.details.climb_type);
+        $('#inform-climb_type').val('');
+    } else {
+        $('#inform-climb_type option').filter(function() {
+            return $(this).val() == invalidEntry.entry.details.climb_type;
+        }).attr('selected', true);    
+    }
+    // Quality Error
+    if (error.src === 3) {
+        $('#in-og').text(invalidEntry.entry.details.quality);
+        $('#inform-quality').val('');
+    } else {
+        $('#inform-quality option').filter(function() {
+            return $(this).val() == invalidEntry.entry.details.quality;
+        }).attr('selected', true);    
+    }
+    // Danger Error
+    if (error.src === 4) {
+        $('#in-og').text(invalidEntry.entry.details.danger);
+        $('#inform-danger').val('');
+    } else {
+        $('#inform-danger option').filter(function() {
+            return $(this).val() == invalidEntry.entry.details.danger;
+        }).attr('selected', true);    }
+
+}
+
+// buildCSL: Creates a comma separated list from the contents of the inputted array.
+function buildCSL(arr) {
+    var csl = "";
+    for (let i in arr) {
+        csl += arr[i] + ", ";
+    }
+    return csl.slice(0,-2);
+}
+
+// User input controls for processing
+$('#subButton').on('click', buttonsHandler);
