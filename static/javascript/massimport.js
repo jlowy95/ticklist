@@ -248,6 +248,10 @@ function gradeCheck(entry) {
     var climb_type = entry.details.climb_type.toLowerCase();
     var grade = entry.details.grade.toLowerCase();
     // console.log('gradeCheck: ' + grade);
+    // Check for blank grade
+    if (grade == '') {
+        return {'valid': false, 'entry': entry, 'error': 109, 'tblId': currentIndex+1};
+    }
 
     // Check for valid symbols
     var valids = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','+','-','/'];
@@ -333,6 +337,11 @@ function gradeCheck(entry) {
 
 // qualCheck: Returns a false JSON object if entry's quality is not 0-5
 function qualCheck(entry) {
+    // Check for no quality
+    if (entry.details.quality == '') {
+        return {'valid': false, 'entry': entry, 'error': 302, 'tblId': currentIndex+1};
+    }
+
     if (parseInt(entry.details.quality) <= 0 || parseInt(entry.details.quality) >= 6) {
         // console.log(entry.name + 'INVALID QUALITY');
         return {'valid': false, 'entry': entry, 'error': 301, 'tblId': currentIndex+1};
@@ -343,6 +352,11 @@ function qualCheck(entry) {
 
 // dangCheck: Returns a false JSON object if the entry's danger is not 0-3 or standard movie
 function dangCheck(entry) {
+    // Check for no danger
+    if (entry.details.danger == '') {
+        return {'valid': false, 'entry': entry, 'error': 404, 'tblId': currentIndex+1};
+    }
+
     // Check int or movie
     var dangInt = parseInt(entry.details.danger);
     if (!isNaN(dangInt)) {
@@ -534,11 +548,17 @@ function errorDecode(code) {
         case 108:
             res.reason = "Invalid Grade: Misplaced letter.  Following standard YDS format, if a letter is used in a grade it is placed after the number.  Please select the intended grade.";
             break;
+        case 109:
+            res.reason = "Invalid Grade: None provided, please enter a grade.";
+            break;
         case 201:
             res.reason = "Invalid Climb_Type: Only 'boulder' or 'route' are accepted climb_types at this time.";
             break;
         case 301:
             res.reason = "Invalid Quality: Quality values may only be 0-5 reflecting absolute shit to life list.";
+            break;
+        case 302:
+            res.reason = "Invalid Quality: None provided, please enter a quality.";
             break;
         case 401:
             res.reason = "Invalid Danger: Danger integer out of range.  Danger may only be 0-3 for 'G', 'PG-13', 'R', and 'X'.";
@@ -548,6 +568,9 @@ function errorDecode(code) {
             break;
         case 403:
             res.reason = "Invalid Danger: Invalid movie grade.  Danger may only be 'G', 'PG-13'(PG13), 'R', and 'X'.";
+            break;
+        case 404:
+            res.reason = "Invalid Danger: None provided, please enter a danger.";
             break;
     }
     return res;
@@ -572,9 +595,15 @@ function fillForm (invalidEntry) {
         $('#in-og').text(invalidEntry.entry.details.grade);
         $('#inform-grade').val('');
     } else {
-        $('#inform-grade option').filter(function() {
-            return $(this).val() == invalidEntry.entry.details.grade;
-        }).attr('selected', true);
+        if (invalidEntry.entry.details.climb_type == 'boulder') {
+            $('#bouldergrades option').filter(function() {
+                return $(this).val() == invalidEntry.entry.details.grade;
+            }).prop('selected', true);
+        } else {
+            $('#routegrades option').filter(function() {
+                return $(this).val() == invalidEntry.entry.details.grade;
+            }).prop('selected', true);
+        }
     }
     // Climb_type Error
     if (error.src === 2) {
@@ -583,7 +612,7 @@ function fillForm (invalidEntry) {
     } else {
         $('#inform-climb_type option').filter(function() {
             return $(this).val() == invalidEntry.entry.details.climb_type;
-        }).attr('selected', true);    
+        }).prop('selected', true);    
     }
     // Quality Error
     if (error.src === 3) {
@@ -592,7 +621,7 @@ function fillForm (invalidEntry) {
     } else {
         $('#inform-quality option').filter(function() {
             return $(this).val() == invalidEntry.entry.details.quality;
-        }).attr('selected', true);    
+        }).prop('selected', true);    
     }
     // Danger Error
     if (error.src === 4) {
@@ -601,8 +630,21 @@ function fillForm (invalidEntry) {
     } else {
         $('#inform-danger option').filter(function() {
             return $(this).val() == invalidEntry.entry.details.danger;
-        }).attr('selected', true);    }
-    
+        }).prop('selected', true);    
+    }
+    // Fill other detail fields
+    $('#inform-pitches').val(invalidEntry.entry.details.pitches);
+    $('#inform-committment option').filter(function() {
+        return $(this).val() == invalidEntry.entry.details.committment;
+    }).prop('selected', true);
+    $('#inform-route_type option').filter(function() {
+        return $(this).val() == invalidEntry.entry.details.route_type;
+    }).prop('selected', true);
+    $('#inform-height').val(invalidEntry.entry.details.height);
+    $('#inform-fa').val(invalidEntry.entry.details.fa);
+    $('#inform-description').val(invalidEntry.entry.details.description);
+    $('#inform-pro').val(invalidEntry.entry.details.pro);
+
     // Trigger change event for climb_type to disable/enable route-specifics
     $('#inform-climb_type').trigger('change');
 }
@@ -677,6 +719,9 @@ $('#subButton').on('click', function() {
 
         if (invalids.length>0) {
             $('#numIN').text(invalids.length);
+            // Reset form and fill
+            $('#inform')[0].reset();
+            $('select').prop('selected',false);
             fillForm(invalids[0]);
         } else {
             // Hide form, replace placeholder

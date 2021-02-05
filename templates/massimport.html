@@ -67,7 +67,7 @@ Mass Import
                         <p id="in-reason">This is what's wrong with this entry.</p>
                         <p>Original Value: <span id="in-og"></span></p>
 
-                        <form class="needs-validation" id="form-group--1">
+                        <form class="needs-validation" id="inform">
                             <!-- Hidden Values -->
                             <input type="text" name="entryIndex" id="inform-entryIndex" style="display: none" required>
                             <!-- Areas (comma-separated list) -->
@@ -158,13 +158,13 @@ Mass Import
                                 <div class="col">
                                     <!-- Committment -->
                                     <select class="custom-select route-specific" name="committment" id="inform-committment" type="text" min="0" max="7">
-                                        <option selected value="">Committment</option>
-                                        <option value="I">I</option>
-                                        <option value="II">II</option>
-                                        <option value="III">III</option>
-                                        <option value="IV">IV</option>
-                                        <option value="V">V</option>
-                                        <option value="VI">VI</option>
+                                        <option value="" disabled>Committment</option>
+                                        <option value="1">I</option>
+                                        <option value="2">II</option>
+                                        <option value="3">III</option>
+                                        <option value="4">IV</option>
+                                        <option value="5">V</option>
+                                        <option value="6">VI</option>
                                     </select>
                                 </div>
                             </div>
@@ -172,10 +172,10 @@ Mass Import
                                 <div class="col">
                                     <!-- Route_type -->
                                     <select class="custom-select route-specific" name="route_type" id="inform-route_type" type="number" min="0" max="3">
-                                        <option selected value="">Route Type</option>
-                                        <option value="1">Sport</option>
-                                        <option value="2">Trad</option>
-                                        <option value="3">Deep Water Solo</option>
+                                        <option value="" disabled>Route Type</option>
+                                        <option value="sport">Sport</option>
+                                        <option value="trad">Trad</option>
+                                        <option value="dws">Deep Water Solo</option>
                                     </select>
                                 </div>
                                 <div class="col">
