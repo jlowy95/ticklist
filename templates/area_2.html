@@ -53,7 +53,7 @@
                                 {% else %}
                                     {{child['name']}}
                                 {% endif %}</span>
-                            <span style="color: black" class="pl-2">{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small></span>
+                            <span style="color: black" class="pl-2">{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small>{% if child['properties']['aid_grade'] != None %}&nbsp;<small>{{child['properties']['aid_grade']}}</small>{% endif %}</small></span>
                             <span class="pl-2"><small>{{child['properties']['route_type']['short']}}</small></span>
                         </a>
                         {% endfor %}
@@ -72,7 +72,7 @@
                                     {% else %}
                                         {{child['name']}}
                                     {% endif %}</span>
-                                <span style="color: black">&nbsp;&nbsp;{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small></span>
+                                <span style="color: black">&nbsp;&nbsp;{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small>{% if child['properties']['aid_grade'] != None %}&nbsp;<small>{{child['properties']['aid_grade']}}</small>{% endif %}</span>
                                 <span class="pl-2"><small>{{child['properties']['route_type']['short']}}</small></span>
                             </a>
                             {% endfor %}
@@ -205,7 +205,7 @@
                             <div class="row">
                                 <!-- Grade/Danger -->
                                 <div class="col-md-auto">
-                                    <h3>&nbsp;{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small></h3>
+                                    <h3>&nbsp;{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small>{% if child['properties']['aid_grade'] != None %}&nbsp;<small>{{child['properties']['aid_grade']}}</small>{% endif %}</h3>
                                 </div>
                                 <!-- Quality -->
                                 <div class="col-md-auto">

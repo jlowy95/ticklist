@@ -17,6 +17,7 @@ from sqlalchemy import func
 from flask_migrate import Migrate
 import mysql.connector
 from bson import ObjectId
+import re
 import datetime
 import json
 import pprint
@@ -169,13 +170,15 @@ class RouteModel(db.Model):
 
     id = db.Column(db.Integer, db.ForeignKey('climbs.id'),primary_key=True, nullable=False)
     grade = db.Column(db.Float, nullable=False)
+    aid_grade = db.Column(db.String(2))
     pitches = db.Column(db.Integer, nullable=False)
     committment = db.Column(db.String(3))
     route_type = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, id, grade, pitches, committment, route_type):
+    def __init__(self, id, grade, aid_grade, pitches, committment, route_type):
         self.id = id
         self.grade = grade
+        self.aid_grade = aid_grade
         self.pitches = pitches
         self.committment
         self.route_type = route_type
@@ -232,7 +235,8 @@ route_types = {
     0: {'short':'','long':''},
     1: {'short':'S','long':'Sport'},
     2: {'short':'T','long':'Trad'},
-    3: {'short':'DWS','long':'Deep Water Solo'}
+    3: {'short':'DWS','long':'Deep Water Solo'},
+    4: {'short': 'A', 'long': 'Aid'}
 }
 
 # likeCommonTags: dictionary of common tags for climbs 
@@ -420,11 +424,17 @@ def routeInt2Grade(floatDifficulty):
     elif floatDifficulty < 21.34:
         return {'usa':'5.13d', 'euro':'8b'}
     elif floatDifficulty < 21.66:
-        return {'usa':'5.14a', 'euro':'8b/+'}
+        return {'usa':'5.14a', 'euro':'8b+'}
     elif floatDifficulty < 22.34:
-        return {'usa':'5.14a', 'euro':'8b+'}    
+        return {'usa':'5.14b', 'euro':'8c'}
+    elif floatDifficulty < 22.66:
+        return {'usa':'5.14c', 'euro':'8c+'}
+    elif floatDifficulty < 23.34:
+        return {'usa':'5.14d', 'euro':'9a'}
+    elif floatDifficulty < 23.66:
+        return {'usa':'5.15a', 'euro':'9a+'}    
     else:
-        return {'usa':'5.14+', 'euro':'8+'}
+        return {'usa':'Aid', 'euro':'Aid'}
     
 
 # getPathNames: Retrieves name and path/route for eachitem in the selected entry's parent path
@@ -438,11 +448,11 @@ def getPathNames(path):
 
 # countClimbs: recursive function for querying and counting number of children climbs by type
 def countClimbs(area_model):
-    boulders, sport, trad, dws, total = 0,0,0,0,0
+    boulders, sport, trad, dws, aid, total = 0,0,0,0,0,0
     # Check area_type to determine search
     if area_model.area_type == 0:
         # Empty area, return all 0s
-        return {'boulders':0,'sport':0,'trad':0,'dws':0,'total':0}
+        return {'boulders':0,'sport':0,'trad':0,'dws':0, 'aid':0, 'total':0}
     elif area_model.area_type == 1:
         # Sub areas, recursively call on children
         children = db.session.query(AreaModel)\
@@ -458,8 +468,9 @@ def countClimbs(area_model):
             sport += counts['sport']
             trad += counts['trad']
             dws += counts['dws']
+            aid += counts['aid']
             total += counts['total']
-        return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
+        return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws, 'aid':aid, 'total':total}
     elif area_model.area_type == 2:
         # Climbs, get counts of climb types
         tallies = db.session.query(func.ifnull(RouteModel.route_type, 0), func.count(func.ifnull(RouteModel.route_type, 0)))\
@@ -478,9 +489,11 @@ def countClimbs(area_model):
                 trad = typ[1]
             elif typ[0] == 3:
                 dws = typ[1]
-        total = boulders+sport+trad+dws
+            elif typ[0] == 4:
+                aid = typ[1]
+        total = boulders+sport+trad+dws+aid
         # print(f"'boulders':{boulders},'sport':{sport},'trad':{trad},'dws':{dws},'total':{total}")
-        return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws,'total':total}
+        return {'boulders':boulders,'sport':sport,'trad':trad,'dws':dws, 'aid':aid, 'total':total}
  
 
 # getChildrenInfo: For populating info on area children, retrieves entry's childrens' data
@@ -521,6 +534,7 @@ def getChildrenInfo(entry):
             ClimbModel.id.label('id'),\
             ClimbModel.name.label('name'),\
             func.coalesce(BoulderModel.grade, RouteModel.grade).label('grade'),\
+            RouteModel.aid_grade.label('aid_grade'),\
             ClimbModel.quality.label('quality'),\
             ClimbModel.danger.label('danger'),\
             ClimbModel.height.label('height'),\
@@ -539,21 +553,22 @@ def getChildrenInfo(entry):
              'route': routeInt2Grade}
         # Append info to corresponding lists
         for child in climbs:
-            # (position, climb_type, id, name, grade, quality, danger, height, pitches, committment, fa, desc, pro, route_type)
+            # (position, climb_type, id, name, grade, aid_grade, quality, danger, height, pitches, committment, fa, desc, pro, route_type)
             child_entry = {
                 'id': child[2],
                 'name': child[3],
                 'properties': {
                     'grade': gradeByClimb_type[child[1]](child[4]),
-                    'route_type': route_types[child[13]],
-                    'quality': child[5],
-                    'danger': dangerInt2Movie[child[6]],
-                    'height': child[7],
-                    'pitches': child[8],
-                    'committment': child[9],
-                    'fa': child[10],
-                    'description': child[11],
-                    'pro': child[12],
+                    'aid_grade': child[5],
+                    'route_type': route_types[child[14]],
+                    'quality': child[6],
+                    'danger': dangerInt2Movie[child[7]],
+                    'height': child[8],
+                    'pitches': child[9],
+                    'committment': child[10],
+                    'fa': child[11],
+                    'description': child[12],
+                    'pro': child[13],
                 },
                 'climb_type': child[1],
                 'route': f"{child[1]}/{child[2]}/{child[3]}",
@@ -600,9 +615,12 @@ def checkDupe(area, climb):
 # ("validated" boolean (True=accepted), error code if error, additional info for error handling)
 def validateAddition(loc_type, new_loc):
     print('Validating...')
-    # Check for all fields filled
+    # Check for all fields filled except for aid_grade
     for field in new_loc.keys():
-        if new_loc[field] == '':
+        if new_loc[field] == '' and field not in ['aid_grade','tags_other']:
+            print(field)
+            print(field == 'aid_grade')
+            print('New invalid aid grade')
             # Invalid field - An Error occurred, please try again.
             return (False, 1, (loc_type, new_loc))
     # Else continue
@@ -617,7 +635,10 @@ def validateAddition(loc_type, new_loc):
     
     if loc_type == 'route':
         new_loc = convertFormDatatypes(new_loc)
-        if new_loc['grade'] > 22 or new_loc['grade'] < -1:
+        if new_loc['grade'] > 99 or new_loc['grade'] < -1:
+            return (False, 1, (loc_type, new_loc))
+        if (not(re.search('^[AC][0-5]$', new_loc['aid_grade'])) and new_loc['aid_grade'] != ''):
+            print('Invalid aid_grade')
             return (False, 1, (loc_type, new_loc))
         if int(new_loc['danger']) != new_loc['danger'] or new_loc['danger'] > 3 or new_loc['danger'] < 0:
             return (False, 1, (loc_type, new_loc))
@@ -863,6 +884,7 @@ def addRoute(new_route):
         new_entry_secondary = RouteModel(
             id=new_entry.id,
             grade=new_route['grade'],
+            aid_grade=new_route['aid_grade'],
             pitches=new_route['pitches'],
             committment=new_route['committment'],
             route_type=new_route['route_type']

@@ -59,8 +59,9 @@
                         <div class="form-row my-1 py-1">
                             <div class="col req-col">
                                 <!-- On entry only whole grades available -->
-                                <select class="custom-select needs-validation" name="grade" type="number" min="-1" max="22" style="width: auto" required>
+                                <select class="custom-select needs-validation" name="grade" type="number" min="-1" max="99" style="width: auto" required>
                                         <option selected value="">YDS Grade</option>
+                                        <option value="99">Aid</option>
                                         <option value="-1">Easy 5th</option>
                                         <option value="0">5.4</option>
                                         <option value="1">5.5</option>
@@ -82,10 +83,31 @@
                                         <option value="17">5.12d</option>
                                         <option value="18">5.13a</option>
                                         <option value="19">5.13b</option>
-                                        <option value="20">5.13c</option>
-                                        <option value="21">5.13d</option>
-                                        <option value="22">5.14a</option>
+                                        <option value="19.7">5.13c</option>
+                                        <option value="20">5.13d</option>
+                                        <option value="21">5.14a</option>
+                                        <option value="22">5.14b</option>
+                                        <option value="22.5">5.14c</option>
+                                        <option value="23">5.14d</option>
+                                        <option value="23.5">5.15a</option>
                                     </select>
+                            </div>
+                            <div class="col">
+                                <select class="custom-select needs-validation" name="aid_grade" maxlength="2" type="text" style="width: auto">
+                                    <option selected value="">Aid Grade</option>
+                                    <option value="A0">A0</option>
+                                    <option value="A1">A1</option>
+                                    <option value="A2">A2</option>
+                                    <option value="A3">A3</option>
+                                    <option value="A4">A4</option>
+                                    <option value="A5">A5</option>
+                                    <option value="C0">C0</option>
+                                    <option value="C1">C1</option>
+                                    <option value="C2">C2</option>
+                                    <option value="C3">C3</option>
+                                    <option value="C4">C4</option>
+                                    <option value="C5">C5</option>
+                                </select>
                             </div>
                             <div class="col req-col">
                                 <!-- <label for="danger">Danger</label> -->
@@ -139,6 +161,7 @@
                                     <option value="1">Sport</option>
                                     <option value="2">Trad</option>
                                     <option value="3">Deep Water Solo</option>
+                                    <option value="4">Aid</option>
                                 </select>
                             </div>
                         </div>

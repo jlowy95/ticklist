@@ -24,7 +24,18 @@ INSERT INTO areas(name,parent_id,parent_name,path,description,directions,elevati
 	VALUES
 		('All Locations', 1, 'All Locations', '1/All Locations', 'This is the root area', 'Just find yourself', 0, 129.23245, -86.545398, 1),
         ('North America', 1, 'All Locations', '1/All Locations', 'This is NA', 'N of SA', 4500, 126.5543, -83.425423, 1),
-        ('Wyoming', 2, 'North America', '1/All Locations$2/North America', 'This is Wyoming', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 2)
+        ('Asia', 1, 'All Locations', '1/All Locations', 'This is Asia', 'Most of Eurasia', 4500, 126.5543, -83.425423, 1),
+        ('Europe', 1, 'All Locations', '1/All Locations', 'This is Europe', 'Left Eurasia', 4500, 126.5543, -83.425423, 1),
+        ('Wyoming', 2, 'North America', '1/All Locations$2/North America', 'This is Wyoming', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 1),
+        ('California', 2, 'North America', '1/All Locations$2/North America', 'This is California', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 1),
+        ('Oregon', 2, 'North America', '1/All Locations$2/North America', 'This is Oregon', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 1),
+        ('Washington', 2, 'North America', '1/All Locations$2/North America', 'This is Washington', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 1),
+        ('Nevada', 2, 'North America', '1/All Locations$2/North America', 'This is Nevada', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 1),
+        ('Utah', 2, 'North America', '1/All Locations$2/North America', 'This is Utah', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 1),
+        ('Colorado', 2, 'North America', '1/All Locations$2/North America', 'This is Colorado', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 1),
+        ('Test Area', 2, 'North America', '1/All Locations$2/North America', 'This is A TEST', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 2),
+        ('Thailand', 3, 'Asia', '1/All Locations$3/Asia', 'This is Thailand', 'Somewhere inside Asia', 6500, 120.425245, -45.52435, 1),
+        ('Canada', 2, 'North America', '1/All Locations$2/North America', 'This is Canada', 'Somewhere inside NA', 6500, 120.425245, -45.52435, 1)
 	;
 
 CREATE TABLE danger (
@@ -46,7 +57,7 @@ CREATE TABLE route_types (
 
 INSERT INTO route_types
 	VALUES
-		(0, 'boulder'), (1, 'sport'), (2, 'trad'), (3, 'dws')
+		(0, 'boulder'), (1, 'sport'), (2, 'trad'), (3, 'dws'), (4, 'aid')
 	;
 
 CREATE TABLE `climbs` (
@@ -71,10 +82,10 @@ CREATE TABLE `climbs` (
 
 INSERT INTO climbs(name,parent_id,parent_name,climb_type,position,quality,danger,height,fa,description,pro)
 	VALUES
-		('Boulder One', 3, 'Wyoming', 'boulder', 1, 3, 0, 12, 'Some rando', 'Its aight', 'Towel'),
-        ('Boulder Two', 3, 'Wyoming', 'boulder', 0, 1, 2, 32, Null, Null, 'pads'),
-        ('Route One', 3, 'Wyoming', 'route', 0, 4, 0, 89, 'Josh Lowy', 'The best', '3 Draws'),
-        ('Route Two', 3, 'Wyoming', 'route', 2, 3, 2, 120, 'Unknown', Null, Null)
+		('Boulder One', 12, 'Test Area', 'boulder', 1, 3, 0, 12, 'Some rando', 'Its aight', 'Towel'),
+        ('Boulder Two', 12, 'Test Area', 'boulder', 0, 1, 2, 32, Null, Null, 'pads'),
+        ('Route One', 12, 'Test Area', 'route', 0, 4, 0, 89, 'Josh Lowy', 'The best', '3 Draws'),
+        ('Route Two', 12, 'Test Area', 'route', 2, 3, 2, 120, 'Unknown', Null, Null)
 	;
 
 
@@ -132,16 +143,18 @@ CREATE TABLE routes (
   `id` INT NOT NULL,
   `route_type` INT NOT NULL,
   `grade` DECIMAL(10,3) NOT NULL,
+  `aid_grade` VARCHAR(2),
   `pitches` INT NOT NULL,
   `committment` INT,
   FOREIGN KEY (id) REFERENCES climbs(id),
-  FOREIGN KEY (route_type) REFERENCES route_types(id)
+  FOREIGN KEY (route_type) REFERENCES route_types(id),
+  CHECK (aid_grade LIKE '[A,C][0-5]')
 );
 
 INSERT INTO routes
 	VALUES
-		(3, 2, 18.7, 4, Null),
-        (4, 3, 6.33, 6, 1)
+		(3, 2, 18.7,Null, 4, Null),
+        (4, 3, 6.33,Null, 6, 1)
 	;
 
 CREATE TABLE boulder_grades (
@@ -236,8 +249,12 @@ INSERT INTO route_grades
 		(19.66, 20.34, '5.13c', '8a+'),
 		(20.34, 20.66, '5.13d', '8a+/b'),
 		(20.66, 21.34, '5.13d', '8b'),
-		(21.34, 21.66, '5.14a', '8b/+'),
-		(21.66, 22.34, '5.14a', '8b+')   
+		(21.34, 21.66, '5.14a', '8b+'),
+		(21.66, 22.34, '5.14b', '8c'),
+        (22.34, 22.66, '5.14c', '8c+'),
+        (22.66, 23.34, '5.14d', '9a'),
+        (23.34, 23.66, '5.15a', '9a+'),
+        (23.66, 100, 'Aid', 'Aid')
     ;
 
 
@@ -271,4 +288,12 @@ SELECT c.climb_type, r.route_type
 SELECT * 
 	FROM areas as a
     WHERE a.name LIKE '%wy%'
+;
+
+SELECT * FROM areas;
+
+SELECT c.name, a.name
+	FROM climbs as c
+	JOIN areas as a ON a.id = c.parent_id
+    WHERE c.name = 'Boulder One' AND a.name = 'Wyoming'
 ;
