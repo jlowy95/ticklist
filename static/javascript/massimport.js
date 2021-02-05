@@ -198,7 +198,7 @@ function validateEntry(entry) {
     // 1. Check climb_type/grade
     // 2. Check quality & danger (required)
     // 3. Optionally validate other details
-    var vfns = [gradeCheck, qualCheck, dangCheck];
+    var vfns = [gradeCheck, aidCheck, qualCheck, dangCheck];
     var valid = true;
     for (let i=0;i<vfns.length;i++) {
         var res = vfns[i](entry);
@@ -248,10 +248,13 @@ function gradeCheck(entry) {
     var climb_type = entry.details.climb_type.toLowerCase();
     var grade = entry.details.grade.toLowerCase();
     // console.log('gradeCheck: ' + grade);
-    // Check for blank grade
+    // Check for blank grade or for aid
     if (grade == '') {
         return {'valid': false, 'entry': entry, 'error': 109, 'tblId': currentIndex+1};
+    } else if (grade == 'aid') {
+        return {'valid': true};
     }
+    
 
     // Check for valid symbols
     var valids = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','+','-','/'];
@@ -331,6 +334,22 @@ function gradeCheck(entry) {
         // Invalid climb_type
         // console.log(entry.name + 'INVALID CLIMB_TYPE');
         return {'valid': false, 'entry': entry, 'error': 201, 'tblId': currentIndex+1};
+    }
+    return {'valid': true};
+}
+
+// aidCheck: Checks for a valid aid grade
+function aidCheck(entry) {
+    // Valid aid_grade is 2 characters ==> [AC][0-5]
+    var aid =  entry.details.aid_grade;
+    if (aid != '') {
+        if (aid.length != 2) {
+            return {'valid': false, 'entry': entry, 'error': 501, 'tblId': currentIndex+1};
+        } else if (/[AC][0-5]/.test(aid)) {
+            return {'valid': true};
+        } else {
+            return {'valid': false, 'entry': entry, 'error': 502, 'tblId': currentIndex+1};
+        }
     }
     return {'valid': true};
 }
@@ -417,15 +436,16 @@ function separateDetails(row) {
     }
     entry.details.climb_type = row[7];
     entry.details.grade = row[8];
-    entry.details.pitches = row[9];
-    entry.details.committment = row[10];
-    entry.details.route_type = row[11];
-    entry.details.height = row[12];
-    entry.details.quality = row[13];
-    entry.details.danger = row[14];
-    entry.details.fa = row[15];
-    entry.details.description = row[16];
-    entry.details.pro = row[17];
+    entry.details.aid_grade = row[9];
+    entry.details.pitches = row[10];
+    entry.details.committment = row[11];
+    entry.details.route_type = row[12];
+    entry.details.height = row[13];
+    entry.details.quality = row[14];
+    entry.details.danger = row[15];
+    entry.details.fa = row[16];
+    entry.details.description = row[17];
+    entry.details.pro = row[18];
     return entry;
 }
 
@@ -572,6 +592,12 @@ function errorDecode(code) {
         case 404:
             res.reason = "Invalid Danger: None provided, please enter a danger.";
             break;
+        case 501:
+            res.reason = "Invalid Aid_Grade: Aid Grade isn't 2 characters in length.";
+            break;
+        case 502:
+            res.reason = "Invalid Aid_Grade: Aid Grade doesnt match the pattern [AC][0-5].";
+            break;
     }
     return res;
 }
@@ -630,6 +656,15 @@ function fillForm (invalidEntry) {
     } else {
         $('#inform-danger option').filter(function() {
             return $(this).val() == invalidEntry.entry.details.danger;
+        }).prop('selected', true);    
+    }
+    // Aid_grade Error
+    if (error.src === 5) {
+        $('#in-og').text(invalidEntry.entry.details.aid_grade);
+        $('#inform-aid_grade').val('');
+    } else {
+        $('#inform-aid_grade option').filter(function() {
+            return $(this).val() == invalidEntry.entry.details.aid_grade;
         }).prop('selected', true);    
     }
     // Fill other detail fields

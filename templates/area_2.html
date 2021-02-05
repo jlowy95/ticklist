@@ -53,8 +53,13 @@
                                 {% else %}
                                     {{child['name']}}
                                 {% endif %}</span>
-                            <span style="color: black" class="pl-2">{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small>{% if child['properties']['aid_grade'] != None %}&nbsp;<small>{{child['properties']['aid_grade']}}</small>{% endif %}</small></span>
-                            <span class="pl-2"><small>{{child['properties']['route_type']['short']}}</small></span>
+                            <!-- Alter grade for aid climbs -->
+                            {% if child['properties']['grade']['usa'] == 'Aid' %}
+                                <span style="color: black" class="pl-2">{{child['properties']['aid_grade']}}</span>
+                            {% else %}
+                                <span style="color: black" class="pl-2">{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small>{% if child['properties']['aid_grade'] != None %}&nbsp;<small>{{child['properties']['aid_grade']}}</small>{% endif %}</small></span>
+                                <span class="pl-2"><small>{{child['properties']['route_type']['short']}}</small></span>
+                            {% endif %}
                         </a>
                         {% endfor %}
 
@@ -72,8 +77,13 @@
                                     {% else %}
                                         {{child['name']}}
                                     {% endif %}</span>
-                                <span style="color: black">&nbsp;&nbsp;{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small>{% if child['properties']['aid_grade'] != None %}&nbsp;<small>{{child['properties']['aid_grade']}}</small>{% endif %}</span>
-                                <span class="pl-2"><small>{{child['properties']['route_type']['short']}}</small></span>
+                                <!-- Alter grade for aid climbs -->
+                                {% if child['properties']['grade']['usa'] == 'Aid' %}
+                                    <span style="color: black" class="pl-2">{{child['properties']['aid_grade']}}</span>
+                                {% else %}
+                                    <span style="color: black" class="pl-2">{{child['properties']['grade']['usa']}} <small>{{child['properties']['danger']}}</small>{% if child['properties']['aid_grade'] != None %}&nbsp;<small>{{child['properties']['aid_grade']}}</small>{% endif %}</small></span>
+                                    <span class="pl-2"><small>{{child['properties']['route_type']['short']}}</small></span>
+                                {% endif %}
                             </a>
                             {% endfor %}
                         {% endif %}

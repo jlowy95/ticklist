@@ -966,6 +966,7 @@ def area(entry_id, entry_name):
             return render_template('404.html', status_code=errors['404'])
         path = getPathNames(entry['parent']['path'])
         children = getChildrenInfo(entry)
+        # print(children)
         
         # Return correct template (areas / climbs)
         if entry['area_type'] == 2:
