@@ -21,7 +21,7 @@
                     <!-- {% endif %} -->
                 {% endfor %}
                 <div class="col-sm-auto">
-                    <h5><a style="color: #26abff" href="/area/{{area['id']}}/{{area['name']}}">{{area['name']}}</a></h5>
+                    <h5><a style="color: #26abff" href="/area?entry_id={{area['id']}}&entry_name={{area['name']}}">{{area['name']}}</a></h5>
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
                     {% if children %}
                         <p class="text-center mb-2"><strong>Areas in {{area['name']}}</strong></p>
                         {% for child in children %}
-                        <a style="color: #26abff" class="nav-link mb-1 py-1 pl-2 ml-2" id="v-pills-{{child['name']}}-tab" href="{{child['route']}}" aria-selected="false">
+                        <a style="color: #26abff" class="nav-link mb-1 py-1 pl-2 ml-2" id="v-pills-{{child['name']}}-tab" href="/area?entry_id={{child['id']}}&entry_name={{child['name']}}" aria-selected="false">
                             <span class="text-right pr-2">{{child['name']}}</span>           
                             <span style="color: #000" class="text-right pr-2">({{child['counts']['total']}})</span>
                         </a>

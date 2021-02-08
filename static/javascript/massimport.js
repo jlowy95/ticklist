@@ -62,6 +62,7 @@ var currentIndex = 0;
 var invalids = [];
 var r2i = [];
 var completed = 0;
+var seRUN = false;
 
 async function nextRow() { //Iterate row by row of imported csv file
     if (currentIndex < mifile.length) {
@@ -76,8 +77,6 @@ async function nextRow() { //Iterate row by row of imported csv file
             updatePBar();
             return true;
         }
-
-        updatePBar();
 
         // Clear contents of previous entry
         $('#areas').empty();
@@ -132,6 +131,7 @@ async function nextRow() { //Iterate row by row of imported csv file
         if (!duped) {
             validateEntry(entry);
         }
+        updatePBar();
         return true;
 
     } else {
@@ -163,7 +163,9 @@ async function justRun() {
         }
     }
     stopPBar();
-    alert('Validation Complete! Please attend to the "Input Needed" entries.');
+    // alert('Validation Complete! Please attend to the "Input Needed" entries.');
+    // Run through r2i, submitting entries for insert
+    submitEntries();
 }
 
 
@@ -222,7 +224,7 @@ function validateEntry(entry) {
 
 // dupeCheck: Sends a GET request to check if a duplicate climb under final listed area exists
 async function dupeCheck(entry) {
-    await fetch(`/check-entry?type=dupe&area=${asciiURL(entry.areas[entry.areas.length-1])}&climb=${asciiURL(entry.name)}`, {
+    let fres = await fetch(`/check-entry?type=dupe&area=${asciiURL(entry.areas[entry.areas.length-1])}&climb=${asciiURL(entry.name)}`, {
         method: 'GET'
     })
     .then (response => response.json())
@@ -239,6 +241,8 @@ async function dupeCheck(entry) {
         
     })
     .catch(error => console.log(error));
+
+    return fres;
 }
 
 // gradeCheck: Performs basic validation on the climb_type and grade details of the current entry
@@ -739,13 +743,14 @@ $('#subButton').on('click', function() {
         // Grab form data
         var disabled = $(':disabled').prop('disabled', false);
         var validEntry = $('form').serializeArray();
-        var entryIndex = validEntry[1].value;
+        var entryIndex = parseInt(validEntry[1].value);
         disabled.prop('disabled', true);
         // Rebuild to row and separate details
         validEntry = separateDetails(rebuildEntry(validEntry));
 
         // Move to r2i, remove from invalids
-        r2i.splice(entryIndex-1, 0, validEntry);
+        // r2i.splice(entryIndex-1, 0, validEntry);
+        r2i.push({'entry': validEntry, 'tblId': entryIndex});
         invalids.splice(0,1);
         updatePBar();
 
@@ -762,8 +767,64 @@ $('#subButton').on('click', function() {
             // Hide form, replace placeholder
             $('#in-form').css('display', 'none');
             $('#form-placeholder').css('display', 'block');
+            submitEntries();
         }
     } else {
         console.log('You better fix that shit!');
     }
 });
+
+
+// ---------------------- Submit Entry Functions ------------------------------
+//submitEntries:
+async function submitEntries() {
+    // To avoid redundant/duplicate processes, check for running variable.  If undefined, process hasn't run
+    // Run process and define running variable
+    if (seRUN == false) {
+        seRUN = true;
+
+        while (r2i.length>0) {
+            let se = await POSTEntry(r2i[0].entry);
+            console.log(se);
+            if (se) {
+                // Update table color and increment completed
+                $(`#tr-${r2i[0].tblId} td:last span`).css('background', 'green');
+                completed++;
+                // Remove from r2i
+                r2i.splice(0,1);
+            } else {
+                console.log('submitEntry false');
+                break;
+            }
+        }
+        console.log('Finished current entries.');
+        seRUN = false;
+    }
+    
+}
+
+// POSTEntry:
+async function POSTEntry(entry) {
+    console.log(`POSTing: ${entry}`);
+    let fres = await fetch('/check-entry', {
+
+        // Specify the method
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        // A JSON payload
+        body: JSON.stringify(entry)
+    })
+    .then(response => response.json())
+    .then(function(data) {
+        if (data.inserted) {
+            return true;
+        } else {
+            return false;
+        }
+    })
+    .catch(error => console.log(error));
+
+    return fres;
+}

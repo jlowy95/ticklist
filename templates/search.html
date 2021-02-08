@@ -35,7 +35,7 @@ Search
             {% for r in results['areas'] %}
             <div class="row">
                 <div class="col-md">
-                    <a href="/area/{{r.id}}/{{r.name}}">{{r.name}}</a>
+                    <a href="/area?entry_id={{r.id}}&entry_name={{r.name}}">{{r.name}}</a>
                 </div>
             </div>
             {% endfor %}
@@ -48,7 +48,7 @@ Search
             {% for r in results['climbs'] %}
             <div class="row">
                 <div class="col-md">
-                    <a href="/area/{{r.parent.id}}/{{r.parent.name}}#v-pills-{{r.climb_type}}-{{r.id}}">{{r.name}}</a>
+                    <a href="/area?entry_id={{r.parent.id}}&entry_name={{r.parent.name}}#v-pills-{{r.climb_type}}-{{r.id}}">{{r.name}}</a>
                 </div>
             </div>
             {% endfor %}

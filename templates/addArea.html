@@ -18,7 +18,7 @@
     <div class="row ml-4">
         <div class="col-md-12">
             <!-- Flask for href to link back to parent -->
-            <h4><a href="/area/{{parent['id']}}/{{parent['name']}}">{{parent['name']}}</a></h4>
+            <h4><a href="/area?entry_id={{parent['id']}}&entry_name={{parent['name']}}">{{parent['name']}}</a></h4>
         </div>
     </div>
     <form id='entry-form' class="needs-validation ml-4" novalidate>

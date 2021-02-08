@@ -442,7 +442,7 @@ def getPathNames(path):
     path_raw = [step.split('/') for step in path.split('$')]
     path_clean = [{'name': 'All Locations', 'route':f"1/All-Locations"}]
     for step in path_raw[1:]:
-        path_clean.append({'name': step[1], 'route':f"area/{step[0]}/{step[1]}"})
+        path_clean.append({'name': step[1], 'route':f"area?entry_id={step[0]}&entry_name={step[1]}"})
     # print(path_clean)
     return path_clean
 
@@ -515,13 +515,15 @@ def getChildrenInfo(entry):
                 if child.toJSON() == entry:
                     continue
                 counts = countClimbs(child)
-                children_info.append({'name': child.name,
-                    'route': f"/area/{child.id}/{child.name}",
+                children_info.append({
+                    'id': child.id,
+                    'name': child.name,
                     'counts': counts})
         else:
             counts = countClimbs(child)
-            children_info.append({'name': child.name,
-                'route': f"/area/{child.id}/{child.name}",
+            children_info.append({
+                'id': child.id,
+                'name': child.name,
                 'counts': counts})
         return children_info
     # if area_type 2, climbs, query ClimbModel
@@ -571,7 +573,7 @@ def getChildrenInfo(entry):
                     'pro': child[13],
                 },
                 'climb_type': child[1],
-                'route': f"{child[1]}/{child[2]}/{child[3]}",
+                # 'route': f"{child[1]}/{child[2]}/{child[3]}",
                 'tags': [str(tag)[2:-3] for tag in db.session.query(TagsModel.title)\
                     .join(TagsClimbsModel, TagsClimbsModel.tag_id == TagsModel.id)\
                     .join(ClimbModel, ClimbModel.id == TagsClimbsModel.climb_id)\
@@ -752,7 +754,6 @@ def addTags(form_fields, new_id):
     # No commit, full commit will be made after boulder is flushed
 
 
-
 # addArea: inserts new area entry and updates parent area
 def addArea(new_area):
     # Validate if new entry
@@ -792,7 +793,6 @@ def addArea(new_area):
         # Else, error - handle the error and return
         print(f"Error Code: {validated[1]}")
         return validationErrorProtocol(validated[1], validated[2])
-
 
 
 # addBoulder: inserts new boulder entry and updates parent area
@@ -852,7 +852,6 @@ def addBoulder(new_boulder):
         # Else, error - handle the error and return
         print(f"Error Code: {validated[1]}")
         return validationErrorProtocol(validated[1], validated[2])
-
 
 
 # addRoute: inserts new boulder entry and updates parent area
@@ -939,11 +938,9 @@ def allLocations():
     children = getChildrenInfo(al)
     grandchildren = []
     for child in children:
-        id_name = child['route'][6:].split('/')
-        # print(id_name)
         grandchildren.append(getChildrenInfo(db.session.query(AreaModel)\
-            .filter(AreaModel.id==id_name[0])\
-            .filter(AreaModel.name==id_name[1])\
+            .filter(AreaModel.id==child['id'])\
+            .filter(AreaModel.name==child['name'])\
             .first().toJSON()))
 
     return render_template('allLocations.html', children=children, grandchildren=grandchildren)
@@ -951,32 +948,33 @@ def allLocations():
 
 # API Routes
 # Loads the corresponding page type to the entry requested
-@app.route('/area/<entry_id>/<entry_name>')
-def area(entry_id, entry_name):
-    # print(f'Entry: {entry_id}/{entry_name}')
-    try:
-        # Retrieve Entry
-        entry = db.session.query(AreaModel)\
-            .filter(AreaModel.id==entry_id)\
-            .filter(AreaModel.name==entry_name)\
-            .first()
-        if entry:
-            entry = entry.toJSON()
-        else:
-            return render_template('404.html', status_code=errors['404'])
-        path = getPathNames(entry['parent']['path'])
-        children = getChildrenInfo(entry)
-        # print(children)
-        
-        # Return correct template (areas / climbs)
-        if entry['area_type'] == 2:
-            return render_template('area_2.html', area=entry, path=path, children=children)
-        else:
-            return render_template('area.html', area=entry, path=path, children=children)
+@app.route('/area', methods=['GET'])
+def area():
+    args = request.args
+    if args['entry_id'] and args['entry_name']:
+        try:
+            # Retrieve Entry
+            entry = db.session.query(AreaModel)\
+                .filter(AreaModel.id==args['entry_id'])\
+                .filter(AreaModel.name==args['entry_name'])\
+                .first()
+            if entry:
+                entry = entry.toJSON()
+            else:
+                return render_template('404.html', status_code=errors['404'])
+            path = getPathNames(entry['parent']['path'])
+            children = getChildrenInfo(entry)
+            # print(children)
+            
+            # Return correct template (areas / climbs)
+            if entry['area_type'] == 2:
+                return render_template('area_2.html', area=entry, path=path, children=children)
+            else:
+                return render_template('area.html', area=entry, path=path, children=children)
 
-    except Exception as e:
-        print(e)
-        return render_template('404.html', status_code=errors['404'])
+        except Exception as e:
+            print(e)
+            return render_template('404.html', status_code=errors['404'])
 
 
 # Search query route
@@ -1119,6 +1117,10 @@ def checkEntry():
                 return {'dupeCheck': True}
             else:
                 return {'dupeCheck': False}
+    elif request.method == 'POST':
+        inputted_data = request.get_json()
+        print(inputted_data['details'])
+        return {'inserted': True}
     return {0: 'hmmm'}
 
 

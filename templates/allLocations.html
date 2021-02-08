@@ -34,7 +34,7 @@ All Locations
             {% for i in range(children|length) %}
             <div class="row">
                 <div class="col-md">
-                    <a href="{{children[i]['route']}}">
+                    <a href="/area?entry_id={{children[i]['id']}}&entry_name={{children[i]['name']}}">
                         <span class="text-right pr-2">{{children[i]['name']}}</span>           
                         <span class="text-right pr-2">({{children[i]['counts']['total']}})</span>
                     </a>
@@ -42,7 +42,7 @@ All Locations
                     <ul>
                         {% for child in grandchildren[i] %}
                         <li>
-                            <a href="{{child['route']}}">
+                            <a href="/area?entry_id={{child['id']}}&entry_name={{child['name']}}">
                                 <span class="text-right pr-2">{{child['name']}}</span>           
                                 <span class="text-right pr-2">({{child['counts']['total']}})</span>
                             </a>
