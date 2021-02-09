@@ -254,7 +254,7 @@ function gradeCheck(entry) {
     // console.log('gradeCheck: ' + grade);
     // Check for blank grade or for aid
     if (grade == '') {
-        return {'valid': false, 'entry': entry, 'error': 109, 'tblId': currentIndex+1};
+        return {'valid': false, 'entry': entry, 'error': 109, 'tblID': currentIndex+1};
     } else if (grade == 'aid') {
         return {'valid': true};
     }
@@ -271,12 +271,12 @@ function gradeCheck(entry) {
         // If character isn't valid...
         if (!(valids.includes(grade[i]))) {
             // console.log(entry.name + 'INVALID GRADE - Character: ' + grade[i]);
-            return {'valid': false, 'entry': entry, 'error': 101, 'tblId': currentIndex+1};
+            return {'valid': false, 'entry': entry, 'error': 101, 'tblID': currentIndex+1};
         }
     }
     if (letterCount>1) {
         // console.log(entry.name + 'INVALID GRADE - multipleLetters: ');
-        return {'valid': false, 'entry': entry, 'error': 109, 'tblId': currentIndex+1};
+        return {'valid': false, 'entry': entry, 'error': 109, 'tblID': currentIndex+1};
     }
 
 
@@ -288,7 +288,7 @@ function gradeCheck(entry) {
         } else {
             // +\- in middle, INVALID
             // console.log(entry.name + 'INVALID GRADE - Out of place +\-');
-            return {'valid': false, 'entry': entry, 'error': 102, 'tblId': currentIndex+1};
+            return {'valid': false, 'entry': entry, 'error': 102, 'tblID': currentIndex+1};
         }
     }
 
@@ -299,13 +299,13 @@ function gradeCheck(entry) {
             return {'valid': true};
         } else if (['a','b','c','d'].some(r => grade.includes(r))) {
             // console.log(entry.name + 'INVALID GRADE - Letters in boulder');
-            return {'valid': false, 'entry': entry, 'error': 103, 'tblId': currentIndex+1};
+            return {'valid': false, 'entry': entry, 'error': 103, 'tblID': currentIndex+1};
         }
         
         // Check that base integer is btw 0-16
         if (parseInt(grade) < 0 || parseInt(grade) > 16) {
             // console.log(entry.name + 'INVALID GRADE - boulderNot0-16');
-            return {'valid': false, 'entry': entry, 'error': 104, 'tblId': currentIndex+1};
+            return {'valid': false, 'entry': entry, 'error': 104, 'tblID': currentIndex+1};
         }
 
     } else if (climb_type == 'route') {
@@ -313,12 +313,12 @@ function gradeCheck(entry) {
         var intGrade = parseInt(grade);
         if (intGrade < 3 || intGrade > 15) {
             // console.log(entry.name + 'INVALID GRADE - routeNot3-15');
-            return {'valid': false, 'entry': entry, 'error': 105, 'tblId': currentIndex+1};
+            return {'valid': false, 'entry': entry, 'error': 105, 'tblID': currentIndex+1};
         } else if (intGrade < 10) {
             // Check for letter (letter for 5.9 and below is invalid)
             if (['a','b','c','d'].some(r => grade.includes(r))) {
                 // console.log(entry.name + 'INVALID GRADE - easyRouteLetter');
-                return {'valid': false, 'entry': entry, 'error': 106, 'tblId': currentIndex+1};
+                return {'valid': false, 'entry': entry, 'error': 106, 'tblID': currentIndex+1};
             }
         } else { // Else 10 <= intGrade <= 15
             // Check for letter (letter is required now)
@@ -326,18 +326,18 @@ function gradeCheck(entry) {
                 // If letter, letter must be at end (+/- already removed)
                 if (!(['a','b','c','d'].some(r => grade.endsWith(r)))) {
                     // console.log(entry.name + 'INVALID GRADE - RouteMisplacedLetter');
-                    return {'valid': false, 'entry': entry, 'error': 108, 'tblId': currentIndex+1};
+                    return {'valid': false, 'entry': entry, 'error': 108, 'tblID': currentIndex+1};
                 }
             } else {
                 // console.log(entry.name + 'INVALID GRADE - hardRouteNoLetter');
-                return {'valid': false, 'entry': entry, 'error': 107, 'tblId': currentIndex+1};
+                return {'valid': false, 'entry': entry, 'error': 107, 'tblID': currentIndex+1};
             }
         }
 
     } else {
         // Invalid climb_type
         // console.log(entry.name + 'INVALID CLIMB_TYPE');
-        return {'valid': false, 'entry': entry, 'error': 201, 'tblId': currentIndex+1};
+        return {'valid': false, 'entry': entry, 'error': 201, 'tblID': currentIndex+1};
     }
     return {'valid': true};
 }
@@ -348,11 +348,11 @@ function aidCheck(entry) {
     var aid =  entry.details.aid_grade;
     if (aid != '') {
         if (aid.length != 2) {
-            return {'valid': false, 'entry': entry, 'error': 501, 'tblId': currentIndex+1};
+            return {'valid': false, 'entry': entry, 'error': 501, 'tblID': currentIndex+1};
         } else if (/[AC][0-5]/.test(aid)) {
             return {'valid': true};
         } else {
-            return {'valid': false, 'entry': entry, 'error': 502, 'tblId': currentIndex+1};
+            return {'valid': false, 'entry': entry, 'error': 502, 'tblID': currentIndex+1};
         }
     }
     return {'valid': true};
@@ -362,12 +362,12 @@ function aidCheck(entry) {
 function qualCheck(entry) {
     // Check for no quality
     if (entry.details.quality == '') {
-        return {'valid': false, 'entry': entry, 'error': 302, 'tblId': currentIndex+1};
+        return {'valid': false, 'entry': entry, 'error': 302, 'tblID': currentIndex+1};
     }
 
     if (parseInt(entry.details.quality) <= 0 || parseInt(entry.details.quality) >= 6) {
         // console.log(entry.name + 'INVALID QUALITY');
-        return {'valid': false, 'entry': entry, 'error': 301, 'tblId': currentIndex+1};
+        return {'valid': false, 'entry': entry, 'error': 301, 'tblID': currentIndex+1};
     } else {
         return {'valid': true};
     }
@@ -377,7 +377,7 @@ function qualCheck(entry) {
 function dangCheck(entry) {
     // Check for no danger
     if (entry.details.danger == '') {
-        return {'valid': false, 'entry': entry, 'error': 404, 'tblId': currentIndex+1};
+        return {'valid': false, 'entry': entry, 'error': 404, 'tblID': currentIndex+1};
     }
 
     // Check int or movie
@@ -388,16 +388,16 @@ function dangCheck(entry) {
             // Check if 0-3
             if (dangInt < 0 || dangInt > 3) {
                 // console.log(entry.name + 'INVALID dangerInt');
-                return {'valid': false, 'entry': entry, 'error': 401, 'tblId': currentIndex+1};
+                return {'valid': false, 'entry': entry, 'error': 401, 'tblID': currentIndex+1};
             }
         } else {
             // console.log(entry.name + 'INVALID Danger - not whole int');
-            return {'valid': false, 'entry': entry, 'error': 402, 'tblId': currentIndex+1};
+            return {'valid': false, 'entry': entry, 'error': 402, 'tblID': currentIndex+1};
         }
     } else { // Else movie
         if (!(['G','PG','PG13','PG-13','R','X'].includes(entry.details.danger))) {
             // console.log(entry.name + 'INVALID Danger - invalidMovie');
-            return {'valid': false, 'entry': entry, 'error': 403, 'tblId': currentIndex+1};
+            return {'valid': false, 'entry': entry, 'error': 403, 'tblID': currentIndex+1};
         }
     }
     return {'valid': true};
@@ -609,7 +609,7 @@ function errorDecode(code) {
 // fillForm: Prefills form fields with data from the inputted (invalid) entry
 function fillForm (invalidEntry) {
     $('form').removeClass('was-validated');
-    $('#inform-entryIndex').val(invalidEntry.tblId);
+    $('#inform-entryIndex').val(invalidEntry.tblID);
     // Get error source and update error reason
     var error = errorDecode(invalidEntry.error);
     $('#in-reason').text(error.reason);
@@ -750,7 +750,7 @@ $('#subButton').on('click', function() {
 
         // Move to r2i, remove from invalids
         // r2i.splice(entryIndex-1, 0, validEntry);
-        r2i.push({'entry': validEntry, 'tblId': entryIndex});
+        r2i.push({'entry': validEntry, 'tblID': entryIndex});
         invalids.splice(0,1);
         updatePBar();
 
@@ -782,16 +782,19 @@ async function submitEntries() {
     // Run process and define running variable
     if (seRUN == false) {
         seRUN = true;
+        // Animate completed bar while running
+        $('#progressbar-c').addClass('progress-bar-striped');
+        $('#progressbar-c').addClass('progress-bar-animated');
 
         while (r2i.length>0) {
             let se = await POSTEntry(r2i[0].entry);
-            console.log(se);
             if (se) {
                 // Update table color and increment completed
-                $(`#tr-${r2i[0].tblId} td:last span`).css('background', 'green');
+                $(`#tr-${r2i[0].tblID} td:last span`).css('background', 'green');
                 completed++;
                 // Remove from r2i
                 r2i.splice(0,1);
+                updatePBar();
             } else {
                 console.log('submitEntry false');
                 break;
@@ -799,13 +802,14 @@ async function submitEntries() {
         }
         console.log('Finished current entries.');
         seRUN = false;
+        $('#progressbar-c').removeClass('progress-bar-striped');
+        $('#progressbar-c').removeClass('progress-bar-animated');
     }
     
 }
 
 // POSTEntry:
 async function POSTEntry(entry) {
-    console.log(`POSTing: ${entry}`);
     let fres = await fetch('/check-entry', {
 
         // Specify the method
