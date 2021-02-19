@@ -100,7 +100,7 @@ Mass Import
                                     <select name="grade" id="inform-grade" type="text" class="custom-select" required>
                                         <option value="" disabled>Grade</option>
                                         <optgroup id="bouldergrades">
-                                            <option value="B">VB</option>
+                                            <option value="-1">VB</option>
                                             <option value="0">V0</option>
                                             <option value="1">V1</option>
                                             <option value="2">V2</option>
@@ -117,42 +117,43 @@ Mass Import
                                             <option value="13">V13</option>
                                             <option value="14">V14</option>
                                             <option value="15">V15</option>
-                                            <option value="16">V16</option>
                                         </optgroup>
                                         <optgroup id="routegrades">
-                                            <option value="3">Easy 5th</option>
-                                            <option value="4">5.4</option>
-                                            <option value="5">5.5</option>
-                                            <option value="6">5.6</option>
-                                            <option value="7">5.7</option>
-                                            <option value="8">5.8</option>
-                                            <option value="9">5.9</option>
-                                            <option value="10a">5.10a</option>
-                                            <option value="10b">5.10b</option>
-                                            <option value="10c">5.10c</option>
-                                            <option value="10d">5.10d</option>
-                                            <option value="11a">5.11a</option>
-                                            <option value="11b">5.11b</option>
-                                            <option value="11c">5.11c</option>
-                                            <option value="11d">5.11d</option>
-                                            <option value="12a">5.12a</option>
-                                            <option value="12b">5.12b</option>
-                                            <option value="12c">5.12c</option>
-                                            <option value="12d">5.12d</option>
-                                            <option value="13a">5.13a</option>
-                                            <option value="13b">5.13b</option>
-                                            <option value="13c">5.13c</option>
-                                            <option value="13d">5.13d</option>
-                                            <option value="14a">5.14a</option>
-                                            <option value="14b">5.14b</option>
-                                            <option value="14c">5.14c</option>
-                                            <option value="14d">5.14d</option>
-                                            <option value="15a">5.15a</option>
+                                            <option value="99">Aid</option>
+                                            <option value="-1">Easy 5th</option>
+                                            <option value="0">5.4</option>
+                                            <option value="1">5.5</option>
+                                            <option value="2">5.6</option>
+                                            <option value="3">5.7</option>
+                                            <option value="4">5.8</option>
+                                            <option value="5">5.9</option>
+                                            <option value="5.5">5.9+</option>
+                                            <option value="6">5.10a</option>
+                                            <option value="7">5.10b</option>
+                                            <option value="8">5.10c</option>
+                                            <option value="9">5.10d</option>
+                                            <option value="10">5.11a</option>
+                                            <option value="11">5.11b</option>
+                                            <option value="12">5.11c</option>
+                                            <option value="13">5.11d</option>
+                                            <option value="14">5.12a</option>
+                                            <option value="15">5.12b</option>
+                                            <option value="16">5.12c</option>
+                                            <option value="17">5.12d</option>
+                                            <option value="18">5.13a</option>
+                                            <option value="19">5.13b</option>
+                                            <option value="20">5.13c</option>
+                                            <option value="21">5.13d</option>
+                                            <option value="22">5.14a</option>
+                                            <option value="23">5.14b</option>
+                                            <option value="24">5.14c</option>
+                                            <option value="25">5.14d</option>
+                                            <option value="26">5.15a</option>
                                         </optgroup>
                                     </select>
                                 </div>
                                 <div class="col">
-                                    <select class="custom-select" name="aid_grade" id="inform-aid_grade" maxlength="2" type="text">
+                                    <select class="custom-select route-specific" name="aid_grade" id="inform-aid_grade" maxlength="2" type="text">
                                         <option selected value="">Aid Grade</option>
                                         <option value="A0">A0</option>
                                         <option value="A1">A1</option>
@@ -190,9 +191,10 @@ Mass Import
                                     <!-- Route_type -->
                                     <select class="custom-select route-specific" name="route_type" id="inform-route_type" type="number" min="0" max="3">
                                         <option value="" disabled>Route Type</option>
-                                        <option value="sport">Sport</option>
-                                        <option value="trad">Trad</option>
-                                        <option value="dws">Deep Water Solo</option>
+                                        <option value="1">Sport</option>
+                                        <option value="2">Trad</option>
+                                        <option value="3">Deep Water Solo</option>
+                                        <option value="4">Aid</option>
                                     </select>
                                 </div>
                                 <div class="col">
@@ -240,6 +242,11 @@ Mass Import
                             <div class="form-row">
                                 <div class="col">
                                     <input name="pro" id="inform-pro" type="text" maxlength="100" class="form-control" placeholder="Protection">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <input id="inform-tags_other" name="tags_other" type="text" class="form-control" placeholder="Enter any tags as a comma-separated list">
                                 </div>
                             </div>
                         </form>

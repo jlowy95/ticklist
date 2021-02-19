@@ -215,8 +215,13 @@ function validateEntry(entry) {
             break;
         }
     }
-    // If still valid, add to r2i array
+    // If still valid, convert grade to database int and add to r2i array
     if (valid) {
+        entry.details.grade = gradeConverter(entry.details.climb_type, entry.details.grade);
+        if (entry.details.climb_type == 'route') {
+            entry.details.route_type = rtConverter(entry.details.route_type);
+        }
+        // console.log(entry);
         $(`#tr-${currentIndex+1} td:last span`).css('background', 'greenyellow');
         r2i.push({'entry': entry, 'tblID': currentIndex+1});
     }
@@ -261,7 +266,7 @@ function gradeCheck(entry) {
     
 
     // Check for valid symbols
-    var valids = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','+','-','/'];
+    var valids = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','+','-'];
     var letterCount = 0;
     for (let i=0;i<grade.length;i++) {
         // Count letters to check no more than 1
@@ -282,10 +287,7 @@ function gradeCheck(entry) {
 
     // Check for +/- in grade and only at end
     if (grade.includes('+') || grade.includes('-')) {
-        if (grade.endswith('+') || grade.endswith('-')) {
-            // +\- OK, remove for further validation
-            grade = grade.slice(0,-1);
-        } else {
+        if (!(grade.endsWith('+') || grade.endsWith('-'))) {
             // +\- in middle, INVALID
             // console.log(entry.name + 'INVALID GRADE - Out of place +\-');
             return {'valid': false, 'entry': entry, 'error': 102, 'tblID': currentIndex+1};
@@ -322,8 +324,12 @@ function gradeCheck(entry) {
             }
         } else { // Else 10 <= intGrade <= 15
             // Check for letter (letter is required now)
-            if (['a','b','c','d'].some(r => grade.includes(r))) {
-                // If letter, letter must be at end (+/- already removed)
+            if (grade.includes('+') || grade.includes('-')) {
+                if (['a','b','c','d'].some(r => grade.includes(r))) {
+                    // console.log(entry.name + 'INVALID GRADE - RoutePMMisplacedLetter');
+                    return {'valid': false, 'entry': entry, 'error': 110, 'tblID': currentIndex+1};
+                }
+            } else if (['a','b','c','d'].some(r => grade.includes(r))) {
                 if (!(['a','b','c','d'].some(r => grade.endsWith(r)))) {
                     // console.log(entry.name + 'INVALID GRADE - RouteMisplacedLetter');
                     return {'valid': false, 'entry': entry, 'error': 108, 'tblID': currentIndex+1};
@@ -340,6 +346,51 @@ function gradeCheck(entry) {
         return {'valid': false, 'entry': entry, 'error': 201, 'tblID': currentIndex+1};
     }
     return {'valid': true};
+}
+
+// gradeConverter: Converts entry grade to database integer by using the grade options as key/value
+function gradeConverter(climb_type, grade) {
+    if (climb_type == 'boulder') {
+        // Add V and log val of bouldergrades option matching text
+        grade = 'V' + parseInt(grade);
+        grade = $('#bouldergrades option').filter(function(){
+            return $(this).text() == grade;
+        }).val();
+
+    } else if (climb_type == 'route') {
+        if (grade == 'aid') {
+            grade = 99;
+        } else if (grade == '9+') {
+            grade = 5.5;
+        } else {
+            if (grade.includes('+') || grade.includes('-')) {
+                grade = grade.replace('+','d');
+                grade = grade.replace('-','a');
+            }
+            grade = '5.' + grade;
+            grade = $('#routegrades option').filter(function(){
+                return $(this).text() == grade;
+            }).val();
+        }
+    }
+    // console.log(grade);
+    return grade;
+}
+
+// rtConverter: Converts route_type to db integer
+function rtConverter(route_type) {
+    switch (route_type) {
+        case 'sport':
+            return 1;
+        case 'trad':
+            return 2;
+        case 'dws':
+            return 3;
+        case 'aid':
+            return 4;
+        default:
+            return 0;
+    }
 }
 
 // aidCheck: Checks for a valid aid grade
@@ -431,6 +482,7 @@ function separateDetails(row) {
     // Separate entry details
     var parents = row.slice(0,6);
     parents = parents.filter(item => item !== '');
+    var tags = buildCSL(row.slice(19).filter(item => item != ''));
     // Object Assignment
     entry.areas = parents;
     entry.name = row[6];
@@ -450,6 +502,8 @@ function separateDetails(row) {
     entry.details.fa = row[16];
     entry.details.description = row[17];
     entry.details.pro = row[18];
+    // Tags is odd to match standard entry form format
+    entry.details.tags_other = tags;
     return entry;
 }
 
@@ -516,7 +570,7 @@ function stopPBar() {
 // Enable correct grades after climb_type selection
 $('#inform-climb_type').on('change', function() {
     // Enable grade select
-    $('#inform-grade').prop('disabled', false);
+    // $('#inform-grade').prop('disabled', false);
     // Disable opposite grades and route specific inputs
     if ($('#inform-climb_type').val() == 'boulder') {
         $('#routegrades').prop('disabled', true);
@@ -575,6 +629,9 @@ function errorDecode(code) {
         case 109:
             res.reason = "Invalid Grade: None provided, please enter a grade.";
             break;
+        case 110:
+            res.reason = "Invalid Grade: Letter included with +/-.  If a +/- is used to describe a route, the letter grade must be dropped.  These can also be converted as +:d or -:a.";
+            break;
         case 201:
             res.reason = "Invalid Climb_Type: Only 'boulder' or 'route' are accepted climb_types at this time.";
             break;
@@ -602,6 +659,9 @@ function errorDecode(code) {
         case 502:
             res.reason = "Invalid Aid_Grade: Aid Grade doesnt match the pattern [AC][0-5].";
             break;
+        case 601:
+            res.reason = "No area connection found: Please make sure one of the areas listed already exists in the system.";
+            break;
     }
     return res;
 }
@@ -627,11 +687,11 @@ function fillForm (invalidEntry) {
     } else {
         if (invalidEntry.entry.details.climb_type == 'boulder') {
             $('#bouldergrades option').filter(function() {
-                return $(this).val() == invalidEntry.entry.details.grade;
+                return $(this).text() == 'V' + invalidEntry.entry.details.grade;
             }).prop('selected', true);
         } else {
             $('#routegrades option').filter(function() {
-                return $(this).val() == invalidEntry.entry.details.grade;
+                return $(this).text() == '5.' + invalidEntry.entry.details.grade;
             }).prop('selected', true);
         }
     }
@@ -677,12 +737,13 @@ function fillForm (invalidEntry) {
         return $(this).val() == invalidEntry.entry.details.committment;
     }).prop('selected', true);
     $('#inform-route_type option').filter(function() {
-        return $(this).val() == invalidEntry.entry.details.route_type;
+        return $(this).text().toLowerCase() == invalidEntry.entry.details.route_type;
     }).prop('selected', true);
     $('#inform-height').val(invalidEntry.entry.details.height);
     $('#inform-fa').val(invalidEntry.entry.details.fa);
     $('#inform-description').val(invalidEntry.entry.details.description);
     $('#inform-pro').val(invalidEntry.entry.details.pro);
+    $('#inform-tags_other').val(invalidEntry.entry.details.tags_other);
 
     // Trigger change event for climb_type to disable/enable route-specifics
     $('#inform-climb_type').trigger('change');
@@ -723,13 +784,19 @@ function rebuildEntry(sarr) {
     for (let a in areas) {
         row.push(areas[a]);
     }
+    var extra_areas = 6-row.length;
     // Add blanks for unused areas up to length of 6
-    for (let i=0;i<(6-row.length);i++) {
+    for (let i=0;i<(extra_areas);i++) {
         row.push('');
     }
     // Loop through other data in array and push
-    for (let obj=3;obj<sarr.length;obj++) {
+    for (let obj=3;obj<sarr.length-1;obj++) {
         row.push(sarr[obj].value);
+    }
+    // Have to split tags because separateDetails will re-CSL them
+    var tags = sarr[16].value.split(',');
+    for (let t in tags) {
+        row.push(tags[t]);
     }
     return row;
 }
@@ -744,7 +811,7 @@ $('#subButton').on('click', function() {
         var disabled = $(':disabled').prop('disabled', false);
         var validEntry = $('form').serializeArray();
         var entryIndex = parseInt(validEntry[1].value);
-        disabled.prop('disabled', true);
+        // disabled.prop('disabled', true);
         // Rebuild to row and separate details
         validEntry = separateDetails(rebuildEntry(validEntry));
 
@@ -796,8 +863,13 @@ async function submitEntries() {
                 r2i.splice(0,1);
                 updatePBar();
             } else {
-                console.log('submitEntry false');
-                break;
+                console.log(`submitEntry false - ${r2i[0].entry.name}`);
+                // Check error code?  Add to invalids for now
+                invalids.push({'valid': false, 'entry': r2i[0].entry, 'error': 601, 'tblID': r2i[0].tblID});
+                r2i.splice(0,1);
+                $('#numIN').text(invalids.length);
+                updatePBar();
+                // break;
             }
         }
         console.log('Finished current entries.');
@@ -825,6 +897,7 @@ async function POSTEntry(entry) {
         if (data.inserted) {
             return true;
         } else {
+            // Check error code?
             return false;
         }
     })

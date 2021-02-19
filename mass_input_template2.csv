@@ -1,5 +1,7 @@
-﻿Area1,Area2,Area3,Area4,Area5,Area6,Climb,Climb_Type,Grade,Aid_Grade,Pitches,Commitment,Route_type,Height,Quality,Danger,FA,Description,Protection
-California,Sierra Eastside,Bishop,Buttermilk Country,Buttermilks Main,Iron Man Boulder,Iron Man Traverse,boulder,4,,,,,12,4,0,Unknown,,pads
-British Columbia,Squamish,The Chief,The Grand Wall,,,The Grand Wall,route,11a,,8,2,trad,650,4,0,Unknown,,
-North America,Wyoming,Test Area,,,,Boulder One,boulder,8,,,,,12,3,0,some rando,,
-California,Sierra Eastside,Bishop,Buttermilk Country,Buttermilks Main,Iron Man Boulder,Iron Fly,boulder,v8,,,,,12,2,0,,,
+﻿Area1,Area2,Area3,Area4,Area5,Area6,Climb,Climb_Type,Grade,Aid_Grade,Pitches,Commitment,Route_type,Height,Quality,Danger,FA,Description,Protection,Tag1,Tag2,Tag3,Tag4
+California,Sierra Eastside,Bishop,Buttermilk Country,Buttermilks Main,Iron Man Boulder,Iron Man Traverse,boulder,4,,,,,12,4,0,Unknown,,pads,,,,
+British Columbia,Squamish,The Chief,The Grand Wall,,,The Grand Wall,route,11a,,8,2,trad,650,4,0,Unknown,,,,,,
+North America,Wyoming,Test Area,,,,Boulder One,boulder,8,,,,,12,3,0,some rando,,,,,,
+California,Sierra Eastside,Bishop,Buttermilk Country,Buttermilks Main,Iron Man Boulder,Iron Fly,boulder,v8,,,,,12,2,0,,,,dirty,broken,choss,
+California,Yosemite,El Capitan,,,,Josh's Bull,route,9+,a2,20,5,trad,,1,1,,,,,,,
+California,Yosemite,El Capitan,,,,Nose Free,route,14-,,32,6,trad,,5,0,,,,,,,

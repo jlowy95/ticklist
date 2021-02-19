@@ -5,7 +5,7 @@ USE `MyTicksTest`;
 
 CREATE TABLE `areas` (
 	`id` INT NOT NULL AUTO_INCREMENT,
-	`name` VARCHAR(35) NOT NULL,
+	`name` VARCHAR(65) NOT NULL,
 	`parent_id` INT NOT NULL,
 	`parent_name` VARCHAR(35) NOT NULL,
 	`path` VARCHAR(150),
@@ -62,7 +62,7 @@ INSERT INTO route_types
 
 CREATE TABLE `climbs` (
 	`id` INT NOT NULL AUTO_INCREMENT,
-	`name` VARCHAR(35) NOT NULL,
+	`name` VARCHAR(65) NOT NULL,
 	`parent_id` INT NOT NULL,
 	`parent_name` VARCHAR(35) NOT NULL,
 	`climb_type` VARCHAR(10) NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE `climbs` (
 	`danger` INT NOT NULL,
 	`height` INT,
 	`fa` VARCHAR(50),
-	`description` VARCHAR(500),
+	`description` VARCHAR(1500),
 	`pro` VARCHAR(100),
 	`date_inserted` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
@@ -147,8 +147,7 @@ CREATE TABLE routes (
   `pitches` INT NOT NULL,
   `committment` INT,
   FOREIGN KEY (id) REFERENCES climbs(id),
-  FOREIGN KEY (route_type) REFERENCES route_types(id),
-  CHECK (aid_grade LIKE '[A,C][0-5]')
+  FOREIGN KEY (route_type) REFERENCES route_types(id)
 );
 
 INSERT INTO routes
@@ -181,21 +180,21 @@ INSERT INTO boulder_grades
 		(4.66, 5.34, 'V5', '6C'),
 		(5.34, 5.66, 'V5-6', '6C+'),
 		(5.66, 6.34, 'V6', '7A'),
-		(6.34, 6.66, 'V6-7', '7A+'),
+		(6.34, 6.66, 'V6-7', '7A/+'),
 		(6.66, 7.34, 'V7', '7A+'),
-		(7.34, 7.66, 'V7-8', '7B'),
+		(7.34, 7.66, 'V7-8', '7A+/B'),
 		(7.66, 8.34, 'V8', '7B'),
-		(8.34, 8.66, 'V8-9', '7B+'),
+		(8.34, 8.66, 'V8-9', '7B+/C'),
 		(8.66, 9.34, 'V9', '7C'),
-		(9.34, 9.66, 'V9-10', '7C'),
+		(9.34, 9.66, 'V9-10', '7C/+'),
 		(9.66, 10.34, 'V10', '7C+'),
-		(10.34, 10.66, 'V10-11', '7C+'),
+		(10.34, 10.66, 'V10-11', '7C+/8A'),
 		(10.66, 11.34, 'V11', '8A'),
-		(11.34, 11.66, 'V11-12', '8A'),
+		(11.34, 11.66, 'V11-12', '8A/+'),
 		(11.66, 12.34, 'V12', '8A+'),
-		(12.34, 12.66, 'V12-13', '8A+'),
+		(12.34, 12.66, 'V12-13', '8A+/B'),
 		(12.66, 13.34, 'V13', '8B'),
-		(13.34, 13.66, 'V13-14', '8B'),
+		(13.34, 13.66, 'V13-14', '8B/+'),
 		(13.66, 14.34, 'V14', '8B+'),
         (14.34, 14.66, 'V14-15', '8C'),
         (14.66, 15.34, 'V15', '8C')
@@ -249,12 +248,17 @@ INSERT INTO route_grades
 		(19.66, 20.34, '5.13c', '8a+'),
 		(20.34, 20.66, '5.13d', '8a+/b'),
 		(20.66, 21.34, '5.13d', '8b'),
-		(21.34, 21.66, '5.14a', '8b+'),
-		(21.66, 22.34, '5.14b', '8c'),
-        (22.34, 22.66, '5.14c', '8c+'),
-        (22.66, 23.34, '5.14d', '9a'),
-        (23.34, 23.66, '5.15a', '9a+'),
-        (23.66, 100, 'Aid', 'Aid')
+        (21.34, 21.66, '5.14a', '8b/+'),
+        (21.66, 22.34, '5.14a', '8b+'),
+        (22.34, 22.66, '5.14b', '8b+/c'),
+        (22.66, 23.34, '5.14b', '8c'),
+        (23.34, 23.66, '5.14c', '8c/+'),
+        (23.66, 24.34, '5.14c', '8c+'),
+		(24.34, 24.66, '5.14d', '8c+/9a'),
+		(24.66, 25.34, '5.14d', '9a'),
+        (25.34, 25.66, '5.15a', '9a/+'),
+        (25.66, 26.34, '5.15a', '9a+'),
+        (26.34, 99, 'Aid', 'Aid')
     ;
 
 

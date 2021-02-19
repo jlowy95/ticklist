@@ -298,39 +298,43 @@ def boulderInt2Grade(floatDifficulty):
     elif floatDifficulty < 6.34:
         return {'usa':'V6', 'euro':'7A'}
     elif floatDifficulty < 6.66:
-        return {'usa':'V6-7', 'euro':'7A+'}
+        return {'usa':'V6-7', 'euro':'7A/+'}
     elif floatDifficulty < 7.34:
         return {'usa':'V7', 'euro':'7A+'}
     elif floatDifficulty < 7.66:
-        return {'usa':'V7-8', 'euro':'7B'}
+        return {'usa':'V7-8', 'euro':'7A+/B'}
     elif floatDifficulty < 8.34:
         return {'usa':'V8', 'euro':'7B'}
     elif floatDifficulty < 8.66:
-        return {'usa':'V8-9', 'euro':'7B+'}
+        return {'usa':'V8-9', 'euro':'7B+/C'}
     elif floatDifficulty < 9.34:
         return {'usa':'V9', 'euro':'7C'}
     elif floatDifficulty < 9.66:
-        return {'usa':'V9-10', 'euro':'7C'}
+        return {'usa':'V9-10', 'euro':'7C/+'}
     elif floatDifficulty < 10.34:
         return {'usa':'V10', 'euro':'7C+'}
     elif floatDifficulty < 10.66:
-        return {'usa':'V10-11', 'euro':'7C+'}
+        return {'usa':'V10-11', 'euro':'7C+/8A'}
     elif floatDifficulty < 11.34:
         return {'usa':'V11', 'euro':'8A'}
     elif floatDifficulty < 11.66:
-        return {'usa':'V11-12', 'euro':'8A'}
+        return {'usa':'V11-12', 'euro':'8A/+'}
     elif floatDifficulty < 12.34:
         return {'usa':'V12', 'euro':'8A+'}
     elif floatDifficulty < 12.66:
-        return {'usa':'V12-13', 'euro':'8A+'}
+        return {'usa':'V12-13', 'euro':'8A+/B'}
     elif floatDifficulty < 13.34:
         return {'usa':'V13', 'euro':'8B'}
     elif floatDifficulty < 13.66:
-        return {'usa':'V13-14', 'euro':'8B'}
+        return {'usa':'V13-14', 'euro':'8B/+'}
     elif floatDifficulty < 14.34:
         return {'usa':'V14', 'euro':'8B+'}
+    elif floatDifficulty < 14.66:
+        return {'usa':'V14-15', 'euro':'8B+/C'}
+    elif floatDifficulty < 15.34:
+        return {'usa':'V15', 'euro':'8C'}
     else:
-        return {'usa':'V14+', 'euro':'8B+'}
+        return {'usa':'V15+', 'euro':'8C+'}
 # routeInt2Grade: translates concensus route difficulty values to common YDS/French grades
 def routeInt2Grade(floatDifficulty):
     if floatDifficulty < -0.66:
@@ -424,18 +428,28 @@ def routeInt2Grade(floatDifficulty):
     elif floatDifficulty < 21.34:
         return {'usa':'5.13d', 'euro':'8b'}
     elif floatDifficulty < 21.66:
-        return {'usa':'5.14a', 'euro':'8b+'}
+        return {'usa':'5.14a', 'euro':'8b/+'}
     elif floatDifficulty < 22.34:
-        return {'usa':'5.14b', 'euro':'8c'}
+        return {'usa':'5.14a', 'euro':'8b+'}
     elif floatDifficulty < 22.66:
-        return {'usa':'5.14c', 'euro':'8c+'}
+        return {'usa':'5.14b', 'euro':'8b+/c'}
     elif floatDifficulty < 23.34:
-        return {'usa':'5.14d', 'euro':'9a'}
+        return {'usa':'5.14b', 'euro':'8c'}
     elif floatDifficulty < 23.66:
+        return {'usa':'5.14c', 'euro':'8c/+'}
+    elif floatDifficulty < 24.34:
+        return {'usa':'5.14c', 'euro':'8c+'}
+    elif floatDifficulty < 24.66:
+        return {'usa':'5.14d', 'euro':'8c+/9a'}
+    elif floatDifficulty < 25.34:
+        return {'usa':'5.14d', 'euro':'9a'}
+    elif floatDifficulty < 25.66:
+        return {'usa':'5.15a', 'euro':'9a/+'}
+    elif floatDifficulty < 26.34:
         return {'usa':'5.15a', 'euro':'9a+'}    
     else:
         return {'usa':'Aid', 'euro':'Aid'}
-    
+
 
 # getPathNames: Retrieves name and path/route for eachitem in the selected entry's parent path
 def getPathNames(path):
@@ -592,9 +606,20 @@ def simplifyArray(json_request):
 
 # convertFormDatatypes: Some HTML form values are submitted as strings, not ints, this converts them
 def convertFormDatatypes(new_loc):
-    for i in ['grade', 'quality', 'danger', 'height', 'pitches']:
+    # Ints
+    for i in ['quality', 'danger', 'height', 'pitches', 'committment']:
         if i in new_loc.keys():
-            new_loc[i] = int(new_loc[i])
+            if new_loc[i] != '':
+                new_loc[i] = int(new_loc[i])
+            else:
+                new_loc[i] = None
+    # Floats
+    for i in ['grade']:
+        if i in new_loc.keys():
+            if new_loc[i] != '':
+                new_loc[i] = float(new_loc[i])
+            else:
+                new_loc[i] = None
     return new_loc
 
 # checkDupe: Checks ClimbModel and AreaModel for an already existing climb under said area.
@@ -617,26 +642,25 @@ def checkDupe(area, climb):
 # ("validated" boolean (True=accepted), error code if error, additional info for error handling)
 def validateAddition(loc_type, new_loc):
     print('Validating...')
-    # Check for all fields filled except for aid_grade
-    for field in new_loc.keys():
-        if new_loc[field] == '' and field not in ['aid_grade','tags_other']:
-            print(field)
-            print(field == 'aid_grade')
-            print('New invalid aid grade')
-            # Invalid field - An Error occurred, please try again.
-            return (False, 1, (loc_type, new_loc))
-    # Else continue
+    # print(new_loc)
+    # Convert int fields to int type
+    new_loc = convertFormDatatypes(new_loc)
+    # Replace blank fields with None
+    # for field in new_loc.keys():
+    #     if new_loc[field] == '':
+    #         new_loc[field] = None
+
 
     # Check for valid grade, danger, committment based on loc_type
     if loc_type == 'boulder':
-        new_loc = convertFormDatatypes(new_loc)
-        if new_loc['grade'] > 14 or new_loc['grade'] < -1:
+        # new_loc = convertFormDatatypes(new_loc)
+        if new_loc['grade'] > 16 or new_loc['grade'] < -1:
             return (False, 1, (loc_type, new_loc))
         if int(new_loc['danger']) != new_loc['danger'] or new_loc['danger'] > 3 or new_loc['danger'] < 0:
             return (False, 1, (loc_type, new_loc))
     
     if loc_type == 'route':
-        new_loc = convertFormDatatypes(new_loc)
+        # new_loc = convertFormDatatypes(new_loc)
         if new_loc['grade'] > 99 or new_loc['grade'] < -1:
             return (False, 1, (loc_type, new_loc))
         if (not(re.search('^[AC][0-5]$', new_loc['aid_grade'])) and new_loc['aid_grade'] != ''):
@@ -646,7 +670,7 @@ def validateAddition(loc_type, new_loc):
             return (False, 1, (loc_type, new_loc))
         if int(new_loc['pitches']) != new_loc['pitches']:
             return (False, 1, (loc_type, new_loc))
-        if new_loc['committment'] not in ['I','II','III','IV','V','VI']:
+        if new_loc['committment'] > 7 or new_loc['committment'] < 1:
             return (False, 1, (loc_type, new_loc))
 
     # Check for duplicate entry
@@ -694,7 +718,6 @@ def validationErrorProtocol(error_code, data):
 def addTags(form_fields, new_id):
     # Isolate tag fields
     tags = {field:form_fields[field] for field in form_fields.keys() if "tag" in field}
-    
     # Process possible new tags
     # New tags in form field 'tags_other' as comma-separated list
     # Tags to be stored/converted to lowercasefor consistency
@@ -754,23 +777,64 @@ def addTags(form_fields, new_id):
     # No commit, full commit will be made after boulder is flushed
 
 
+# findArea: Intended for mass import inserts, locates the parent area of the entry, adding new areas as needed
+def findArea(areasList):
+    # print(areasList)
+
+    # First area should 100% be in database
+    connection = db.session.query(AreaModel)\
+        .filter(AreaModel.name == areasList[0])\
+        .first()
+    # If not in database, we need user input
+    if not connection:
+        # print("No connection found, move this entry to IN-Invalid Area")
+        return (False,)
+    # Else continue
+    else:
+        parent_area = connection.toJSON()
+        # Check database subsequent areas until one isn't found or list is emptied
+        i = 1
+        while i < len(areasList):
+            current_area = db.session.query(AreaModel)\
+                .filter(AreaModel.parent_id == parent_area['id'])\
+                .filter(AreaModel.parent_name == parent_area['name'])\
+                .filter(AreaModel.name == areasList[i])\
+                .first()
+            # If current_area is found, set as new parent
+            if current_area:
+                parent_area = current_area.toJSON()
+                i += 1
+            # Else move on to entering new areas
+            else:
+                break
+        # Add new areas as needed
+        while i < len(areasList):
+            # addArea, store the new area to add as parent
+            new_area = {
+                'name': areasList[i],
+                'parent_id': parent_area['id'],
+                'parent_name': parent_area['name'],
+                'description': 'TBA',
+                'directions': 'TBA'
+            }
+            aa_res = addArea(new_area)
+            # print(aa_res)
+            if aa_res['success']:
+                # Shortcut to fully defining parent_area, as we only need id/name which are returned in the success message
+                parent_area = aa_res['success']
+                i += 1
+            # If addArea fails, very confused, print error
+            else:
+                print(f'addArea failure for {new_area}.')
+        # Return area details for adding entry
+        return (True, parent_area)
+
+
 # addArea: inserts new area entry and updates parent area
 def addArea(new_area):
     # Validate if new entry
     validated = validateAddition('area', new_area)
     if validated[0]:
-        # Initialize new entry
-        new_entry = AreaModel(
-            name=new_area['name'],
-            parent_id=new_area['parent_id'],
-            parent_name=new_area['parent_name'],
-            path=new_area['parent_path']+f"${new_area['parent_id']}/{new_area['parent_name']}",
-            description=new_area['description'],
-            elevation=None,
-            lat=None,
-            lng=None
-        )
-
         # Update parent area_type if necessary (1 for Areas)
         parent = db.session.query(AreaModel)\
             .filter(AreaModel.id==new_area['parent_id'])\
@@ -781,14 +845,34 @@ def addArea(new_area):
         elif parent.area_type == 2:
             return render_template('404.html', status_code=errors['403'])
 
+        # Initialize new entry
+        new_entry = AreaModel(
+            name=new_area['name'],
+            parent_id=new_area['parent_id'],
+            parent_name=new_area['parent_name'],
+            path=parent.path+f"${new_area['parent_id']}/{new_area['parent_name']}",
+            description=new_area['description'],
+            directions=new_area['directions'],
+            elevation=None,
+            lat=None,
+            lng=None
+        )
+
+
         # Commit
         db.session.add(new_entry)
         db.session.commit()
 
         # Return and redirect
-        print(f"Redirecting to area/{new_entry.id}/{new_entry.name}")
-        return {'redirect': f"/area/{str(new_entry.id)}/{str(new_entry.name)}",
-            'success': 'New entry added successfully!'}
+        print(f"Redirecting to area?entry_id={str(new_entry.id)}&entry_name={str(new_entry.name)}")
+        return {
+            'redirect': f"/area?entry_id={str(new_entry.id)}&entry_name={str(new_entry.name)}",
+            'success': {
+                'message': 'New entry added successfully!',
+                'id': new_entry.id,
+                'name': new_entry.name
+                }
+        }
     else:
         # Else, error - handle the error and return
         print(f"Error Code: {validated[1]}")
@@ -846,8 +930,14 @@ def addBoulder(new_boulder):
 
         # Return and redirect
         print(f'Redirecting to area/{str(new_entry.parent_id)}/{new_entry.parent_name}')
-        return {'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-boulder-{new_entry.id}',
-            'success': 'New entry added successfully!'}
+        return {
+            'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-boulder-{new_entry.id}',
+            'success': {
+                'message': 'New entry added successfully!',
+                'id': new_entry.id,
+                'name': new_entry.name
+                }
+            }
     else:
         # Else, error - handle the error and return
         print(f"Error Code: {validated[1]}")
@@ -909,8 +999,14 @@ def addRoute(new_route):
 
         # Return and redirect
         print(f'Redirecting to area/{str(new_entry.parent_id)}/{new_entry.parent_name}')
-        return {'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-route-{new_entry.id}',
-            'success': 'New entry added successfully!'}
+        return {
+            'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-route-{new_entry.id}',
+            'success': {
+                'message': 'New entry added successfully!',
+                'id': new_entry.id,
+                'name': new_entry.name
+                }
+            }
     else:
         # Else, error - handle the error and return
         print(f"Error Code: {validated[1]}")
@@ -1119,8 +1215,32 @@ def checkEntry():
                 return {'dupeCheck': False}
     elif request.method == 'POST':
         inputted_data = request.get_json()
-        print(inputted_data['details'])
-        return {'inserted': True}
+        print(f'Adding: {inputted_data["name"]}')
+        # Build out tree of parent areas
+        parent_area = findArea(inputted_data['areas'])
+        # print(f"findArea done: {parent_area}")
+        # Returns tuple (completed boolean, parent_area)
+        if parent_area[0]:
+            new_climb = {
+                'name': inputted_data['name'],
+                'parent_id': parent_area[1]['id'],
+                'parent_name': parent_area[1]['name']
+            }
+            for key in inputted_data['details']:
+                new_climb[key] = inputted_data['details'][key]
+
+            if inputted_data['details']['climb_type'] == 'boulder':
+                aeRes = addBoulder(new_climb)
+            elif inputted_data['details']['climb_type'] == 'route':
+                aeRes = addRoute(new_climb)
+            
+            print(f"Climb added!: {aeRes}")
+            if aeRes['success']:
+                return {'inserted': True}
+        else:
+            # Area Error, move to IN
+            return {'inserted': False}
+
     return {0: 'hmmm'}
 
 
