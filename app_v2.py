@@ -460,6 +460,7 @@ def getPathNames(path):
     # print(path_clean)
     return path_clean
 
+
 # countClimbs: recursive function for querying and counting number of children climbs by type
 def countClimbs(area_model):
     boulders, sport, trad, dws, aid, total = 0,0,0,0,0,0
@@ -641,15 +642,8 @@ def checkDupe(area, climb):
 # Returns a tuple corresponding to the following:
 # ("validated" boolean (True=accepted), error code if error, additional info for error handling)
 def validateAddition(loc_type, new_loc):
-    print('Validating...')
-    # print(new_loc)
     # Convert int fields to int type
     new_loc = convertFormDatatypes(new_loc)
-    # Replace blank fields with None
-    # for field in new_loc.keys():
-    #     if new_loc[field] == '':
-    #         new_loc[field] = None
-
 
     # Check for valid grade, danger, committment based on loc_type
     if loc_type == 'boulder':
@@ -688,6 +682,7 @@ def validateAddition(loc_type, new_loc):
         .first()
     # If validated (if an entry already exists) return duplicta entry error, otherwise proceed
     if validated:
+        print(f"Duplicate found: {validated.name}")
         return (False, 2, (loc_type, validated))
     else:
         return (True, new_loc)
@@ -779,54 +774,62 @@ def addTags(form_fields, new_id):
 
 # findArea: Intended for mass import inserts, locates the parent area of the entry, adding new areas as needed
 def findArea(areasList):
-    # print(areasList)
-
-    # First area should 100% be in database
-    connection = db.session.query(AreaModel)\
-        .filter(AreaModel.name == areasList[0])\
-        .first()
-    # If not in database, we need user input
-    if not connection:
-        # print("No connection found, move this entry to IN-Invalid Area")
-        return (False,)
-    # Else continue
-    else:
-        parent_area = connection.toJSON()
-        # Check database subsequent areas until one isn't found or list is emptied
-        i = 1
-        while i < len(areasList):
-            current_area = db.session.query(AreaModel)\
-                .filter(AreaModel.parent_id == parent_area['id'])\
-                .filter(AreaModel.parent_name == parent_area['name'])\
-                .filter(AreaModel.name == areasList[i])\
-                .first()
-            # If current_area is found, set as new parent
-            if current_area:
-                parent_area = current_area.toJSON()
-                i += 1
-            # Else move on to entering new areas
-            else:
-                break
-        # Add new areas as needed
-        while i < len(areasList):
-            # addArea, store the new area to add as parent
-            new_area = {
-                'name': areasList[i],
-                'parent_id': parent_area['id'],
-                'parent_name': parent_area['name'],
-                'description': 'TBA',
-                'directions': 'TBA'
-            }
-            aa_res = addArea(new_area)
-            # print(aa_res)
-            if aa_res['success']:
-                # Shortcut to fully defining parent_area, as we only need id/name which are returned in the success message
-                parent_area = aa_res['success']
-                i += 1
-            # If addArea fails, very confused, print error
-            else:
-                print(f'addArea failure for {new_area}.')
-        # Return area details for adding entry
+    try:
+        # First area should 100% be in database
+        connection = db.session.query(AreaModel)\
+            .filter(AreaModel.name == areasList[0])\
+            .first()
+        # If not in database, we need user input
+        if not connection:
+            # print("No connection found, move this entry to IN-Invalid Area")
+            return (False,)
+        # Else continue
+        else:
+            parent_area = connection.toJSON()
+            # Check areas for current area and reassign as parent if parent is in path. If area isn't found or areasList is empty, move on
+            i = 1
+            while i < len(areasList):
+                query_areas = db.session.query(AreaModel)\
+                    .filter(AreaModel.name == areasList[i])\
+                    .all()
+                # If current_area is found, check for parent in path then set as new parent
+                if len(query_areas) == 0:
+                    break
+                else:
+                    j = 0
+                    while j < len(query_areas):
+                        path = getPathNames(query_areas[j].path)
+                        if parent_area['name'] in [a['name'] for a in path]:
+                            parent_area = query_areas[j].toJSON()
+                            i += 1
+                            break
+                        else:
+                            j += 1
+                    if j >= len(query_areas):
+                        break
+            # Add new areas as needed
+            while i < len(areasList):
+                # addArea, store the new area to add as parent
+                new_area = {
+                    'name': areasList[i],
+                    'parent_id': parent_area['id'],
+                    'parent_name': parent_area['name'],
+                    'description': 'TBA',
+                    'directions': 'TBA'
+                }
+                aa_res = addArea(new_area)
+                # print(aa_res)
+                if aa_res['success']:
+                    # Shortcut to fully defining parent_area, as we only need id/name which are returned in the success message
+                    parent_area = aa_res['success']
+                    i += 1
+                # If addArea fails, very confused, print error
+                else:
+                    print(f'addArea failure for {new_area}.')
+            # Return area details for adding entry
+            return (True, parent_area)
+    except Exception as e:
+        print(f"findArea Error: {e}")
         return (True, parent_area)
 
 
@@ -864,7 +867,7 @@ def addArea(new_area):
         db.session.commit()
 
         # Return and redirect
-        print(f"Redirecting to area?entry_id={str(new_entry.id)}&entry_name={str(new_entry.name)}")
+        # print(f"Redirecting to area?entry_id={str(new_entry.id)}&entry_name={str(new_entry.name)}")
         return {
             'redirect': f"/area?entry_id={str(new_entry.id)}&entry_name={str(new_entry.name)}",
             'success': {
@@ -929,7 +932,7 @@ def addBoulder(new_boulder):
         db.session.commit()
 
         # Return and redirect
-        print(f'Redirecting to area/{str(new_entry.parent_id)}/{new_entry.parent_name}')
+        # print(f'Redirecting to area/{str(new_entry.parent_id)}/{new_entry.parent_name}')
         return {
             'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-boulder-{new_entry.id}',
             'success': {
@@ -998,7 +1001,7 @@ def addRoute(new_route):
         db.session.commit()
 
         # Return and redirect
-        print(f'Redirecting to area/{str(new_entry.parent_id)}/{new_entry.parent_name}')
+        # print(f'Redirecting to area/{str(new_entry.parent_id)}/{new_entry.parent_name}')
         return {
             'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-route-{new_entry.id}',
             'success': {
@@ -1214,34 +1217,41 @@ def checkEntry():
             else:
                 return {'dupeCheck': False}
     elif request.method == 'POST':
-        inputted_data = request.get_json()
-        print(f'Adding: {inputted_data["name"]}')
-        # Build out tree of parent areas
-        parent_area = findArea(inputted_data['areas'])
-        # print(f"findArea done: {parent_area}")
-        # Returns tuple (completed boolean, parent_area)
-        if parent_area[0]:
-            new_climb = {
-                'name': inputted_data['name'],
-                'parent_id': parent_area[1]['id'],
-                'parent_name': parent_area[1]['name']
-            }
-            for key in inputted_data['details']:
-                new_climb[key] = inputted_data['details'][key]
+        try:
+            inputted_data = request.get_json()
+            # print(f'Adding: {inputted_data["name"]}')
+            # Build out tree of parent areas
+            parent_area = findArea(inputted_data['areas'])
+            # print(f"findArea done: {parent_area}")
+            # Returns tuple (completed boolean, parent_area)
+            if parent_area[0]:
+                new_climb = {
+                    'name': inputted_data['name'],
+                    'parent_id': parent_area[1]['id'],
+                    'parent_name': parent_area[1]['name']
+                }
+                for key in inputted_data['details']:
+                    new_climb[key] = inputted_data['details'][key]
 
-            if inputted_data['details']['climb_type'] == 'boulder':
-                aeRes = addBoulder(new_climb)
-            elif inputted_data['details']['climb_type'] == 'route':
-                aeRes = addRoute(new_climb)
-            
-            print(f"Climb added!: {aeRes}")
-            if aeRes['success']:
-                return {'inserted': True}
-        else:
-            # Area Error, move to IN
+                if inputted_data['details']['climb_type'] == 'boulder':
+                    aeRes = addBoulder(new_climb)
+                elif inputted_data['details']['climb_type'] == 'route':
+                    aeRes = addRoute(new_climb)
+                
+                
+                if aeRes['success']:
+                    print(f"Climb added!: {inputted_data['name']}")
+                    return {'inserted': True}
+            else:
+                # Area Error, move to IN
+                print(f"Area error for {inputted_data['name']}")
+                return {'inserted': False}
+        except Exception as e:
+            print(f"Error importing {inputted_data['name']}: {e}")
+            print(inputted_data)
             return {'inserted': False}
-
-    return {0: 'hmmm'}
+    else:
+        print("Method Error at /check-entry")
 
 
 if __name__ == '__main__':

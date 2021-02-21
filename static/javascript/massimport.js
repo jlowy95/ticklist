@@ -352,7 +352,7 @@ function gradeCheck(entry) {
 function gradeConverter(climb_type, grade) {
     if (climb_type == 'boulder') {
         // Add V and log val of bouldergrades option matching text
-        grade = 'V' + parseInt(grade);
+        grade = 'V' + grade;
         grade = $('#bouldergrades option').filter(function(){
             return $(this).text() == grade;
         }).val();
@@ -416,7 +416,7 @@ function qualCheck(entry) {
         return {'valid': false, 'entry': entry, 'error': 302, 'tblID': currentIndex+1};
     }
 
-    if (parseInt(entry.details.quality) <= 0 || parseInt(entry.details.quality) >= 6) {
+    if (parseInt(entry.details.quality) < 0 || parseInt(entry.details.quality) > 5) {
         // console.log(entry.name + 'INVALID QUALITY');
         return {'valid': false, 'entry': entry, 'error': 301, 'tblID': currentIndex+1};
     } else {
@@ -435,9 +435,9 @@ function dangCheck(entry) {
     var dangInt = parseInt(entry.details.danger);
     if (!isNaN(dangInt)) {
         // Check if whole number
-        if (dangInt % 1 === 0) {
+        if (entry.details.danger % 1 === 0) {
             // Check if 0-3
-            if (dangInt < 0 || dangInt > 3) {
+            if (entry.details.danger < 0 || entry.details.danger > 3) {
                 // console.log(entry.name + 'INVALID dangerInt');
                 return {'valid': false, 'entry': entry, 'error': 401, 'tblID': currentIndex+1};
             }
@@ -445,11 +445,11 @@ function dangCheck(entry) {
             // console.log(entry.name + 'INVALID Danger - not whole int');
             return {'valid': false, 'entry': entry, 'error': 402, 'tblID': currentIndex+1};
         }
-    } else { // Else movie
-        if (!(['G','PG','PG13','PG-13','R','X'].includes(entry.details.danger))) {
+    } else { // Else movie, no longer accepted
+        // if (!(['G','PG','PG13','PG-13','R','X'].includes(entry.details.danger))) {
             // console.log(entry.name + 'INVALID Danger - invalidMovie');
-            return {'valid': false, 'entry': entry, 'error': 403, 'tblID': currentIndex+1};
-        }
+        return {'valid': false, 'entry': entry, 'error': 403, 'tblID': currentIndex+1};
+        // }
     }
     return {'valid': true};
 }
@@ -864,6 +864,7 @@ async function submitEntries() {
                 updatePBar();
             } else {
                 console.log(`submitEntry false - ${r2i[0].entry.name}`);
+                console.log(r2i[0].entry);
                 // Check error code?  Add to invalids for now
                 invalids.push({'valid': false, 'entry': r2i[0].entry, 'error': 601, 'tblID': r2i[0].tblID});
                 r2i.splice(0,1);
