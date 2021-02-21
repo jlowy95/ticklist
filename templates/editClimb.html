@@ -27,10 +27,10 @@
                 <!-- {% endif %} -->
                 {% endfor %}
                 <div class="col-sm-auto">
-                    <h6><a style="color: #26abff" href="/area/{{entry['parent']['id']}}/{{entry['parent']['name']}}">{{entry['parent']['name']}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;</h6>
+                    <h6><a style="color: #26abff" href="/area?entry_id={{entry['parent']['id']}}&entry_name={{entry['parent']['name']}}">{{entry['parent']['name']}}</a>&nbsp;&nbsp;>&nbsp;&nbsp;</h6>
                 </div>
                 <div class="col-sm-auto">
-                    <h6><a style="color: #26abff" href="/area/{{entry['parent']['id']}}/{{entry['parent']['name']}}#v-pills-{{entry['climb_type']}}-{{entry['id']}}">{{entry['name']}}</a></h6>
+                    <h6><a style="color: #26abff" href="/area?entry_id={{entry['parent']['id']}}&entry_name={{entry['parent']['name']}}#v-pills-{{entry['climb_type']}}-{{entry['id']}}">{{entry['name']}}</a></h6>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@
     <div class="row ml-4">
         <div class="col-md-12">
             <!-- Flask for href to link back to area -->
-            <h4><a style="color: black;" href="/area/{{entry['id']}}/{{entry['name']}}">{{entry['name']}}</a></h4>
+            <h4><a style="color: black;" href="/area?entry_id={{entry['id']}}&entry_name={{entry['name']}}">{{entry['name']}}</a></h4>
         </div>
     </div>
     <br>
@@ -85,10 +85,13 @@
                     <option value="12">V12</option>
                     <option value="13">V13</option>
                     <option value="14">V14</option>
-                    </select>
+                    <option value="15">V15</option>
+                    <option value="16">V16</option>
+                </select>
                 {% elif entry['climb_type'] == 'route' %}
                 <select class="custom-select needs-validation" name="grade" type="number" min="-1" max="22" style="width: auto">
                     <option selected value="{{entry['properties']['grade'][0]}}">{{entry['properties']['grade'][1]['usa']}}</option>
+                    <option value="99">Aid</option>
                     <option value="-1">Easy 5th</option>
                     <option value="0">5.4</option>
                     <option value="1">5.5</option>
@@ -96,6 +99,7 @@
                     <option value="3">5.7</option>
                     <option value="4">5.8</option>
                     <option value="5">5.9</option>
+                    <option value="5.5">5.9+</option>
                     <option value="6">5.10a</option>
                     <option value="7">5.10b</option>
                     <option value="8">5.10c</option>
@@ -113,6 +117,10 @@
                     <option value="20">5.13c</option>
                     <option value="21">5.13d</option>
                     <option value="22">5.14a</option>
+                    <option value="23">5.14b</option>
+                    <option value="24">5.14c</option>
+                    <option value="25">5.14d</option>
+                    <option value="26">5.15a</option>
                 </select>
                 {% endif %}
             </div>

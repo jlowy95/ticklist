@@ -1099,31 +1099,32 @@ def search():
 
 # Entry Management
 # addEntry (adds an entry to the current area)
-@app.route('/add-entry/<entry_type>/<parent_id>/<parent_name>')
-def addEntry(entry_type, parent_id, parent_name):
+@app.route('/add-entry', methods=['GET'])
+def addEntry():
+    args = request.args
     parent = db.session.query(AreaModel)\
-            .filter(AreaModel.id==parent_id)\
-            .filter(AreaModel.name==parent_name)\
+            .filter(AreaModel.id==args['id'])\
+            .filter(AreaModel.name==args['name'])\
             .first()
     if parent:
         if parent.area_type == 0:
             parent = parent.toJSON()
         # Forbidden - areas may only have child areas OR boulders/routes
-        elif (parent.area_type == 1 and entry_type != 'area') or (parent.area_type == 2 and entry_type == 'area'):
+        elif (parent.area_type == 1 and args['type'] != 'area') or (parent.area_type == 2 and args['type'] == 'area'):
             return render_template('404.html', status_code=errors['403'])
         else:
             parent = parent.toJSON()
     else:
         return render_template('404.html', status_code=errors['404'])
-    if entry_type == 'area':
+    if args['type'] == 'area':
         return render_template('addArea.html', parent=parent)
-    elif entry_type == 'boulder':
+    elif args['type'] == 'boulder':
         return render_template('addBoulder2.html', parent=parent)
-    elif entry_type == 'route':
+    elif args['type'] == 'route':
         return render_template('addRoute2.html', parent=parent)
     else:
         print('Error: invalid entry_type')
-        redirect(url_for('area', entry_id=parent_id, entry_name=parent_name))
+        redirect(url_for('area', entry_id=args['id'], entry_name=args['name']))
 
 # submitChanges - POST route processes changes to db
 # then redirects to new page if successful
@@ -1142,18 +1143,19 @@ def submitChanges():
     return change_options[inputted_data['change-type']](inputted_data)
 
 # editEntry (allows edits to the current entry)
-@app.route('/edit-entry/<entry_type>/<entry_id>/<entry_name>')
-def editEntry(entry_type, entry_id, entry_name):
+@app.route('/edit-entry', methods=['GET'])
+def editEntry():
+    args = request.args
     # Attempt to locate entry
-    if entry_type == 'area':
+    if args['type'] == 'area':
         entry = db.session.query(AreaModel)\
-            .filter(AreaModel.id == entry_id)\
-            .filter(AreaModel.name == entry_name)\
+            .filter(AreaModel.id == args['id'])\
+            .filter(AreaModel.name == args['name'])\
             .first()
-    elif entry_type == 'climb':
+    elif args['type'] == 'climb':
         entry = db.session.query(ClimbModel)\
-            .filter(ClimbModel.id == entry_id)\
-            .filter(ClimbModel.name == entry_name)\
+            .filter(ClimbModel.id == args['id'])\
+            .filter(ClimbModel.name == args['name'])\
             .first()
     else:
         # Invalid entry type, 404
@@ -1167,10 +1169,10 @@ def editEntry(entry_type, entry_id, entry_name):
         return render_template('404.html', status_code=errors['404'])
 
     # Use toJSON to create object to populate template then redirect
-    if entry_type == 'area':
+    if args['type'] == 'area':
         path = getPathNames(entry['parent']['path'])
         return render_template('editArea.html', entry=entry, path=path)
-    elif entry_type == 'climb':
+    elif args['type'] == 'climb':
         path = getPathNames(db.session.query(AreaModel.path)\
             .filter(AreaModel.id == entry['parent']['id'])\
             .filter(AreaModel.name == entry['parent']['name'])\

@@ -27,7 +27,7 @@
                 <!-- {% endif %} -->
                 {% endfor %}
                 <div class="col-sm-auto">
-                    <h6><a style="color: #26abff" href="/area/{{entry['id']}}/{{entry['name']}}">{{entry['name']}}</a></h6>
+                    <h6><a style="color: #26abff" href="/area?entry_id={{entry['id']}}&entry_name={{entry['name']}}">{{entry['name']}}</a></h6>
                 </div>
             </div>
         </div>
@@ -40,7 +40,7 @@
     <div class="row ml-4">
         <div class="col-md-12">
             <!-- Flask for href to link back to area -->
-            <h4><a style="color: black;" href="/area/{{entry['id']}}/{{entry['name']}}">{{entry['name']}}</a></h4>
+            <h4><a style="color: black;" href="/area?entry_id={{entry['id']}}&entry_name={{entry['name']}}">{{entry['name']}}</a></h4>
         </div>
     </div>
     <br>

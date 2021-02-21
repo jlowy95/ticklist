@@ -36,16 +36,16 @@
                     </button>
                     <div class="dropdown-menu" aria-labelledby="addEntryDrop">
                         {% if area['area_type'] == 0 or area['area_type'] == 1 %}
-                        <a style="color: #26abff" class="dropdown-item" href="/add-entry/area/{{area['id']}}/{{area['name']}}">Area</a>
+                        <a style="color: #26abff" class="dropdown-item" href="/add-entry?type=area&id={{area['id']}}&name={{area['name']}}">Area</a>
                         {% endif %}
                         {% if area['area_type'] == 0 or area['area_type'] == 2 %}
-                        <a style="color: #26abff" class="dropdown-item" href="/add-entry/boulder/{{area['id']}}/{{area['name']}}">Boulder</a>
-                        <a style="color: #26abff" class="dropdown-item" href="/add-entry/route/{{area['id']}}/{{area['name']}}">Route</a>
+                        <a style="color: #26abff" class="dropdown-item" href="/add-entry?type=boulder&id={{area['id']}}&name={{area['name']}}">Boulder</a>
+                        <a style="color: #26abff" class="dropdown-item" href="/add-entry?type=route&id={{area['id']}}&name={{area['name']}}">Route</a>
                         {% endif %}
                     </div>
                 </div>
                 <div class="btn-group btn-group-sm" role="group" aria-label="First group">
-                    <a class="btn btn-secondary" href="/edit-entry/area/{{area['id']}}/{{area['name']}}" role="button">Edit Entry</a>
+                    <a class="btn btn-secondary" href="/edit-entry?type=area&id={{area['id']}}&name={{area['name']}}" role="button">Edit Entry</a>
                     <button type="button" class="btn btn-secondary">Delete Entry</button>
                 </div>
             </div>        
