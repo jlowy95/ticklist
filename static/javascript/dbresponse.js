@@ -64,8 +64,45 @@ function get_inputs() {
     return $('#entry-form').serializeArray();
 }
 
+// Simplify array to single obj
+function simplifyArray(form_obj) {
+    newObj = {};
+    for (i=0;i<form_obj.length;i++) {
+        newObj[form_obj[i].name] = form_obj[i].value;
+    }
+    return newObj;
+}
+
+// Correct default str datatypes to int/float
+function correct_dt(form_obj) {
+    intKeys = ['id', 'parent_id', 'danger', 'quality', 'height', 'pitches', 'committment', 'route_type'];
+    floatKeys = ['grade'];
+
+    for (i=0;i<intKeys.length;i++) {
+        if (intKeys[i] in form_obj) {
+            form_obj[intKeys[i]] = parseInt(form_obj[intKeys[i]]);
+        }
+    }
+    for (i=0;i<floatKeys.length;i++) {
+        if (floatKeys[i] in form_obj) {
+            form_obj[floatKeys[i]] = parseFloat(form_obj[floatKeys[i]]);
+        }
+    }
+}
+
 // // Send request to flask and use response(prediction) in page
 function call_API(data) {
+    // Simplify Array
+    data = simplifyArray(data);
+
+    var change_type = data['change-type'];
+    var entry_type = data['entry-type'];
+    // Isolate entry data for body
+    delete data['change-type'];
+    delete data['entry-type'];
+    // Correct datatypes before submission
+    correct_dt(data);
+
     fetch('/submit-changes', {
 
             // Specify the method
@@ -74,7 +111,7 @@ function call_API(data) {
                 'Content-Type': 'application/json'
             },
             // A JSON payload
-            body: JSON.stringify(data)
+            body: JSON.stringify({ct:change_type, et:entry_type, body:data})
         })
         .then(response => response.json())
         .then(function(data) {

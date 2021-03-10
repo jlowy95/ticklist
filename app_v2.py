@@ -13,7 +13,7 @@ and for the tracking of ascents.
 from flask import Flask, render_template, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy as sa
-from sqlalchemy import func
+from sqlalchemy import func, inspect
 from flask_migrate import Migrate
 import mysql.connector
 from bson import ObjectId
@@ -1015,6 +1015,89 @@ def addRoute(new_route):
         print(f"Error Code: {validated[1]}")
         return validationErrorProtocol(validated[1], validated[2])
 
+
+# Mapping functions by Esostack - https://stackoverflow.com/questions/27280862/sqlalchemy-getting-a-single-object-from-joining-multiple-tables
+def obj_to_dict(obj):
+    return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
+def flatten_join(tup_list):
+    return [{**obj_to_dict(a), **obj_to_dict(b)} for a,b in tup_list]
+
+# updateEntry:
+def updateEntry(entry_type, entry):
+    print(f"updateEntry: {entry}")
+    if entry_type == 'area':
+        print("WIP")
+        return None
+    else:
+        # Parent Area changes are not allowed, so we'll separate those details so they aren't 
+        # compared in the update checking phase, but we'll double check they're still the same
+        # to ensure there was no page manipulation 
+        parent = {'id': entry['parent_id'], 'name': entry['parent_name']}
+        entry.pop('parent_id', None)
+        entry.pop('parent_name', None)
+        print(entry)
+        try:
+            if entry_type == 'boulder':
+                db_entry = db.session.query(ClimbModel, BoulderModel)\
+                    .join(BoulderModel, BoulderModel.id == ClimbModel.id)\
+                    .filter(ClimbModel.id == entry['id'])\
+                    .all()
+            elif entry_type == 'route':
+                db_entry = db.session.query(ClimbModel, RouteModel)\
+                    .join(RouteModel, RouteModel.id == ClimbModel.id)\
+                    .filter(ClimbModel.id == entry['id'])\
+                    .all()
+            else:
+                # Manipulated entry_type, redirect to 403
+                return render_template('404.html', status_code=errors['403'])
+        except Exception as e:
+            # Manipulated id submitted, redirect to 403
+            return render_template('404.html', status_code=errors['403'])
+
+        db_entry = flatten_join(db_entry)[0]
+        # print(db_entry)
+
+        # Check for same parents
+        if parent['id'] != db_entry['parent_id'] or parent['name'] != db_entry['parent_name']:
+            print('Parent Info Manipulation')
+            # Manipulated parent info, redirect to 403
+            return render_template('404.html', status_code=errors['403'])
+        
+        # Check for updates
+        update_count = 0
+        for key in entry.keys():
+            if entry[key] != db_entry[key]:
+                update_count += 1
+                print(f"{key}, et:{entry[key]}/{type(entry[key])}, db:{db_entry[key]}/{type(db_entry[key])}")
+
+        if update_count > 0:
+            print("Updates Found")
+            # Process updates
+            '''
+            return {
+            'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-route-{new_entry.id}',
+            'success': {
+                'message': 'New entry added successfully!',
+                'id': new_entry.id,
+                'name': new_entry.name
+                }
+            }
+            '''
+        else:
+            print("No updates found")
+            return {
+                'redirect': f"/area?entry_id={parent['id']}&entry_name={parent['name']}#v-pills-{entry_type}-{entry['id']}",
+                'success': {
+                    'message': 'No edits detected, redirecting back to entry.',
+                    'id': entry['id'],
+                    'name': entry['name']
+                    }
+                }
+    
+
+
+    
+
 '''--------------------------------------- ROUTES ---------------------------------------'''
 # Home Route
 # home page with secondary tools/info
@@ -1045,7 +1128,7 @@ def allLocations():
     return render_template('allLocations.html', children=children, grandchildren=grandchildren)
 
 
-# API Routes
+# ---------------------- API Routes ----------------------------------------------------------
 # Loads the corresponding page type to the entry requested
 @app.route('/area', methods=['GET'])
 def area():
@@ -1130,17 +1213,30 @@ def addEntry():
 # then redirects to new page if successful
 @app.route('/submit-changes', methods=['POST'])
 def submitChanges():
-    inputted_data = simplifyArray(request.get_json())
-    print(inputted_data)
-    # Switch for correct actions
-    change_options = {
-        'area': addArea, # add new area functions plus returns redirect to new area
-        'boulder': addBoulder,
-        'route': addRoute,
-        'edit': ''
-    }
-    
-    return change_options[inputted_data['change-type']](inputted_data)
+    try:
+        inputted_data = request.get_json()
+        # print(inputted_data)
+        # ct=change_type, et=entry_type
+        ct = inputted_data['ct']
+        et = inputted_data['et']
+        body = inputted_data['body']
+        # Switch for correct actions
+        add_options = {
+            'area': addArea, # add new area functions plus returns redirect to new area
+            'boulder': addBoulder,
+            'route': addRoute
+        }
+        if ct == 'add':
+            return add_options[et](body)
+        elif ct == 'edit':
+            return updateEntry(et, body)
+        else:
+            print(f"/submit-changes Error: Invalid change type, 403")
+            return render_template('404.html', status_code=errors['403'])
+        
+    except Exception as e:
+        print(f"/submit-changes Error: {e}")
+        return render_template('404.html', status_code=errors['403'])
 
 # editEntry (allows edits to the current entry)
 @app.route('/edit-entry', methods=['GET'])

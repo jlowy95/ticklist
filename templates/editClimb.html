@@ -54,7 +54,10 @@
     <br>
     <form id='entry-form' class="needs-validation ml-4" novalidate>
         <input name="id" type="text" style="display: none;" value="{{entry['id']}}" required>
+        <input name="parent_id" type="text" style="display: none;" value="{{entry['parent']['id']}}" required>
+        <input name="parent_name" type="text" style="display: none;" value="{{entry['parent']['name']}}" required>
         <input name="change-type" type="text" style="display: none;" value="edit" required>
+
         <!-- Name -->
         <div class="form-group-row">
             <div class="col-md-6">
@@ -67,6 +70,7 @@
         <div class="form-row">
             <div class="col-md-1 ml-3 mr-0">
                 {% if entry['climb_type'] == 'boulder' %}
+                <input name="entry-type" type="text" style="display: none;" value="boulder" required>
                 <select class="custom-select" name="grade" type="number" min="-1" max="17" style="width: auto">
                     <option selected value="{{entry['properties']['grade'][0]}}">{{entry['properties']['grade'][1]['usa']}}</option>
                     <option value="-1">VB</option>
@@ -89,7 +93,8 @@
                     <option value="16">V16</option>
                 </select>
                 {% elif entry['climb_type'] == 'route' %}
-                <select class="custom-select needs-validation" name="grade" type="number" min="-1" max="22" style="width: auto">
+                <input name="entry-type" type="text" style="display: none;" value="route" required>
+                <select class="custom-select needs-validation" name="grade" type="number" min="-1" max="99" style="width: auto">
                     <option selected value="{{entry['properties']['grade'][0]}}">{{entry['properties']['grade'][1]['usa']}}</option>
                     <option value="99">Aid</option>
                     <option value="-1">Easy 5th</option>
@@ -186,21 +191,22 @@
                             VI
                             {% endif %}
                         </option>
-                        <option value="I">I</option>
-                        <option value="II">II</option>
-                        <option value="III">III</option>
-                        <option value="IV">IV</option>
-                        <option value="V">V</option>
-                        <option value="VI">VI</option>
+                        <option value="1">I</option>
+                        <option value="2">II</option>
+                        <option value="3">III</option>
+                        <option value="4">IV</option>
+                        <option value="5">V</option>
+                        <option value="6">VI</option>
                     </select>
                 </div>
             <!-- Route Type -->
             <div class="col-md-1 ml-3 mr-0">
-                <select name="route_type" type="number" min="0" max="3" class="custom-select needs-validation" style="width: auto" required>
+                <select name="route_type" type="number" min="0" max="4" class="custom-select needs-validation" style="width: auto" required>
                     <option selected value="{{entry['properties']['route_type'][0]}}">{{entry['properties']['route_type'][1]['long']}}</option>
                     <option value="1">Sport</option>
                     <option value="2">Trad</option>
                     <option value="3">Deep Water Solo</option>
+                    <option value="4">Aid</option>
                 </select>
             </div>
         </div>
