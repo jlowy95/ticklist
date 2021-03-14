@@ -10,7 +10,7 @@ and for the tracking of ascents.
 
 
 # Imported Modules
-from flask import Flask, render_template, redirect, request, url_for
+from flask import Flask, render_template, redirect, request, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy as sa
 from sqlalchemy import func, inspect
@@ -218,6 +218,11 @@ errors = {
         'title':'404 - Woops, bad topo!',
         'description':"We couldn't find that spot in our guidebooks, try double checking your spelling or check out the search.",
         'secondary':"If what you're looking for still isn't there, consider adding it!"
+    },
+    '500': {
+        'title':'500 - It looks like you found some choss!',
+        'description': "Something doesn't look right on the inside.  We'll replace these bolts soon, but please continue browsing while we sort this out.",
+        'secondary': "If you have time though, please contact a site admin about this entry."
     }
 }
 
@@ -1035,7 +1040,7 @@ def updateEntry(entry_type, entry):
         parent = {'id': entry['parent_id'], 'name': entry['parent_name']}
         entry.pop('parent_id', None)
         entry.pop('parent_name', None)
-        print(entry)
+        # Grab entry from db
         try:
             if entry_type == 'boulder':
                 db_entry = db.session.query(ClimbModel, BoulderModel)\
@@ -1054,14 +1059,15 @@ def updateEntry(entry_type, entry):
             # Manipulated id submitted, redirect to 403
             return render_template('404.html', status_code=errors['403'])
 
+        # Convert db join tuple to dict
         db_entry = flatten_join(db_entry)[0]
-        # print(db_entry)
 
         # Check for same parents
         if parent['id'] != db_entry['parent_id'] or parent['name'] != db_entry['parent_name']:
             print('Parent Info Manipulation')
             # Manipulated parent info, redirect to 403
-            return render_template('404.html', status_code=errors['403'])
+            abort(404, description = "Manipulated Parent Info")
+            # return render_template('404.html', status_code=errors['403'])
         
         # Check for updates
         update_count = 0
@@ -1099,6 +1105,31 @@ def updateEntry(entry_type, entry):
     
 
 '''--------------------------------------- ROUTES ---------------------------------------'''
+# Error Handlers
+@app.errorhandler(403)
+def disallowedAction(resource):
+    print(f"403 Error: {resource}")
+    # If a resource was passed use that as return link, otherwise index
+    if type(resource.description) is dict:
+        return render_template('404.html', status_code=errors['403'], resource=resource.description), 403
+    else:
+        return render_template('404.html', status_code=errors['403'], resource=None), 403
+
+@app.errorhandler(404)
+def pageNotFound(resource):
+    print(f"404 Error: {resource}")
+    # If a resource was passed use that as return link, otherwise index
+    if type(resource.description) is dict:
+        return render_template('404.html', status_code=errors['404'], resource=resource.description), 404
+    else:
+        return render_template('404.html', status_code=errors['404'], resource=None), 404
+
+@app.errorhandler(500)
+def internalServerError(e):
+    print(f"500 Error: {e.description}")
+    return render_template('404.html', status_code=errors['500']), 500
+
+
 # Home Route
 # home page with secondary tools/info
 @app.route('/')
@@ -1133,8 +1164,8 @@ def allLocations():
 @app.route('/area', methods=['GET'])
 def area():
     args = request.args
-    if args['entry_id'] and args['entry_name']:
-        try:
+    try:
+        if args['entry_id'] and args['entry_name']:
             # Retrieve Entry
             entry = db.session.query(AreaModel)\
                 .filter(AreaModel.id==args['entry_id'])\
@@ -1143,7 +1174,7 @@ def area():
             if entry:
                 entry = entry.toJSON()
             else:
-                return render_template('404.html', status_code=errors['404'])
+                abort(404)
             path = getPathNames(entry['parent']['path'])
             children = getChildrenInfo(entry)
             # print(children)
@@ -1153,11 +1184,13 @@ def area():
                 return render_template('area_2.html', area=entry, path=path, children=children)
             else:
                 return render_template('area.html', area=entry, path=path, children=children)
+        else:
+            abort(404)
 
-        except Exception as e:
-            print(e)
-            return render_template('404.html', status_code=errors['404'])
-
+    except Exception as e:
+        print(e)
+        abort(404)
+    
 
 # Search query route
 @app.route('/search')
@@ -1194,11 +1227,12 @@ def addEntry():
             parent = parent.toJSON()
         # Forbidden - areas may only have child areas OR boulders/routes
         elif (parent.area_type == 1 and args['type'] != 'area') or (parent.area_type == 2 and args['type'] == 'area'):
-            return render_template('404.html', status_code=errors['403'])
+            abort(403, description={'title':parent.name, 'route':f"/area?entry_id={parent.id}&entry_name={parent.name}"})
         else:
             parent = parent.toJSON()
     else:
-        return render_template('404.html', status_code=errors['404'])
+        # Parent entry not found, 404
+        abort(404)
     if args['type'] == 'area':
         return render_template('addArea.html', parent=parent)
     elif args['type'] == 'boulder':
@@ -1231,12 +1265,13 @@ def submitChanges():
         elif ct == 'edit':
             return updateEntry(et, body)
         else:
-            print(f"/submit-changes Error: Invalid change type, 403")
-            return render_template('404.html', status_code=errors['403'])
+            # Assume misentered change type, 404
+            print(f"/submit-changes Error: Invalid change type, 404")
+            abort(404)
         
     except Exception as e:
         print(f"/submit-changes Error: {e}")
-        return render_template('404.html', status_code=errors['403'])
+        abort(403)
 
 # editEntry (allows edits to the current entry)
 @app.route('/edit-entry', methods=['GET'])
@@ -1256,13 +1291,13 @@ def editEntry():
     else:
         # Invalid entry type, 404
         print('Error: invalid entry_type')
-        return render_template('404.html', status_code=errors['404'])
+        abort(404)
 
     # Verify that an entry was found or 404    
     if entry:
         entry = entry.toJSON()
     else:
-        return render_template('404.html', status_code=errors['404'])
+        abort(404)
 
     # Use toJSON to create object to populate template then redirect
     if args['type'] == 'area':
@@ -1292,9 +1327,10 @@ def editEntry():
             entry['properties']['committment'] = secondary.committment
             return render_template('editClimb.html', entry=entry, path=path)
         else:
-            # Invalid climb_type, redirect to error
+            # Invalid climb_type which means something was entered into the db incorrectly. 
+            # Serve 500 with suggestion to contact site admin
             print('Error: invalid climb_type')
-            return render_template('404.html', status_code=errors['404'])
+            abort(500, description={'type':'climb', 'id': entry['id'], 'name': entry['name']})
         
 
 # Mass Import Tool
@@ -1303,6 +1339,7 @@ def editEntry():
 def massImport():
     return render_template('massimport.html')
 
+# Check entry is used by the mass-import tool for duplicate checks and final entry submissions/validation
 @app.route('/check-entry', methods=['GET', 'POST'])
 def checkEntry():
     args = request.args
@@ -1350,6 +1387,7 @@ def checkEntry():
             return {'inserted': False}
     else:
         print("Method Error at /check-entry")
+
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    404
+    Error
 {% endblock %}
 
 {% block content %}
@@ -12,7 +12,11 @@
                 <p class="lead">{{status_code['description']}}</p>
                 <hr class="my-2">
                 <p>{{status_code['secondary']}}</p>
-                </div>
+                <br>
+                {% if resource is not none %}
+                <p class="text-center">Back to <a href="{{resource['route']}}">{{resource['title']}}</a></p>
+                {% endif %}
+            </div>
         </div>
     </div>
 {% endblock %}
