@@ -40,7 +40,7 @@ UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = {'csv'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# SQL Models
+'''----------------------------- SQL Models ----------------------------------'''
 # These are translations of the tables in the db
 # Area and Climb have toJSON fn for simplified data retrieval in templates
 
@@ -99,6 +99,12 @@ class AreaModel(db.Model):
             'area_type': self.area_type,
             'date_inserted': self.date_inserted
         }
+    
+    # From Stackoverflow user Perfect
+    def update(self, up_dict):
+        for key, value in up_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 
 class ClimbModel(db.Model):
@@ -153,6 +159,12 @@ class ClimbModel(db.Model):
             'date_inserted': self.date_inserted
         }
 
+    # From Stackoverflow user Perfect
+    def update(self, up_dict):
+        for key, value in up_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
 
 class BoulderModel(db.Model):
     __tablename__ = 'boulders'
@@ -163,6 +175,12 @@ class BoulderModel(db.Model):
     def __init__(self, id, grade):
         self.id = id
         self.grade = grade
+    
+    # From Stackoverflow user Perfect
+    def update(self, up_dict):
+        for key, value in up_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 
 class RouteModel(db.Model):
@@ -182,6 +200,12 @@ class RouteModel(db.Model):
         self.pitches = pitches
         self.committment
         self.route_type = route_type
+
+    # From Stackoverflow user Perfect
+    def update(self, up_dict):
+        for key, value in up_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 
 class TagsModel(db.Model):
@@ -205,7 +229,7 @@ class TagsClimbsModel(db.Model):
         self.tag_id = tag_id
 
 
-# Global Functions + Variables
+#----------------- Global Functions + Variables ----------------------------------
 
 # errors: dictionary containing different error messages to be displayed when page issues occur
 errors = {
@@ -1026,10 +1050,20 @@ def obj_to_dict(obj):
     return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
 def flatten_join(tup_list):
     return [{**obj_to_dict(a), **obj_to_dict(b)} for a,b in tup_list]
+# Modified flatten_join fn for single result returns
+def flatten_join2(first):
+    return {**obj_to_dict(first[0]), **obj_to_dict(first[1])}
 
 # updateEntry:
 def updateEntry(entry_type, entry):
     print(f"updateEntry: {entry}")
+
+    # Validate entry!!!!!!!!!!!!!!!!!!!!!!!!!
+    '''Rework needed on validateAddition functions ot be more universally compatible'''
+    # validateAddition(entry_type, entry)
+    # Until rework, just convert datatypes
+    entry = convertFormDatatypes(entry)
+
     if entry_type == 'area':
         print("WIP")
         return None
@@ -1041,54 +1075,83 @@ def updateEntry(entry_type, entry):
         entry.pop('parent_id', None)
         entry.pop('parent_name', None)
         # Grab entry from db
-        try:
-            if entry_type == 'boulder':
-                db_entry = db.session.query(ClimbModel, BoulderModel)\
-                    .join(BoulderModel, BoulderModel.id == ClimbModel.id)\
-                    .filter(ClimbModel.id == entry['id'])\
-                    .all()
-            elif entry_type == 'route':
-                db_entry = db.session.query(ClimbModel, RouteModel)\
-                    .join(RouteModel, RouteModel.id == ClimbModel.id)\
-                    .filter(ClimbModel.id == entry['id'])\
-                    .all()
-            else:
-                # Manipulated entry_type, redirect to 403
-                return render_template('404.html', status_code=errors['403'])
-        except Exception as e:
-            # Manipulated id submitted, redirect to 403
-            return render_template('404.html', status_code=errors['403'])
+        # Querying for 'all' because of flatten_join fn below; only first result is wanted/needed
+        if entry_type == 'boulder':
+            db_entry = db.session.query(ClimbModel, BoulderModel)\
+                .join(BoulderModel, BoulderModel.id == ClimbModel.id)\
+                .filter(ClimbModel.id == entry['id'])\
+                .first()
+        elif entry_type == 'route':
+            db_entry = db.session.query(ClimbModel, RouteModel)\
+                .join(RouteModel, RouteModel.id == ClimbModel.id)\
+                .filter(ClimbModel.id == entry['id'])\
+                .first()
+        else:
+            # Manipulated entry_type, redirect to 403
+            abort(403, description={'title':entry['name'], 'route':f"/area?entry_id={parent['id']}&entry_name={parent['name']}#v-pills-{entry_type}-{entry['id']}"})
 
-        # Convert db join tuple to dict
-        db_entry = flatten_join(db_entry)[0]
+        # Check for manipulated id.  
+        # Would need a session variable or something sent to server which could not be manipulated by 
+        # user for true check.  This only checks if no entry was found matching the id submitted.
+        if len(db_entry) == 0:
+            print("Manipulated entry id.")
+            abort(403, {'title':entry['name'], 'route':f"/area?entry_id={parent['id']}&entry_name={parent['name']}#v-pills-{entry_type}-{entry['id']}"})
+
+        # Convert db join tuple to dict.  Save db_entry as db object for entry changes
+        flat_entry = flatten_join2(db_entry)
 
         # Check for same parents
-        if parent['id'] != db_entry['parent_id'] or parent['name'] != db_entry['parent_name']:
+        if parent['id'] != flat_entry['parent_id'] or parent['name'] != flat_entry['parent_name']:
             print('Parent Info Manipulation')
             # Manipulated parent info, redirect to 403
-            abort(404, description = "Manipulated Parent Info")
-            # return render_template('404.html', status_code=errors['403'])
+            abort(403)
         
+
         # Check for updates
         update_count = 0
+        update_list = []
         for key in entry.keys():
-            if entry[key] != db_entry[key]:
+            # Don't allow blank/none updates
+            if entry[key] == '' or entry[key] == None:
+                continue
+            if entry[key] != flat_entry[key]:
                 update_count += 1
-                print(f"{key}, et:{entry[key]}/{type(entry[key])}, db:{db_entry[key]}/{type(db_entry[key])}")
+                update_list.append(key)
+                print(f"{key}, et:{entry[key]}/{type(entry[key])}, db:{flat_entry[key]}/{type(flat_entry[key])}")
 
         if update_count > 0:
             print("Updates Found")
+            climb_keys = ['name','quality','danger','height','fa','description','pro']
+            print(update_list)
+            print(db_entry)
+            # If attempted change to grade/quality and a concensus already exists, this is not allowed.
             # Process updates
-            '''
+            # Separate ClimbModel updates from others
+            cm_updates, ctm_updates = {}, {}
+            for key in update_list:
+                if key in climb_keys:
+                    cm_updates[key] = entry[key]
+                else:
+                    ctm_updates[key] = entry[key]
+            print(cm_updates)
+            print(ctm_updates)
+            # Call update fn for each model
+            db_entry[0].update(cm_updates)
+            db_entry[1].update(ctm_updates)
+            print(db_entry[0].pro)
+            print(db_entry[1].grade)
+
+            db.session.commit()
+
             return {
-            'redirect': f'/area/{str(new_entry.parent_id)}/{new_entry.parent_name}#v-pills-route-{new_entry.id}',
-            'success': {
-                'message': 'New entry added successfully!',
-                'id': new_entry.id,
-                'name': new_entry.name
+                'redirect': f"/area?entry_id={parent['id']}&entry_name={parent['name']}#v-pills-{entry_type}-{entry['id']}",
+                'success': {
+                    'message': 'Entry updates processed successfully!',
+                    'id': entry['id'],
+                    'name': entry['name']
                 }
             }
-            '''
+            
         else:
             print("No updates found")
             return {
@@ -1254,6 +1317,7 @@ def submitChanges():
         ct = inputted_data['ct']
         et = inputted_data['et']
         body = inputted_data['body']
+
         # Switch for correct actions
         add_options = {
             'area': addArea, # add new area functions plus returns redirect to new area
